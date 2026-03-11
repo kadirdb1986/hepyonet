@@ -113,7 +113,7 @@ export class MenuService {
             description: true,
             image: true,
             price: true,
-            category: true,
+            category: { select: { name: true } },
           },
         },
       },
@@ -122,7 +122,7 @@ export class MenuService {
 
     const categories: Record<string, typeof menuItems> = {};
     for (const item of menuItems) {
-      const category = item.product.category || 'Diger';
+      const category = item.product.category?.name || 'Diger';
       if (!categories[category]) {
         categories[category] = [];
       }

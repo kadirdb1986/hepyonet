@@ -44,6 +44,25 @@ interface RawMaterial {
 
 const UNITS = ['KG', 'GR', 'LT', 'ML', 'ADET'] as const;
 
+const UNIT_LABELS: Record<string, string> = {
+  KG: 'Kilogram',
+  GR: 'Gram',
+  LT: 'Litre',
+  ML: 'Mililitre',
+  ADET: 'Adet',
+};
+
+/** Miktar formatla: tam sayıysa küsürat gösterme, varsa virgülle göster */
+function formatQuantity(val: number): string {
+  if (Number.isInteger(val)) return val.toLocaleString('tr-TR');
+  return val.toLocaleString('tr-TR', { maximumFractionDigits: 3 });
+}
+
+/** Para formatla: her zaman 2 küsürat, Türkiye formatı (1.000,00) */
+function formatCurrency(val: number): string {
+  return val.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 export default function InventoryPage() {
   const t = useTranslations('inventory');
   const tc = useTranslations('common');
@@ -231,7 +250,7 @@ export default function InventoryPage() {
             <div className="flex flex-wrap gap-2">
               {lowStockMaterials.map((m: RawMaterial) => (
                 <Badge key={m.id} variant="destructive">
-                  {m.name}: {Number(m.currentStock)} {m.unit}
+                  {m.name}: {formatQuantity(Number(m.currentStock))} {UNIT_LABELS[m.unit] || m.unit}
                 </Badge>
               ))}
             </div>
@@ -249,52 +268,62 @@ export default function InventoryPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>{t('name')}</TableHead>
-                <TableHead>{t('unit')}</TableHead>
-                <TableHead className="text-right">{t('currentStock')}</TableHead>
-                <TableHead className="text-right">{t('minStockLevel')}</TableHead>
-                <TableHead className="text-right">{t('lastPurchasePrice')}</TableHead>
+                <TableHead className="text-center">{t('currentStock')}</TableHead>
+                <TableHead className="text-center">{t('minStockLevel')}</TableHead>
+                <TableHead className="text-center">{t('lastPurchasePrice')}</TableHead>
                 <TableHead className="text-center">{t('stockStatus')}</TableHead>
                 <TableHead className="text-right">{tc('actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {materials.map((material) => (
-                <TableRow key={material.id}>
-                  <TableCell className="font-medium">{material.name}</TableCell>
-                  <TableCell>{t(`units.${material.unit}`)}</TableCell>
-                  <TableCell className="text-right">{Number(material.currentStock).toFixed(2)}</TableCell>
-                  <TableCell className="text-right">{Number(material.minStockLevel).toFixed(2)}</TableCell>
-                  <TableCell className="text-right">{Number(material.lastPurchasePrice).toFixed(2)} TL</TableCell>
-                  <TableCell className="text-center">
-                    {isLowStock(material) ? (
-                      <Badge variant="destructive">{t('critical')}</Badge>
-                    ) : (
-                      <Badge variant="secondary">{t('normal')}</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openEdit(material)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          if (confirm(tc('confirm') + '?')) {
-                            deleteMutation.mutate(material.id);
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {materials.map((material) => {
+                const unitLabel = UNIT_LABELS[material.unit] || material.unit;
+                return (
+                  <TableRow key={material.id}>
+                    <TableCell className="font-medium">{material.name}</TableCell>
+                    <TableCell className="text-center">
+                      <span className="inline-block w-16 text-right tabular-nums">{formatQuantity(Number(material.currentStock))}</span>
+                      <span className="inline-block w-20 text-left text-muted-foreground ml-1">{unitLabel}</span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className="inline-block w-16 text-right tabular-nums">{formatQuantity(Number(material.minStockLevel))}</span>
+                      <span className="inline-block w-20 text-left text-muted-foreground ml-1">{unitLabel}</span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className="inline-block w-24 text-right tabular-nums">{formatCurrency(Number(material.lastPurchasePrice))} TL</span>
+                      <span className="inline-block w-20 text-left text-muted-foreground ml-1">/{unitLabel}</span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {isLowStock(material) ? (
+                        <Badge variant="destructive">{t('critical')}</Badge>
+                      ) : (
+                        <Badge variant="secondary">{t('normal')}</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => openEdit(material)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            if (confirm(tc('confirm') + '?')) {
+                              deleteMutation.mutate(material.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
               {materials.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                     {t('materialNotFound')}
                   </TableCell>
                 </TableRow>

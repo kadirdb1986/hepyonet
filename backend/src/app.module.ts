@@ -11,6 +11,7 @@ import { PersonnelModule } from './personnel/personnel.module';
 import { FinanceModule } from './finance/finance.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ProductModule } from './product/product.module';
+import { CategoryModule } from './category/category.module';
 import { MenuModule } from './menu/menu.module';
 import { ReportModule } from './report/report.module';
 
@@ -28,6 +29,7 @@ import { ReportModule } from './report/report.module';
     FinanceModule,
     InventoryModule,
     ProductModule,
+    CategoryModule,
     MenuModule,
     ReportModule,
   ],

@@ -17,6 +17,7 @@ export class ProductService {
       where: { restaurantId },
       orderBy: { name: 'asc' },
       include: {
+        category: { select: { id: true, name: true } },
         ingredients: {
           include: {
             rawMaterial: { select: { id: true, name: true, unit: true, lastPurchasePrice: true } },
@@ -47,6 +48,7 @@ export class ProductService {
     const product = await this.prisma.product.findFirst({
       where: { id, restaurantId },
       include: {
+        category: { select: { id: true, name: true } },
         ingredients: {
           include: {
             rawMaterial: {
@@ -73,8 +75,26 @@ export class ProductService {
     const price = Number(product.price);
     const profitMargin = price > 0 ? ((price - cost) / price) * 100 : 0;
 
+    // Attach calculatedCost to each sub-product ingredient
+    const ingredientsWithCost = await Promise.all(
+      product.ingredients.map(async (ing) => {
+        if (ing.subProductId && ing.subProduct) {
+          const subCost = await this.calculateCost(ing.subProductId, restaurantId);
+          return {
+            ...ing,
+            subProduct: {
+              ...ing.subProduct,
+              calculatedCost: subCost,
+            },
+          };
+        }
+        return ing;
+      }),
+    );
+
     return {
       ...product,
+      ingredients: ingredientsWithCost,
       calculatedCost: cost,
       profitMargin: Math.round(profitMargin * 100) / 100,
     };
@@ -91,7 +111,7 @@ export class ProductService {
         price: dto.price ?? 0,
         isMenuItem: dto.isMenuItem ?? false,
         isComposite: dto.isComposite ?? false,
-        category: dto.category,
+        categoryId: dto.categoryId || null,
       },
     });
   }
@@ -114,7 +134,7 @@ export class ProductService {
         ...(dto.price !== undefined && { price: dto.price }),
         ...(dto.isMenuItem !== undefined && { isMenuItem: dto.isMenuItem }),
         ...(dto.isComposite !== undefined && { isComposite: dto.isComposite }),
-        ...(dto.category !== undefined && { category: dto.category }),
+        ...(dto.categoryId !== undefined && { categoryId: dto.categoryId || null }),
       },
     });
   }

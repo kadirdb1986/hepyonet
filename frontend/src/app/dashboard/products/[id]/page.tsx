@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
@@ -9,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Table,
   TableBody,
@@ -41,7 +41,12 @@ interface Ingredient {
   quantity: number;
   unit: string;
   rawMaterial: { id: string; name: string; unit: string; lastPurchasePrice: number } | null;
-  subProduct: { id: string; name: string; price: number } | null;
+  subProduct: { id: string; name: string; price: number; calculatedCost?: number } | null;
+}
+
+interface Category {
+  id: string;
+  name: string;
 }
 
 interface Product {
@@ -53,10 +58,22 @@ interface Product {
   price: number;
   isMenuItem: boolean;
   isComposite: boolean;
-  category: string | null;
+  categoryId: string | null;
+  category: Category | null;
   calculatedCost?: number;
   profitMargin?: number;
   ingredients: Ingredient[];
+}
+
+interface CostBreakdownIngredient {
+  type: 'raw_material' | 'sub_product';
+  name: string;
+  quantity: number;
+  unit: string;
+  cost: number;
+  unitPrice?: number;
+  baseUnit?: string;
+  unitCost?: number;
 }
 
 interface CostBreakdown {
@@ -65,22 +82,69 @@ interface CostBreakdown {
   price: number;
   totalCost: number;
   profitMargin: number;
-  ingredients: {
-    name: string;
-    quantity: number;
-    unit: string;
-    unitCost: number;
-    totalCost: number;
-    type: string;
-  }[];
+  ingredients: CostBreakdownIngredient[];
 }
 
 const UNITS = ['KG', 'GR', 'LT', 'ML', 'ADET'] as const;
 
+const UNIT_LABELS: Record<string, string> = {
+  KG: 'Kilogram',
+  GR: 'Gram',
+  LT: 'Litre',
+  ML: 'Mililitre',
+  ADET: 'Adet',
+};
+
+/** Miktar formatla: tam sayıysa küsürat gösterme, varsa virgülle göster */
+function formatQuantity(val: number): string {
+  if (Number.isInteger(val)) return val.toLocaleString('tr-TR');
+  return val.toLocaleString('tr-TR', { maximumFractionDigits: 3 });
+}
+
+/** Para formatla: her zaman 2 küsürat, Türkiye formatı (1.000,00) */
+function formatCurrency(val: number): string {
+  return val.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/** Yüzde formatla: virgülle, 1 küsürat */
+function formatPercent(val: number): string {
+  return val.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+/** Birim dönüşümü: içerik biriminden ham madde baz birimine çevir */
+function convertToBaseUnit(quantity: number, ingredientUnit: string, materialBaseUnit: string): number {
+  const from = ingredientUnit.toUpperCase();
+  const to = materialBaseUnit.toUpperCase();
+  if (from === to) return quantity;
+  if (from === 'GR' && to === 'KG') return quantity / 1000;
+  if (from === 'KG' && to === 'GR') return quantity * 1000;
+  if (from === 'ML' && to === 'LT') return quantity / 1000;
+  if (from === 'LT' && to === 'ML') return quantity * 1000;
+  return quantity;
+}
+
+/** Baz birim fiyatını içerik birimine çevir (ör: 700 TL/KG → 0,70 TL/GR) */
+function getUnitCostInIngredientUnit(pricePerBaseUnit: number, ingredientUnit: string, materialBaseUnit: string): number {
+  const from = ingredientUnit.toUpperCase();
+  const to = materialBaseUnit.toUpperCase();
+  if (from === to) return pricePerBaseUnit;
+  if (from === 'GR' && to === 'KG') return pricePerBaseUnit / 1000;
+  if (from === 'KG' && to === 'GR') return pricePerBaseUnit * 1000;
+  if (from === 'ML' && to === 'LT') return pricePerBaseUnit / 1000;
+  if (from === 'LT' && to === 'ML') return pricePerBaseUnit * 1000;
+  return pricePerBaseUnit;
+}
+
+/** Uyumlu birimler: KG↔GR, LT↔ML, ADET yalnız */
+const COMPATIBLE_UNITS: Record<string, string[]> = {
+  KG: ['KG', 'GR'],
+  GR: ['KG', 'GR'],
+  LT: ['LT', 'ML'],
+  ML: ['LT', 'ML'],
+  ADET: ['ADET'],
+};
+
 export default function ProductDetailPage() {
-  const t = useTranslations('product');
-  const tc = useTranslations('common');
-  const ti = useTranslations('inventory');
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -101,9 +165,8 @@ export default function ProductDetailPage() {
     description: '',
     image: '',
     price: 0,
-    category: '',
+    categoryId: '',
     isMenuItem: false,
-    isComposite: false,
   });
 
   const { data: product, isLoading } = useQuery<Product>({
@@ -115,6 +178,11 @@ export default function ProductDetailPage() {
     queryKey: ['products', productId, 'cost'],
     queryFn: () => api.get(`/products/${productId}/cost`).then((r) => r.data),
     enabled: !!product,
+  });
+
+  const { data: categories = [] } = useQuery<Category[]>({
+    queryKey: ['categories'],
+    queryFn: () => api.get('/categories').then((r) => r.data),
   });
 
   const { data: rawMaterials = [] } = useQuery<RawMaterial[]>({
@@ -130,19 +198,22 @@ export default function ProductDetailPage() {
   const updateMutation = useMutation({
     mutationFn: (data: typeof form) =>
       api.patch(`/products/${productId}`, {
-        ...data,
+        name: data.name,
         code: data.code || undefined,
         description: data.description || undefined,
         image: data.image || undefined,
-        category: data.category || undefined,
+        price: data.price,
+        categoryId: data.categoryId || undefined,
+        isMenuItem: data.isMenuItem,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       setEditing(false);
-      toast.success(tc('save') + ' - OK');
+      toast.success('Urun basariyla guncellendi');
     },
-    onError: () => {
-      toast.error('Hata olustu');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { message?: string } } };
+      toast.error(err?.response?.data?.message || 'Guncelleme sirasinda hata olustu');
     },
   });
 
@@ -153,11 +224,11 @@ export default function ProductDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       setIngredientDialogOpen(false);
       resetIngredientForm();
-      toast.success(tc('save') + ' - OK');
+      toast.success('Icerik basariyla eklendi');
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err?.response?.data?.message || 'Hata olustu');
+      toast.error(err?.response?.data?.message || 'Icerik eklenirken hata olustu');
     },
   });
 
@@ -166,7 +237,10 @@ export default function ProductDetailPage() {
       api.delete(`/products/${productId}/ingredients/${ingredientId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast.success(tc('delete') + ' - OK');
+      toast.success('Icerik basariyla silindi');
+    },
+    onError: () => {
+      toast.error('Icerik silinirken hata olustu');
     },
   });
 
@@ -178,9 +252,8 @@ export default function ProductDetailPage() {
       description: product.description || '',
       image: product.image || '',
       price: Number(product.price),
-      category: product.category || '',
+      categoryId: product.categoryId || '',
       isMenuItem: product.isMenuItem,
-      isComposite: product.isComposite,
     });
     setEditing(true);
   }
@@ -210,28 +283,30 @@ export default function ProductDetailPage() {
   }
 
   if (isLoading || !product) {
-    return <div className="p-6">{tc('loading')}</div>;
+    return <div className="p-6 text-muted-foreground">Yukleniyor...</div>;
   }
 
   const otherProducts = allProducts.filter((p) => p.id !== productId);
+  const margin = costBreakdown ? Number(costBreakdown.profitMargin) : (product.profitMargin != null ? Number(product.profitMargin) : null);
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard/products')}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-2xl font-bold">{t('productDetail')}</h1>
+        <h1 className="text-2xl font-bold">Urun Detayi</h1>
       </div>
 
-      {/* Product info card */}
+      {/* Product Info Card */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>{product.name}</CardTitle>
           {!editing && (
             <Button variant="outline" size="sm" onClick={startEdit}>
               <Pencil className="mr-2 h-4 w-4" />
-              {tc('edit')}
+              Duzenle
             </Button>
           )}
         </CardHeader>
@@ -239,7 +314,7 @@ export default function ProductDetailPage() {
           {editing ? (
             <form onSubmit={handleUpdate} className="space-y-4 max-w-lg">
               <div>
-                <Label>{t('name')}</Label>
+                <Label>Urun Adi <span className="text-red-500">*</span></Label>
                 <Input
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -248,39 +323,41 @@ export default function ProductDetailPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>{t('code')}</Label>
+                  <Label>Kod</Label>
                   <Input
                     value={form.code}
                     onChange={(e) => setForm({ ...form, code: e.target.value })}
                   />
                 </div>
                 <div>
-                  <Label>{t('category')}</Label>
-                  <Input
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  />
+                  <Label>Kategori</Label>
+                  <select
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    value={form.categoryId}
+                    onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+                  >
+                    <option value="">Kategorisiz</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div>
-                <Label>{t('description')}</Label>
-                <Input
+                <Label>Aciklama</Label>
+                <Textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                 />
               </div>
               <div>
-                <Label>{t('price')} (TL)</Label>
+                <Label>Gorsel URL</Label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={form.price}
-                  onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
-                  required
+                  value={form.image}
+                  onChange={(e) => setForm({ ...form, image: e.target.value })}
                 />
               </div>
-              <div className="flex gap-6">
+              <div>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -288,216 +365,188 @@ export default function ProductDetailPage() {
                     onChange={(e) => setForm({ ...form, isMenuItem: e.target.checked })}
                     className="rounded border-gray-300"
                   />
-                  <span className="text-sm">{t('isMenuItem')}</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={form.isComposite}
-                    onChange={(e) => setForm({ ...form, isComposite: e.target.checked })}
-                    className="rounded border-gray-300"
-                  />
-                  <span className="text-sm">{t('isComposite')}</span>
+                  <span className="text-sm">Menude Goster</span>
                 </label>
               </div>
+              {form.isMenuItem && (
+                <div>
+                  <Label>Satis Fiyati (TL) <span className="text-red-500">*</span></Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={form.price || ''}
+                    onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
+                    required
+                  />
+                </div>
+              )}
+              {!form.isMenuItem && (
+                <div>
+                  <Label>Satis Fiyati (TL)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={form.price || ''}
+                    onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
+                    placeholder="Opsiyonel - ara urun ise bos birakilabilir"
+                  />
+                </div>
+              )}
               <div className="flex gap-2 pt-2">
                 <Button type="button" variant="outline" onClick={() => setEditing(false)}>
                   <X className="mr-2 h-4 w-4" />
-                  {tc('cancel')}
+                  Iptal
                 </Button>
                 <Button type="submit" disabled={updateMutation.isPending}>
                   <Save className="mr-2 h-4 w-4" />
-                  {tc('save')}
+                  {updateMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
                 </Button>
               </div>
             </form>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">{t('code')}</p>
+                <p className="text-sm text-muted-foreground">Kod</p>
                 <p className="font-medium">{product.code || '-'}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{t('category')}</p>
-                <p className="font-medium">{product.category || '-'}</p>
+                <p className="text-sm text-muted-foreground">Kategori</p>
+                <p className="font-medium">{product.category?.name || '-'}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{t('price')}</p>
-                <p className="font-medium">{Number(product.price).toFixed(2)} TL</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t('cost')}</p>
+                <p className="text-sm text-muted-foreground">Satis Fiyati</p>
                 <p className="font-medium">
-                  {product.calculatedCost != null
-                    ? `${Number(product.calculatedCost).toFixed(2)} TL`
-                    : '-'}
+                  {Number(product.price) > 0
+                    ? `${formatCurrency(Number(product.price))} TL`
+                    : <span className="text-muted-foreground">Belirlenmedi</span>}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{t('profitMargin')}</p>
+                <p className="text-sm text-muted-foreground">Maliyet</p>
                 <p className="font-medium">
-                  {product.profitMargin != null
-                    ? `%${Number(product.profitMargin).toFixed(1)}`
+                  {product.calculatedCost != null && Number(product.calculatedCost) > 0
+                    ? `${formatCurrency(Number(product.calculatedCost))} TL`
                     : '-'}
                 </p>
               </div>
+              {Number(product.price) > 0 && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Kar Marji</p>
+                  <p className="font-medium">
+                    {product.profitMargin != null ? (
+                      <span
+                        className={`${
+                          Number(product.profitMargin) >= 50
+                            ? 'text-green-600'
+                            : Number(product.profitMargin) >= 30
+                              ? 'text-yellow-600'
+                              : 'text-red-600'
+                        }`}
+                      >
+                        %{formatPercent(Number(product.profitMargin))}
+                      </span>
+                    ) : (
+                      '-'
+                    )}
+                  </p>
+                </div>
+              )}
               <div>
-                <p className="text-sm text-muted-foreground">{t('description')}</p>
+                <p className="text-sm text-muted-foreground">Aciklama</p>
                 <p className="font-medium">{product.description || '-'}</p>
               </div>
-              <div className="flex gap-2">
-                {product.isMenuItem && <Badge variant="secondary">{t('isMenuItem')}</Badge>}
-                {product.isComposite && <Badge variant="outline">{t('isComposite')}</Badge>}
+              <div>
+                <p className="text-sm text-muted-foreground">Durum</p>
+                <div className="flex gap-2 mt-1">
+                  {product.isMenuItem && <Badge variant="secondary">Menu</Badge>}
+                  {product.isComposite && <Badge variant="outline">Kompozit</Badge>}
+                  {!product.isMenuItem && !product.isComposite && (
+                    <span className="text-sm text-muted-foreground">-</span>
+                  )}
+                </div>
               </div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Ingredients / Recipe */}
+      {/* Recete / Icerikler */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>{t('ingredients')}</CardTitle>
-          <Dialog open={ingredientDialogOpen} onOpenChange={setIngredientDialogOpen}>
-            <Button onClick={() => { resetIngredientForm(); setIngredientDialogOpen(true); }}>
-              <Plus className="mr-2 h-4 w-4" />
-              {t('addIngredient')}
-            </Button>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t('addIngredient')}</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleAddIngredient} className="space-y-4">
-                <div>
-                  <Label>{t('selectType')}</Label>
-                  <select
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    value={ingredientType}
-                    onChange={(e) => setIngredientType(e.target.value as 'raw' | 'sub')}
-                  >
-                    <option value="raw">{t('rawMaterial')}</option>
-                    <option value="sub">{t('subProduct')}</option>
-                  </select>
-                </div>
-                {ingredientType === 'raw' ? (
-                  <div>
-                    <Label>{t('selectMaterial')}</Label>
-                    <select
-                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                      value={ingredientForm.rawMaterialId}
-                      onChange={(e) => setIngredientForm({ ...ingredientForm, rawMaterialId: e.target.value })}
-                      required
-                    >
-                      <option value="">{t('selectMaterial')}</option>
-                      {rawMaterials.map((m) => (
-                        <option key={m.id} value={m.id}>
-                          {m.name} ({m.unit})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                ) : (
-                  <div>
-                    <Label>{t('selectProduct')}</Label>
-                    <select
-                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                      value={ingredientForm.subProductId}
-                      onChange={(e) => setIngredientForm({ ...ingredientForm, subProductId: e.target.value })}
-                      required
-                    >
-                      <option value="">{t('selectProduct')}</option>
-                      {otherProducts.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>{t('quantity')}</Label>
-                    <Input
-                      type="number"
-                      step="0.001"
-                      min="0.001"
-                      value={ingredientForm.quantity}
-                      onChange={(e) => setIngredientForm({ ...ingredientForm, quantity: parseFloat(e.target.value) || 0 })}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label>{t('unit')}</Label>
-                    <select
-                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                      value={ingredientForm.unit}
-                      onChange={(e) => setIngredientForm({ ...ingredientForm, unit: e.target.value })}
-                    >
-                      {UNITS.map((u) => (
-                        <option key={u} value={u}>
-                          {ti(`units.${u}`)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIngredientDialogOpen(false)}>
-                    {tc('cancel')}
-                  </Button>
-                  <Button type="submit" disabled={addIngredientMutation.isPending}>
-                    {tc('save')}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <CardTitle>Recete / Icerikler</CardTitle>
+          <Button onClick={() => { resetIngredientForm(); setIngredientDialogOpen(true); }}>
+            <Plus className="mr-2 h-4 w-4" />
+            Icerik Ekle
+          </Button>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t('name')}</TableHead>
-                <TableHead className="text-center">{t('selectType')}</TableHead>
-                <TableHead className="text-right">{t('quantity')}</TableHead>
-                <TableHead>{t('unit')}</TableHead>
-                <TableHead className="text-right">{tc('actions')}</TableHead>
+                <TableHead>Ad</TableHead>
+                <TableHead className="text-center">Tip</TableHead>
+                <TableHead className="text-right">Miktar</TableHead>
+                <TableHead>Birim</TableHead>
+                <TableHead className="text-right">Birim Maliyet</TableHead>
+                <TableHead className="text-right">Toplam Maliyet</TableHead>
+                <TableHead className="text-right">Sil</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {product.ingredients.map((ing) => (
-                <TableRow key={ing.id}>
-                  <TableCell className="font-medium">
-                    {ing.rawMaterial?.name || ing.subProduct?.name || '-'}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Badge variant={ing.rawMaterialId ? 'secondary' : 'outline'}>
-                      {ing.rawMaterialId ? t('rawMaterial') : t('subProduct')}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {Number(ing.quantity).toFixed(3)}
-                  </TableCell>
-                  <TableCell>{ing.unit}</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        if (confirm(tc('confirm') + '?')) {
-                          deleteIngredientMutation.mutate(ing.id);
-                        }
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {product.ingredients.map((ing) => {
+                const name = ing.rawMaterial?.name || ing.subProduct?.name || '-';
+                const isRaw = ing.rawMaterialId != null;
+                let unitCost: number;
+                let totalCost: number;
+                if (isRaw && ing.rawMaterial) {
+                  const pricePerBaseUnit = Number(ing.rawMaterial.lastPurchasePrice);
+                  unitCost = getUnitCostInIngredientUnit(pricePerBaseUnit, ing.unit, ing.rawMaterial.unit);
+                  totalCost = unitCost * Number(ing.quantity);
+                } else {
+                  unitCost = Number(ing.subProduct?.calculatedCost ?? ing.subProduct?.price ?? 0);
+                  totalCost = unitCost * Number(ing.quantity);
+                }
+
+                return (
+                  <TableRow key={ing.id}>
+                    <TableCell className="font-medium">{name}</TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant={isRaw ? 'secondary' : 'outline'}>
+                        {isRaw ? 'Ham Madde' : 'Alt Urun'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatQuantity(Number(ing.quantity))}
+                    </TableCell>
+                    <TableCell>{UNIT_LABELS[ing.unit] || ing.unit}</TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(Number(unitCost))} TL
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(totalCost)} TL
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          if (confirm('Bu icerigi silmek istediginize emin misiniz?')) {
+                            deleteIngredientMutation.mutate(ing.id);
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
               {product.ingredients.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                    {t('noIngredients')}
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                    Henuz icerik eklenmemis. &quot;Icerik Ekle&quot; butonunu kullanarak ham madde veya alt urun ekleyebilirsiniz.
                   </TableCell>
                 </TableRow>
               )}
@@ -506,50 +555,184 @@ export default function ProductDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Cost breakdown */}
+      {/* Maliyet Dokumu */}
       {costBreakdown && costBreakdown.ingredients.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>{t('costBreakdown')}</CardTitle>
+            <CardTitle>Maliyet Dokumu</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('name')}</TableHead>
-                  <TableHead className="text-right">{t('quantity')}</TableHead>
-                  <TableHead>{t('unit')}</TableHead>
-                  <TableHead className="text-right">{t('unitCost')}</TableHead>
-                  <TableHead className="text-right">{t('ingredientCost')}</TableHead>
+                  <TableHead>Icerik</TableHead>
+                  <TableHead className="text-right">Miktar</TableHead>
+                  <TableHead className="text-right">Birim Maliyet</TableHead>
+                  <TableHead className="text-right">Toplam Maliyet</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {costBreakdown.ingredients.map((item, idx) => (
-                  <TableRow key={idx}>
-                    <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell className="text-right">{Number(item.quantity).toFixed(3)}</TableCell>
-                    <TableCell>{item.unit}</TableCell>
-                    <TableCell className="text-right">{Number(item.unitCost).toFixed(2)} TL</TableCell>
-                    <TableCell className="text-right">{Number(item.totalCost).toFixed(2)} TL</TableCell>
-                  </TableRow>
-                ))}
-                <TableRow className="font-bold border-t-2">
-                  <TableCell colSpan={4} className="text-right">{t('totalCost')}</TableCell>
-                  <TableCell className="text-right">{Number(costBreakdown.totalCost).toFixed(2)} TL</TableCell>
-                </TableRow>
-                <TableRow className="font-bold">
-                  <TableCell colSpan={4} className="text-right">{t('price')}</TableCell>
-                  <TableCell className="text-right">{Number(costBreakdown.price).toFixed(2)} TL</TableCell>
-                </TableRow>
-                <TableRow className="font-bold">
-                  <TableCell colSpan={4} className="text-right">{t('profitMargin')}</TableCell>
-                  <TableCell className="text-right">%{Number(costBreakdown.profitMargin).toFixed(1)}</TableCell>
-                </TableRow>
+                {costBreakdown.ingredients.map((item, idx) => {
+                  let displayUnitCost: number;
+                  if (item.type === 'raw_material' && item.unitPrice != null && item.baseUnit) {
+                    displayUnitCost = getUnitCostInIngredientUnit(item.unitPrice, item.unit, item.baseUnit);
+                  } else {
+                    displayUnitCost = item.unitCost ?? (item.quantity > 0 ? item.cost / item.quantity : 0);
+                  }
+                  const unitLabel = UNIT_LABELS[item.unit] || item.unit;
+                  return (
+                    <TableRow key={idx}>
+                      <TableCell className="font-medium">{item.name}</TableCell>
+                      <TableCell className="text-right">{formatQuantity(Number(item.quantity))} {unitLabel}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(displayUnitCost)} TL/{unitLabel}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(item.cost)} TL</TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
+
+            {/* Ozet */}
+            <div className="mt-6 border-t pt-4 space-y-3 max-w-sm ml-auto">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Toplam Maliyet</span>
+                <span className="font-semibold">{formatCurrency(Number(costBreakdown.totalCost))} TL</span>
+              </div>
+              {Number(costBreakdown.price) > 0 && (
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Satis Fiyati</span>
+                    <span className="font-semibold">{formatCurrency(Number(costBreakdown.price))} TL</span>
+                  </div>
+                  <div className="flex justify-between text-sm border-t pt-2">
+                    <span className="text-muted-foreground">Kar Marji</span>
+                    <span
+                      className={`font-bold text-base ${
+                        margin != null && margin >= 50
+                          ? 'text-green-600'
+                          : margin != null && margin >= 30
+                            ? 'text-yellow-600'
+                            : 'text-red-600'
+                      }`}
+                    >
+                      %{formatPercent(Number(costBreakdown.profitMargin))}
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
+
+      {/* Icerik Ekleme Dialogu */}
+      <Dialog open={ingredientDialogOpen} onOpenChange={setIngredientDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Icerik Ekle</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddIngredient} className="space-y-4">
+            <div>
+              <Label>Icerik Tipi</Label>
+              <select
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                value={ingredientType}
+                onChange={(e) => setIngredientType(e.target.value as 'raw' | 'sub')}
+              >
+                <option value="raw">Ham Madde</option>
+                <option value="sub">Alt Urun</option>
+              </select>
+            </div>
+
+            {ingredientType === 'raw' ? (
+              <div>
+                <Label>Ham Madde Sec</Label>
+                <select
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  value={ingredientForm.rawMaterialId}
+                  onChange={(e) => {
+                    const rmId = e.target.value;
+                    const rm = rawMaterials.find((m) => m.id === rmId);
+                    const compatible = rm ? (COMPATIBLE_UNITS[rm.unit.toUpperCase()] || [rm.unit]) : UNITS as unknown as string[];
+                    const newUnit = rm && !compatible.includes(ingredientForm.unit) ? compatible[0] : ingredientForm.unit;
+                    setIngredientForm({ ...ingredientForm, rawMaterialId: rmId, unit: newUnit });
+                  }}
+                  required
+                >
+                  <option value="">Ham madde secin...</option>
+                  {rawMaterials.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name} ({UNIT_LABELS[m.unit] || m.unit}) - {formatCurrency(Number(m.lastPurchasePrice))} TL/{m.unit}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div>
+                <Label>Alt Urun Sec</Label>
+                <select
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  value={ingredientForm.subProductId}
+                  onChange={(e) => setIngredientForm({ ...ingredientForm, subProductId: e.target.value })}
+                  required
+                >
+                  <option value="">Urun secin...</option>
+                  {otherProducts.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} {p.calculatedCost != null ? `- ${formatCurrency(Number(p.calculatedCost))} TL` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Miktar</Label>
+                <Input
+                  type="number"
+                  step="0.001"
+                  min="0.001"
+                  value={ingredientForm.quantity || ''}
+                  onChange={(e) => setIngredientForm({ ...ingredientForm, quantity: parseFloat(e.target.value) || 0 })}
+                  placeholder="Ornek: 200"
+                  required
+                />
+              </div>
+              <div>
+                <Label>Birim</Label>
+                <select
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  value={ingredientForm.unit}
+                  onChange={(e) => setIngredientForm({ ...ingredientForm, unit: e.target.value })}
+                >
+                  {(() => {
+                    if (ingredientType === 'raw' && ingredientForm.rawMaterialId) {
+                      const rm = rawMaterials.find((m) => m.id === ingredientForm.rawMaterialId);
+                      const compatible = rm ? (COMPATIBLE_UNITS[rm.unit.toUpperCase()] || [rm.unit]) : (UNITS as unknown as string[]);
+                      return compatible.map((u) => (
+                        <option key={u} value={u}>{UNIT_LABELS[u] || u}</option>
+                      ));
+                    }
+                    return UNITS.map((u) => (
+                      <option key={u} value={u}>{UNIT_LABELS[u]}</option>
+                    ));
+                  })()}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setIngredientDialogOpen(false)}>
+                Iptal
+              </Button>
+              <Button type="submit" disabled={addIngredientMutation.isPending}>
+                {addIngredientMutation.isPending ? 'Ekleniyor...' : 'Ekle'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

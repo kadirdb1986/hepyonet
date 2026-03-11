@@ -39,6 +39,7 @@ model Restaurant {
   revenues       Revenue[]
   rawMaterials   RawMaterial[]
   products       Product[]
+  categories     Category[]
   menuItems      MenuItem[]
   stockMovements StockMovement[]
 
@@ -202,21 +203,36 @@ model RawMaterial {
   @@map("raw_materials")
 }
 
+model Category {
+  id           String   @id @default(uuid())
+  restaurantId String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  products   Product[]
+
+  @@unique([restaurantId, name])
+  @@map("categories")
+}
+
 model Product {
-  id           String  @id @default(uuid())
+  id           String   @id @default(uuid())
   restaurantId String
   name         String
   code         String?
   description  String?
   image        String?
-  price        Decimal @db.Decimal(10, 2) @default(0)
-  isMenuItem   Boolean @default(false)
-  isComposite  Boolean @default(false)
-  category     String?
+  price        Decimal  @db.Decimal(10, 2) @default(0)
+  isMenuItem   Boolean  @default(false)
+  isComposite  Boolean  @default(false)
+  categoryId   String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   restaurant  Restaurant          @relation(fields: [restaurantId], references: [id])
+  category    Category?           @relation(fields: [categoryId], references: [id])
   ingredients ProductIngredient[] @relation("ProductIngredients")
   usedIn      ProductIngredient[] @relation("SubProductIngredients")
   menuItem    MenuItem?
