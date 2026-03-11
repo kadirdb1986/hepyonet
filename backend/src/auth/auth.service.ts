@@ -69,6 +69,7 @@ export class AuthService {
     });
 
     if (error) {
+      console.error('Supabase login error:', error.message);
       throw new UnauthorizedException('Invalid credentials');
     }
 
