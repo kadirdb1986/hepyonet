@@ -8,6 +8,7 @@ import { RestaurantModule } from './restaurant/restaurant.module';
 import { UserModule } from './user/user.module';
 import { AdminModule } from './admin/admin.module';
 import { PersonnelModule } from './personnel/personnel.module';
+import { FinanceModule } from './finance/finance.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PersonnelModule } from './personnel/personnel.module';
     UserModule,
     AdminModule,
     PersonnelModule,
+    FinanceModule,
   ],
 })
 export class AppModule {}
