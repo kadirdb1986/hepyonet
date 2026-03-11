@@ -246,5 +246,35 @@
     "selectType": "Icerik Tipi Secin",
     "selectMaterial": "Ham Madde Secin",
     "selectProduct": "Alt Urun Secin"
+  },
+  "menu": {
+    "title": "Menu Yonetimi",
+    "description": "Menunuzdeki urunleri yonetin, siralayin ve musterilerinize gosterin.",
+    "emptyState": "Henuz menude urun yok. Urunler sayfasindan urunleri menuye ekleyebilirsiniz.",
+    "product": "Urun",
+    "code": "Kod",
+    "category": "Kategori",
+    "price": "Fiyat",
+    "order": "Sira",
+    "availability": "Durum",
+    "available": "Aktif",
+    "unavailable": "Pasif",
+    "moveUp": "Yukari",
+    "moveDown": "Asagi",
+    "saveOrder": "Siralamavi Kaydet",
+    "orderSaved": "Siralama kaydedildi",
+    "availabilityUpdated": "Urun durumu guncellendi",
+    "qr": {
+      "title": "QR Menu",
+      "description": "QR kodu olusturun ve musterilerinizin menunuzu telefonlarindan goruntulemesini saglayin.",
+      "menuUrl": "Menu Adresi",
+      "downloadPng": "PNG Indir",
+      "downloadSvg": "SVG Indir",
+      "preview": "Menu Onizleme",
+      "openInNewTab": "Yeni Sekmede Ac",
+      "copyUrl": "Adresi Kopyala",
+      "copied": "Kopyalandi!",
+      "scanToView": "QR kodu tarayarak menunuzu goruntuleyebilirsiniz."
+    }
   }
 }
