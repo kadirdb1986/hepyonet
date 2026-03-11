@@ -22,4 +22,4 @@ RUN npm prune --omit=dev
 
 EXPOSE 3000
 
-CMD ["node", "dist/main"]
+CMD ["sh", "-c", "npx prisma db push --skip-generate && node dist/main"]
