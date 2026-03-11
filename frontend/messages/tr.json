@@ -276,5 +276,37 @@
       "copied": "Kopyalandi!",
       "scanToView": "QR kodu tarayarak menunuzu goruntuleyebilirsiniz."
     }
+  },
+  "reports": {
+    "title": "Raporlar",
+    "monthly": "Aylik Rapor",
+    "weekly": "Haftalik Rapor",
+    "comparison": "Karsilastirma",
+    "fetchReport": "Raporu Getir",
+    "compare": "Karsilastir",
+    "generate": "Raporla",
+    "resetEdits": "Duzeltmeleri Sifirla",
+    "revenue": "Gelir",
+    "expense": "Gider",
+    "tax": "Vergi",
+    "netProfit": "Net Kar/Zarar",
+    "margin": "Kar Marji",
+    "totalRevenue": "Toplam Gelir",
+    "totalExpense": "Toplam Gider",
+    "format": "Cikti Formati",
+    "pdf": "PDF",
+    "html": "HTML",
+    "loading": "Rapor yukleniyor...",
+    "error": "Rapor yuklenirken hata olustu",
+    "noData": "Bu donem icin veri bulunamadi",
+    "editedMarker": "elle duzeltildi",
+    "categories": {
+      "SALARY": "Maas",
+      "BILL": "Fatura",
+      "TAX": "Vergi",
+      "RENT": "Kira",
+      "SUPPLIER": "Tedarikci",
+      "OTHER": "Diger"
+    }
   }
 }
