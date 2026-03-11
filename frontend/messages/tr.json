@@ -1,0 +1,71 @@
+{
+  "common": {
+    "appName": "HepYonet",
+    "loading": "Yukleniyor...",
+    "save": "Kaydet",
+    "cancel": "Iptal",
+    "delete": "Sil",
+    "edit": "Duzenle",
+    "add": "Ekle",
+    "search": "Ara",
+    "actions": "Islemler",
+    "confirm": "Onayla",
+    "reject": "Reddet",
+    "back": "Geri",
+    "next": "Ileri",
+    "yes": "Evet",
+    "no": "Hayir"
+  },
+  "auth": {
+    "login": "Giris Yap",
+    "register": "Kayit Ol",
+    "email": "E-posta",
+    "password": "Sifre",
+    "name": "Ad Soyad",
+    "restaurantName": "Restoran Adi",
+    "forgotPassword": "Sifremi Unuttum",
+    "noAccount": "Hesabiniz yok mu?",
+    "hasAccount": "Zaten hesabiniz var mi?",
+    "registerSuccess": "Kayit basarili! Restoraniniz onay bekliyor.",
+    "loginError": "E-posta veya sifre hatali.",
+    "logout": "Cikis Yap"
+  },
+  "dashboard": {
+    "title": "Genel Bakis",
+    "welcome": "Hos geldiniz",
+    "monthlyRevenue": "Aylik Ciro",
+    "monthlyExpense": "Aylik Gider",
+    "netProfit": "Net Kar",
+    "personnelCount": "Personel Sayisi"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "personnel": "Personel",
+    "finance": "Finans",
+    "inventory": "Stok",
+    "products": "Urunler",
+    "menu": "Menu",
+    "reports": "Raporlar",
+    "settings": "Ayarlar",
+    "users": "Kullanicilar"
+  },
+  "admin": {
+    "title": "Yonetim Paneli",
+    "restaurants": "Restoranlar",
+    "pendingApproval": "Onay Bekleyenler",
+    "approved": "Onaylananlar",
+    "rejected": "Reddedilenler",
+    "approve": "Onayla",
+    "reject": "Reddet",
+    "stats": "Istatistikler",
+    "totalRestaurants": "Toplam Restoran",
+    "totalUsers": "Toplam Kullanici"
+  },
+  "restaurant": {
+    "status": {
+      "PENDING": "Onay Bekliyor",
+      "APPROVED": "Onaylandi",
+      "REJECTED": "Reddedildi"
+    }
+  }
+}

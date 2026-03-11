@@ -1,0 +1,278 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  ACCOUNTANT
+  HR
+  STOCK_MANAGER
+  MENU_MANAGER
+}
+
+enum RestaurantStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Restaurant {
+  id               String           @id @default(uuid())
+  name             String
+  slug             String           @unique
+  logo             String?
+  address          String?
+  phone            String?
+  status           RestaurantStatus @default(PENDING)
+  subscriptionPlan String           @default("free")
+  settings         Json             @default("{}")
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  users          User[]
+  personnel      Personnel[]
+  expenses       Expense[]
+  revenues       Revenue[]
+  rawMaterials   RawMaterial[]
+  products       Product[]
+  menuItems      MenuItem[]
+  stockMovements StockMovement[]
+
+  @@map("restaurants")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  supabaseId   String   @unique
+  email        String   @unique
+  name         String
+  restaurantId String?
+  role         Role     @default(ADMIN)
+  isActive     Boolean  @default(true)
+  isSuperAdmin Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant Restaurant? @relation(fields: [restaurantId], references: [id])
+
+  @@map("users")
+}
+
+model Personnel {
+  id           String   @id @default(uuid())
+  restaurantId String
+  name         String
+  surname      String
+  phone        String?
+  tcNo         String?
+  position     String?
+  startDate    DateTime
+  salary       Decimal  @db.Decimal(10, 2)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
+  leaveRecords LeaveRecord[]
+
+  @@map("personnel")
+}
+
+enum LeaveType {
+  ANNUAL
+  SICK
+  OTHER
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model LeaveRecord {
+  id           String      @id @default(uuid())
+  restaurantId String
+  personnelId  String
+  startDate    DateTime
+  endDate      DateTime
+  type         LeaveType
+  status       LeaveStatus @default(PENDING)
+  notes        String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  personnel Personnel @relation(fields: [personnelId], references: [id])
+
+  @@map("leave_records")
+}
+
+enum ExpenseCategory {
+  SALARY
+  BILL
+  TAX
+  RENT
+  SUPPLIER
+  OTHER
+}
+
+enum DistributionType {
+  NONE
+  EQUAL
+  REVENUE_BASED
+}
+
+model Expense {
+  id                 String           @id @default(uuid())
+  restaurantId       String
+  title              String
+  amount             Decimal          @db.Decimal(10, 2)
+  category           ExpenseCategory
+  paymentDate        DateTime
+  isDistributed      Boolean          @default(false)
+  distributionType   DistributionType @default(NONE)
+  distributionMonths Int?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  restaurant    Restaurant             @relation(fields: [restaurantId], references: [id])
+  distributions ExpenseDistribution[]
+
+  @@map("expenses")
+}
+
+model ExpenseDistribution {
+  id        String  @id @default(uuid())
+  expenseId String
+  month     String
+  amount    Decimal @db.Decimal(10, 2)
+
+  expense Expense @relation(fields: [expenseId], references: [id])
+
+  @@map("expense_distributions")
+}
+
+enum RevenueSource {
+  MANUAL
+  API
+}
+
+model Revenue {
+  id           String        @id @default(uuid())
+  restaurantId String
+  date         DateTime
+  amount       Decimal       @db.Decimal(10, 2)
+  source       RevenueSource @default(MANUAL)
+  notes        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@map("revenues")
+}
+
+enum MaterialUnit {
+  KG
+  GR
+  LT
+  ML
+  ADET
+}
+
+model RawMaterial {
+  id                String       @id @default(uuid())
+  restaurantId      String
+  name              String
+  unit              MaterialUnit
+  currentStock      Decimal      @db.Decimal(10, 3) @default(0)
+  lastPurchasePrice Decimal      @db.Decimal(10, 2) @default(0)
+  minStockLevel     Decimal      @db.Decimal(10, 3) @default(0)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  restaurant     Restaurant          @relation(fields: [restaurantId], references: [id])
+  stockMovements StockMovement[]
+  ingredients    ProductIngredient[]
+
+  @@map("raw_materials")
+}
+
+model Product {
+  id           String  @id @default(uuid())
+  restaurantId String
+  name         String
+  code         String?
+  description  String?
+  image        String?
+  price        Decimal @db.Decimal(10, 2) @default(0)
+  isMenuItem   Boolean @default(false)
+  isComposite  Boolean @default(false)
+  category     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant  Restaurant          @relation(fields: [restaurantId], references: [id])
+  ingredients ProductIngredient[] @relation("ProductIngredients")
+  usedIn      ProductIngredient[] @relation("SubProductIngredients")
+  menuItem    MenuItem?
+
+  @@map("products")
+}
+
+model ProductIngredient {
+  id            String  @id @default(uuid())
+  productId     String
+  rawMaterialId String?
+  subProductId  String?
+  quantity      Decimal @db.Decimal(10, 3)
+  unit          String
+
+  product     Product      @relation("ProductIngredients", fields: [productId], references: [id])
+  rawMaterial RawMaterial? @relation(fields: [rawMaterialId], references: [id])
+  subProduct  Product?     @relation("SubProductIngredients", fields: [subProductId], references: [id])
+
+  @@map("product_ingredients")
+}
+
+model MenuItem {
+  id           String  @id @default(uuid())
+  productId    String  @unique
+  restaurantId String
+  displayOrder Int     @default(0)
+  isAvailable  Boolean @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  product    Product    @relation(fields: [productId], references: [id])
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@map("menu_items")
+}
+
+enum StockMovementType {
+  IN
+  OUT
+}
+
+model StockMovement {
+  id            String            @id @default(uuid())
+  restaurantId  String
+  rawMaterialId String
+  quantity      Decimal           @db.Decimal(10, 3)
+  unitPrice     Decimal           @db.Decimal(10, 2)
+  type          StockMovementType
+  supplier      String?
+  invoiceNo     String?
+  date          DateTime
+  createdAt     DateTime          @default(now())
+
+  restaurant  Restaurant  @relation(fields: [restaurantId], references: [id])
+  rawMaterial RawMaterial @relation(fields: [rawMaterialId], references: [id])
+
+  @@map("stock_movements")
+}
