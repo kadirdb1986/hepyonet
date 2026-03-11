@@ -27,7 +27,7 @@ interface Product {
   description: string | null;
   image: string | null;
   price: string;
-  category: string | null;
+  category: { id: string; name: string } | null;
   isMenuItem: boolean;
 }
 
@@ -209,7 +209,7 @@ export default function MenuManagementPage() {
                     </TableCell>
                     <TableCell>
                       {item.product.category ? (
-                        <Badge variant="secondary">{item.product.category}</Badge>
+                        <Badge variant="secondary">{item.product.category.name}</Badge>
                       ) : (
                         <span className="text-muted-foreground">-</span>
                       )}
