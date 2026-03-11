@@ -67,5 +67,61 @@
       "APPROVED": "Onaylandi",
       "REJECTED": "Reddedildi"
     }
+  },
+  "personnel": {
+    "title": "Personel Yonetimi",
+    "addNew": "Yeni Personel Ekle",
+    "name": "Ad",
+    "surname": "Soyad",
+    "fullName": "Ad Soyad",
+    "phone": "Telefon",
+    "tcNo": "TC Kimlik No",
+    "position": "Pozisyon",
+    "startDate": "Baslangic Tarihi",
+    "salary": "Maas",
+    "status": "Durum",
+    "active": "Aktif",
+    "inactive": "Pasif",
+    "actions": "Islemler",
+    "detail": "Detay",
+    "edit": "Duzenle",
+    "deactivate": "Pasife Al",
+    "noPersonnel": "Henuz personel kaydi yok.",
+    "createSuccess": "Personel basariyla eklendi.",
+    "updateSuccess": "Personel bilgileri guncellendi.",
+    "deactivateSuccess": "Personel pasife alindi.",
+    "leaves": {
+      "title": "Izin Kayitlari",
+      "addNew": "Yeni Izin Ekle",
+      "startDate": "Baslangic",
+      "endDate": "Bitis",
+      "type": "Izin Turu",
+      "status": "Durum",
+      "notes": "Notlar",
+      "approve": "Onayla",
+      "reject": "Reddet",
+      "noLeaves": "Henuz izin kaydi yok.",
+      "createSuccess": "Izin talebi olusturuldu.",
+      "updateSuccess": "Izin durumu guncellendi.",
+      "types": {
+        "ANNUAL": "Yillik Izin",
+        "SICK": "Hastalik Izni",
+        "OTHER": "Diger"
+      },
+      "statuses": {
+        "PENDING": "Beklemede",
+        "APPROVED": "Onaylandi",
+        "REJECTED": "Reddedildi"
+      }
+    },
+    "workDays": {
+      "title": "Calisma Gunleri",
+      "month": "Ay",
+      "totalDays": "Toplam Gun",
+      "weekends": "Hafta Sonu",
+      "businessDays": "Is Gunu",
+      "leaveDays": "Izinli Gun",
+      "workDays": "Calisilan Gun"
+    }
   }
 }
