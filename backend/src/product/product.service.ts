@@ -101,7 +101,7 @@ export class ProductService {
   }
 
   async create(restaurantId: string, dto: CreateProductDto) {
-    return this.prisma.product.create({
+    const product = await this.prisma.product.create({
       data: {
         restaurantId,
         name: dto.name,
@@ -114,6 +114,23 @@ export class ProductService {
         categoryId: dto.categoryId || null,
       },
     });
+
+    // Auto-create MenuItem when product is marked for menu
+    if (product.isMenuItem) {
+      const maxOrder = await this.prisma.menuItem.aggregate({
+        where: { restaurantId },
+        _max: { displayOrder: true },
+      });
+      await this.prisma.menuItem.create({
+        data: {
+          productId: product.id,
+          restaurantId,
+          displayOrder: (maxOrder._max.displayOrder ?? 0) + 1,
+        },
+      });
+    }
+
+    return product;
   }
 
   async update(id: string, restaurantId: string, dto: UpdateProductDto) {
@@ -124,7 +141,7 @@ export class ProductService {
       throw new NotFoundException('Urun bulunamadi');
     }
 
-    return this.prisma.product.update({
+    const updated = await this.prisma.product.update({
       where: { id },
       data: {
         ...(dto.name !== undefined && { name: dto.name }),
@@ -137,6 +154,32 @@ export class ProductService {
         ...(dto.categoryId !== undefined && { categoryId: dto.categoryId || null }),
       },
     });
+
+    // Sync MenuItem record when isMenuItem changes
+    if (dto.isMenuItem !== undefined && dto.isMenuItem !== product.isMenuItem) {
+      if (dto.isMenuItem) {
+        // Create MenuItem if not exists
+        const existing = await this.prisma.menuItem.findUnique({ where: { productId: id } });
+        if (!existing) {
+          const maxOrder = await this.prisma.menuItem.aggregate({
+            where: { restaurantId },
+            _max: { displayOrder: true },
+          });
+          await this.prisma.menuItem.create({
+            data: {
+              productId: id,
+              restaurantId,
+              displayOrder: (maxOrder._max.displayOrder ?? 0) + 1,
+            },
+          });
+        }
+      } else {
+        // Remove MenuItem when unchecked
+        await this.prisma.menuItem.deleteMany({ where: { productId: id } });
+      }
+    }
+
+    return updated;
   }
 
   async remove(id: string, restaurantId: string) {
@@ -147,7 +190,8 @@ export class ProductService {
       throw new NotFoundException('Urun bulunamadi');
     }
 
-    // Delete associated ingredients first, then the product
+    // Delete associated menu item, ingredients, then the product
+    await this.prisma.menuItem.deleteMany({ where: { productId: id } });
     await this.prisma.productIngredient.deleteMany({
       where: { productId: id },
     });
