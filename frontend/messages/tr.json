@@ -277,6 +277,49 @@
       "scanToView": "QR kodu tarayarak menunuzu goruntuleyebilirsiniz."
     }
   },
+  "settings": {
+    "title": "Restoran Ayarlari",
+    "general": "Genel Bilgiler",
+    "name": "Restoran Adi",
+    "slug": "Slug (URL)",
+    "slugHint": "Slug degistirilemez",
+    "logo": "Logo URL",
+    "address": "Adres",
+    "phone": "Telefon",
+    "save": "Kaydet",
+    "saveSuccess": "Restoran bilgileri guncellendi.",
+    "saveError": "Bilgiler guncellenirken hata olustu.",
+    "accountStatus": "Hesap Durumu",
+    "manager": "Yonetici"
+  },
+  "users": {
+    "title": "Kullanicilar",
+    "addNew": "Yeni Kullanici",
+    "name": "Ad Soyad",
+    "email": "E-posta",
+    "password": "Sifre",
+    "role": "Rol",
+    "status": "Durum",
+    "active": "Aktif",
+    "inactive": "Pasif",
+    "actions": "Islemler",
+    "create": "Olustur",
+    "createSuccess": "Kullanici olusturuldu.",
+    "createError": "Kullanici olusturulurken hata olustu.",
+    "roleUpdated": "Rol guncellendi.",
+    "roleError": "Rol guncellenirken hata olustu.",
+    "deleteConfirm": "Bu kullaniciyi silmek istediginize emin misiniz?",
+    "deleteSuccess": "Kullanici silindi.",
+    "deleteError": "Kullanici silinirken hata olustu.",
+    "noUsers": "Henuz kullanici yok.",
+    "roles": {
+      "ADMIN": "Yonetici",
+      "ACCOUNTANT": "Muhasebe",
+      "HR": "Insan Kaynaklari",
+      "STOCK_MANAGER": "Depocu",
+      "MENU_MANAGER": "Menu Yoneticisi"
+    }
+  },
   "reports": {
     "title": "Raporlar",
     "monthly": "Aylik Rapor",

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,6 +30,7 @@ const statusMap = {
 };
 
 export default function AdminRestaurantsPage() {
+  const router = useRouter();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [filter, setFilter] = useState<string>('');
 
@@ -76,7 +78,7 @@ export default function AdminRestaurantsPage() {
           <TableBody>
             {restaurants.map((r) => (
               <TableRow key={r.id} className="border-gray-700">
-                <TableCell className="text-white font-medium">{r.name}</TableCell>
+                <TableCell className="text-white font-medium cursor-pointer hover:underline" onClick={() => router.push(`/admin/restaurants/${r.id}`)}>{r.name}</TableCell>
                 <TableCell className="text-gray-300">
                   {r.users[0]?.name} ({r.users[0]?.email})
                 </TableCell>
