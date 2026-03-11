@@ -36,6 +36,7 @@ import { toast } from 'sonner';
 interface RawMaterial {
   id: string;
   name: string;
+  type: string;
   unit: string;
   currentStock: number;
   lastPurchasePrice: number;
@@ -50,6 +51,14 @@ const UNIT_LABELS: Record<string, string> = {
   LT: 'Litre',
   ML: 'Mililitre',
   ADET: 'Adet',
+};
+
+const MATERIAL_TYPES = ['GIDA', 'AMBALAJ', 'SARF'] as const;
+
+const TYPE_LABELS: Record<string, string> = {
+  GIDA: 'Gida',
+  AMBALAJ: 'Ambalaj',
+  SARF: 'Sarf Malzeme',
 };
 
 /** Miktar formatla: tam sayıysa küsürat gösterme, varsa virgülle göster */
@@ -69,8 +78,10 @@ export default function InventoryPage() {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<RawMaterial | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('ALL');
   const [form, setForm] = useState({
     name: '',
+    type: 'GIDA' as string,
     unit: 'KG' as string,
     currentStock: 0,
     lastPurchasePrice: 0,
@@ -115,7 +126,7 @@ export default function InventoryPage() {
   });
 
   function resetForm() {
-    setForm({ name: '', unit: 'KG', currentStock: 0, lastPurchasePrice: 0, minStockLevel: 0 });
+    setForm({ name: '', type: 'GIDA', unit: 'KG', currentStock: 0, lastPurchasePrice: 0, minStockLevel: 0 });
     setEditingMaterial(null);
     setDialogOpen(false);
   }
@@ -124,6 +135,7 @@ export default function InventoryPage() {
     setEditingMaterial(material);
     setForm({
       name: material.name,
+      type: material.type || 'GIDA',
       unit: material.unit,
       currentStock: Number(material.currentStock),
       lastPurchasePrice: Number(material.lastPurchasePrice),
@@ -177,6 +189,18 @@ export default function InventoryPage() {
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   required
                 />
+              </div>
+              <div>
+                <Label>Malzeme Tipi</Label>
+                <select
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  value={form.type}
+                  onChange={(e) => setForm({ ...form, type: e.target.value })}
+                >
+                  {MATERIAL_TYPES.map((t) => (
+                    <option key={t} value={t}>{TYPE_LABELS[t]}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <Label>{t('unit')}</Label>
@@ -258,16 +282,36 @@ export default function InventoryPage() {
         </Card>
       )}
 
+      {/* Filter tabs */}
+      <div className="flex gap-2">
+        {[{ key: 'ALL', label: 'Tumu' }, ...MATERIAL_TYPES.map((t) => ({ key: t, label: TYPE_LABELS[t] }))].map((tab) => (
+          <Button
+            key={tab.key}
+            variant={activeTab === tab.key ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveTab(tab.key)}
+          >
+            {tab.label}
+            <span className="ml-1.5 text-xs opacity-70">
+              ({tab.key === 'ALL' ? materials.length : materials.filter((m) => m.type === tab.key).length})
+            </span>
+          </Button>
+        ))}
+      </div>
+
       {/* Materials table */}
       <Card>
         <CardHeader>
-          <CardTitle>{t('rawMaterials')}</CardTitle>
+          <CardTitle>
+            {activeTab === 'ALL' ? t('rawMaterials') : TYPE_LABELS[activeTab]}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>{t('name')}</TableHead>
+                <TableHead className="text-center">Tip</TableHead>
                 <TableHead className="text-center">{t('currentStock')}</TableHead>
                 <TableHead className="text-center">{t('minStockLevel')}</TableHead>
                 <TableHead className="text-center">{t('lastPurchasePrice')}</TableHead>
@@ -276,11 +320,14 @@ export default function InventoryPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {materials.map((material) => {
+              {materials.filter((m) => activeTab === 'ALL' || m.type === activeTab).map((material) => {
                 const unitLabel = UNIT_LABELS[material.unit] || material.unit;
                 return (
                   <TableRow key={material.id}>
                     <TableCell className="font-medium">{material.name}</TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline">{TYPE_LABELS[material.type] || 'Gida'}</Badge>
+                    </TableCell>
                     <TableCell className="text-center">
                       <span className="inline-block w-16 text-right tabular-nums">{formatQuantity(Number(material.currentStock))}</span>
                       <span className="inline-block w-20 text-left text-muted-foreground ml-1">{unitLabel}</span>
@@ -323,7 +370,7 @@ export default function InventoryPage() {
               })}
               {materials.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                     {t('materialNotFound')}
                   </TableCell>
                 </TableRow>

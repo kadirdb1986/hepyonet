@@ -185,10 +185,17 @@ enum MaterialUnit {
   ADET
 }
 
+enum MaterialType {
+  GIDA
+  AMBALAJ
+  SARF
+}
+
 model RawMaterial {
   id                String       @id @default(uuid())
   restaurantId      String
   name              String
+  type              MaterialType @default(GIDA)
   unit              MaterialUnit
   currentStock      Decimal      @db.Decimal(10, 3) @default(0)
   lastPurchasePrice Decimal      @db.Decimal(10, 2) @default(0)
