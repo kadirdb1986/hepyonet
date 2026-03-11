@@ -22,12 +22,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Plus, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, Plus, Pencil, Trash2, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Category {
   id: string;
   name: string;
+  displayOrder: number;
   _count: { products: number };
 }
 
@@ -82,6 +83,27 @@ export default function CategoriesPage() {
       toast.error('Kategori silinirken hata olustu');
     },
   });
+
+  const reorderMutation = useMutation({
+    mutationFn: (items: { id: string; displayOrder: number }[]) =>
+      api.patch('/categories/order', { items }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      toast.success('Siralama kaydedildi');
+    },
+    onError: () => {
+      toast.error('Siralama kaydedilirken hata olustu');
+    },
+  });
+
+  function moveCategory(index: number, direction: 'up' | 'down') {
+    const newList = [...categories];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= newList.length) return;
+    [newList[index], newList[targetIndex]] = [newList[targetIndex], newList[index]];
+    const items = newList.map((cat, i) => ({ id: cat.id, displayOrder: i }));
+    reorderMutation.mutate(items);
+  }
 
   function closeDialog() {
     setDialogOpen(false);
@@ -141,16 +163,41 @@ export default function CategoriesPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[80px]">Sira</TableHead>
                 <TableHead>Kategori Adi</TableHead>
                 <TableHead className="text-center">Urun Sayisi</TableHead>
+                <TableHead className="text-center w-[100px]">Sirala</TableHead>
                 <TableHead className="text-right">Islemler</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {categories.map((cat) => (
+              {categories.map((cat, index) => (
                 <TableRow key={cat.id}>
+                  <TableCell className="text-muted-foreground">{index + 1}</TableCell>
                   <TableCell className="font-medium">{cat.name}</TableCell>
                   <TableCell className="text-center">{cat._count.products}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => moveCategory(index, 'up')}
+                        disabled={index === 0 || reorderMutation.isPending}
+                      >
+                        <ArrowUp className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => moveCategory(index, 'down')}
+                        disabled={index === categories.length - 1 || reorderMutation.isPending}
+                      >
+                        <ArrowDown className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
                       <Button variant="ghost" size="icon" onClick={() => openEdit(cat)}>
@@ -173,7 +220,7 @@ export default function CategoriesPage() {
               ))}
               {categories.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                     Henuz kategori eklenmemis
                   </TableCell>
                 </TableRow>

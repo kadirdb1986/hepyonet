@@ -99,6 +99,13 @@ export class MenuService {
       throw new NotFoundException('Restaurant not found');
     }
 
+    // Fetch categories ordered by displayOrder
+    const orderedCategories = await this.prisma.category.findMany({
+      where: { restaurantId: restaurant.id },
+      orderBy: { displayOrder: 'asc' },
+      select: { id: true, name: true },
+    });
+
     const menuItems = await this.prisma.menuItem.findMany({
       where: {
         restaurantId: restaurant.id,
@@ -113,35 +120,42 @@ export class MenuService {
             description: true,
             image: true,
             price: true,
-            category: { select: { name: true } },
+            categoryId: true,
+            category: { select: { id: true, name: true } },
           },
         },
       },
       orderBy: { displayOrder: 'asc' },
     });
 
-    const categories: Record<string, typeof menuItems> = {};
+    // Group items by category in category displayOrder
+    const categoryMap = new Map<string, { name: string; items: typeof menuItems }>();
+    for (const cat of orderedCategories) {
+      categoryMap.set(cat.id, { name: cat.name, items: [] });
+    }
+    categoryMap.set('__other__', { name: 'Diger', items: [] });
+
     for (const item of menuItems) {
-      const category = item.product.category?.name || 'Diger';
-      if (!categories[category]) {
-        categories[category] = [];
-      }
-      categories[category].push(item);
+      const catId = item.product.categoryId || '__other__';
+      const entry = categoryMap.get(catId) || categoryMap.get('__other__')!;
+      entry.items.push(item);
     }
 
     return {
       restaurant,
-      categories: Object.entries(categories).map(([name, items]) => ({
-        name,
-        items: items.map((item) => ({
-          id: item.product.id,
-          name: item.product.name,
-          code: item.product.code,
-          description: item.product.description,
-          image: item.product.image,
-          price: item.product.price,
+      categories: Array.from(categoryMap.values())
+        .filter((c) => c.items.length > 0)
+        .map((c) => ({
+          name: c.name,
+          items: c.items.map((item) => ({
+            id: item.product.id,
+            name: item.product.name,
+            code: item.product.code,
+            description: item.product.description,
+            image: item.product.image,
+            price: item.product.price,
+          })),
         })),
-      })),
     };
   }
 }

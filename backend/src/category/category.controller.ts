@@ -43,6 +43,15 @@ export class CategoryController {
     return this.categoryService.create(restaurantId, dto.name);
   }
 
+  @Patch('order')
+  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  updateOrder(
+    @CurrentUser('restaurantId') restaurantId: string,
+    @Body() dto: { items: { id: string; displayOrder: number }[] },
+  ) {
+    return this.categoryService.updateOrder(restaurantId, dto.items);
+  }
+
   @Patch(':id')
   @Roles(Role.ADMIN, Role.MENU_MANAGER)
   update(

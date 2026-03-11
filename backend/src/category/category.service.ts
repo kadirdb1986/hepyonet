@@ -8,7 +8,7 @@ export class CategoryService {
   async findAll(restaurantId: string) {
     return this.prisma.category.findMany({
       where: { restaurantId },
-      orderBy: { name: 'asc' },
+      orderBy: { displayOrder: 'asc' },
       include: {
         _count: { select: { products: true } },
       },
@@ -23,9 +23,25 @@ export class CategoryService {
       throw new ConflictException('Bu isimde bir kategori zaten mevcut');
     }
 
-    return this.prisma.category.create({
-      data: { restaurantId, name },
+    const maxOrder = await this.prisma.category.aggregate({
+      where: { restaurantId },
+      _max: { displayOrder: true },
     });
+
+    return this.prisma.category.create({
+      data: { restaurantId, name, displayOrder: (maxOrder._max.displayOrder ?? 0) + 1 },
+    });
+  }
+
+  async updateOrder(restaurantId: string, items: { id: string; displayOrder: number }[]) {
+    const updates = items.map((item) =>
+      this.prisma.category.updateMany({
+        where: { id: item.id, restaurantId },
+        data: { displayOrder: item.displayOrder },
+      }),
+    );
+    await this.prisma.$transaction(updates);
+    return this.findAll(restaurantId);
   }
 
   async update(id: string, restaurantId: string, name: string) {
