@@ -35,8 +35,9 @@ model Restaurant {
 
   users          User[]
   personnel      Personnel[]
-  expenses       Expense[]
-  revenues       Revenue[]
+  expenses           Expense[]
+  expenseCategories  ExpenseCategoryConfig[]
+  revenues           Revenue[]
   rawMaterials   RawMaterial[]
   products       Product[]
   categories     Category[]
@@ -112,15 +113,6 @@ model LeaveRecord {
   @@map("leave_records")
 }
 
-enum ExpenseCategory {
-  SALARY
-  BILL
-  TAX
-  RENT
-  SUPPLIER
-  OTHER
-}
-
 enum DistributionType {
   NONE
   EQUAL
@@ -132,7 +124,7 @@ model Expense {
   restaurantId       String
   title              String
   amount             Decimal          @db.Decimal(10, 2)
-  category           ExpenseCategory
+  category           String
   paymentDate        DateTime
   isDistributed      Boolean          @default(false)
   distributionType   DistributionType @default(NONE)
@@ -157,6 +149,19 @@ model ExpenseDistribution {
   expense Expense @relation(fields: [expenseId], references: [id])
 
   @@map("expense_distributions")
+}
+
+model ExpenseCategoryConfig {
+  id           String   @id @default(uuid())
+  restaurantId String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@unique([restaurantId, name])
+  @@map("expense_categories")
 }
 
 enum RevenueSource {

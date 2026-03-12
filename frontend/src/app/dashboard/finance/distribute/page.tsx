@@ -29,14 +29,8 @@ import {
 } from '@/components/ui/accordion';
 import { Split, Undo2, Info, AlertTriangle } from 'lucide-react';
 
-const CATEGORY_LABELS: Record<string, string> = {
-  SALARY: 'Maas',
-  BILL: 'Fatura',
-  TAX: 'Vergi',
-  RENT: 'Kira',
-  SUPPLIER: 'Tedarikci',
-  OTHER: 'Diger',
-};
+// Kategori adı artık doğrudan expense.category'de saklanıyor
+const CATEGORY_LABELS: Record<string, string> = {};
 
 const DISTRIBUTION_TYPE_LABELS: Record<string, string> = {
   NONE: 'Dagitim Yok (Tek Aya Yaz)',

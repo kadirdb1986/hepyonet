@@ -1,13 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber, IsEnum, IsDateString, IsOptional, Min, Matches } from 'class-validator';
-
-export enum ExpenseCategory {
-  SALARY = 'SALARY',
-  BILL = 'BILL',
-  TAX = 'TAX',
-  RENT = 'RENT',
-  SUPPLIER = 'SUPPLIER',
-  OTHER = 'OTHER',
-}
+import { IsString, IsNotEmpty, IsNumber, IsDateString, IsOptional, Min, Matches } from 'class-validator';
 
 export class CreateExpenseDto {
   @IsString()
@@ -18,8 +9,9 @@ export class CreateExpenseDto {
   @Min(0.01)
   amount: number;
 
-  @IsEnum(ExpenseCategory)
-  category: ExpenseCategory;
+  @IsString()
+  @IsNotEmpty()
+  category: string;
 
   @IsDateString()
   paymentDate: string;

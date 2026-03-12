@@ -1,5 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsEnum, IsDateString, Min, Matches } from 'class-validator';
-import { ExpenseCategory } from './create-expense.dto';
+import { IsString, IsOptional, IsNumber, IsDateString, Min, Matches } from 'class-validator';
 
 export class UpdateExpenseDto {
   @IsString()
@@ -11,9 +10,9 @@ export class UpdateExpenseDto {
   @IsOptional()
   amount?: number;
 
-  @IsEnum(ExpenseCategory)
+  @IsString()
   @IsOptional()
-  category?: ExpenseCategory;
+  category?: string;
 
   @IsDateString()
   @IsOptional()
