@@ -432,7 +432,7 @@ export default function ExpensesPage() {
       <div className="flex items-center gap-3">
         <Label>Kategori Filtresi:</Label>
         <select
-          className={selectClass + ' w-48'}
+          className="flex h-9 w-48 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           value={filterCategory}
           onChange={(e) => setFilterCategory(e.target.value)}
         >
