@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsEnum, IsDateString, Min } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsEnum, IsDateString, Min, Matches } from 'class-validator';
 import { ExpenseCategory } from './create-expense.dto';
 
 export class UpdateExpenseDto {
@@ -18,4 +18,14 @@ export class UpdateExpenseDto {
   @IsDateString()
   @IsOptional()
   paymentDate?: string;
+
+  @IsString()
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}$/, { message: 'effectiveMonth YYYY-MM formatinda olmalidir' })
+  effectiveMonth?: string | null;
+
+  @IsString()
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}$/, { message: 'effectiveEndMonth YYYY-MM formatinda olmalidir' })
+  effectiveEndMonth?: string | null;
 }

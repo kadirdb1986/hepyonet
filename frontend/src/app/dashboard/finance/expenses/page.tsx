@@ -42,19 +42,35 @@ const CATEGORY_LABELS: Record<string, string> = {
   OTHER: 'Diger',
 };
 
+type PeriodType = 'SAME_MONTH' | 'DIFFERENT_MONTH' | 'MULTI_MONTH';
+
 interface ExpenseForm {
   title: string;
   amount: string;
   category: string;
   paymentDate: string;
+  periodType: PeriodType;
+  effectiveMonth: string;
+  effectiveEndMonth: string;
 }
+
+const currentMonth = new Date().toISOString().slice(0, 7);
 
 const emptyForm: ExpenseForm = {
   title: '',
   amount: '',
   category: 'OTHER',
   paymentDate: new Date().toISOString().split('T')[0],
+  periodType: 'SAME_MONTH',
+  effectiveMonth: currentMonth,
+  effectiveEndMonth: currentMonth,
 };
+
+function formatMonth(ym: string): string {
+  const [y, m] = ym.split('-');
+  const months = ['Oca', 'Sub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Agu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+  return `${months[parseInt(m, 10) - 1]} ${y}`;
+}
 
 export default function ExpensesPage() {
   const queryClient = useQueryClient();
@@ -121,12 +137,19 @@ export default function ExpensesPage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    createMutation.mutate({
+    const payload: any = {
       title: form.title,
       amount: parseFloat(form.amount),
       category: form.category,
       paymentDate: form.paymentDate,
-    });
+    };
+    if (form.periodType === 'DIFFERENT_MONTH') {
+      payload.effectiveMonth = form.effectiveMonth;
+    } else if (form.periodType === 'MULTI_MONTH') {
+      payload.effectiveMonth = form.effectiveMonth;
+      payload.effectiveEndMonth = form.effectiveEndMonth;
+    }
+    createMutation.mutate(payload);
   };
 
   const handleUpdate = (e: React.FormEvent) => {
@@ -150,6 +173,9 @@ export default function ExpensesPage() {
       amount: String(expense.amount),
       category: expense.category,
       paymentDate: new Date(expense.paymentDate).toISOString().split('T')[0],
+      periodType: expense.effectiveEndMonth ? 'MULTI_MONTH' : expense.effectiveMonth ? 'DIFFERENT_MONTH' : 'SAME_MONTH',
+      effectiveMonth: expense.effectiveMonth || currentMonth,
+      effectiveEndMonth: expense.effectiveEndMonth || currentMonth,
     });
     setError('');
     setIsEditOpen(true);
@@ -252,6 +278,74 @@ export default function ExpensesPage() {
                   required
                 />
               </div>
+              <div className="space-y-2">
+                <Label>Ait Oldugu Donem</Label>
+                <Select
+                  value={form.periodType}
+                  onValueChange={(value) =>
+                    value && setForm({ ...form, periodType: value as PeriodType })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SAME_MONTH">Ayni Ay (odeme tarihi)</SelectItem>
+                    <SelectItem value="DIFFERENT_MONTH">Farkli Ay</SelectItem>
+                    <SelectItem value="MULTI_MONTH">Birden Fazla Ay</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {form.periodType === 'DIFFERENT_MONTH' && (
+                <div className="space-y-2">
+                  <Label>Hangi Ay?</Label>
+                  <Input
+                    type="month"
+                    value={form.effectiveMonth}
+                    onChange={(e) =>
+                      setForm({ ...form, effectiveMonth: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              )}
+              {form.periodType === 'MULTI_MONTH' && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>Baslangic Ayi</Label>
+                    <Input
+                      type="month"
+                      value={form.effectiveMonth}
+                      onChange={(e) =>
+                        setForm({ ...form, effectiveMonth: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Bitis Ayi</Label>
+                    <Input
+                      type="month"
+                      value={form.effectiveEndMonth}
+                      onChange={(e) =>
+                        setForm({ ...form, effectiveEndMonth: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  {form.amount && form.effectiveMonth && form.effectiveEndMonth && form.effectiveEndMonth >= form.effectiveMonth && (
+                    <div className="col-span-2 p-2 bg-blue-50 rounded text-sm text-blue-700">
+                      {(() => {
+                        const [sy, sm] = form.effectiveMonth.split('-').map(Number);
+                        const [ey, em] = form.effectiveEndMonth.split('-').map(Number);
+                        const count = (ey - sy) * 12 + (em - sm) + 1;
+                        const perMonth = parseFloat(form.amount) / count;
+                        return `${count} aya esit dagitim: ${perMonth.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL/ay`;
+                      })()}
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="flex gap-2 justify-end">
                 <Button
                   type="button"
@@ -351,10 +445,10 @@ export default function ExpensesPage() {
         <Label>Kategori Filtresi:</Label>
         <Select value={filterCategory} onValueChange={(value) => value && setFilterCategory(value)}>
           <SelectTrigger className="w-48">
-            <SelectValue />
+            <SelectValue placeholder="Tümü" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">Tumu</SelectItem>
+            <SelectItem value="ALL">Tümü</SelectItem>
             {CATEGORIES.map((cat) => (
               <SelectItem key={cat.value} value={cat.value}>
                 {cat.label}
@@ -384,7 +478,7 @@ export default function ExpensesPage() {
                     <th className="text-left py-2 px-3 font-medium">Kategori</th>
                     <th className="text-right py-2 px-3 font-medium">Tutar</th>
                     <th className="text-left py-2 px-3 font-medium">Odeme Tarihi</th>
-                    <th className="text-center py-2 px-3 font-medium">Dagitim</th>
+                    <th className="text-center py-2 px-3 font-medium">Donem</th>
                     <th className="text-right py-2 px-3 font-medium">Islemler</th>
                   </tr>
                 </thead>
@@ -404,7 +498,15 @@ export default function ExpensesPage() {
                         {formatDate(expense.paymentDate)}
                       </td>
                       <td className="py-2 px-3 text-center">
-                        {expense.isDistributed ? (
+                        {expense.effectiveMonth && !expense.effectiveEndMonth ? (
+                          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+                            {formatMonth(expense.effectiveMonth)}
+                          </Badge>
+                        ) : expense.effectiveMonth && expense.effectiveEndMonth ? (
+                          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+                            {formatMonth(expense.effectiveMonth)} - {formatMonth(expense.effectiveEndMonth)}
+                          </Badge>
+                        ) : expense.isDistributed ? (
                           <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
                             {expense.distributionType === 'EQUAL'
                               ? `Esit (${expense.distributionMonths} ay)`
@@ -413,7 +515,7 @@ export default function ExpensesPage() {
                               : 'Dagitildi'}
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">Dagitilmadi</Badge>
+                          <Badge variant="secondary">Ayni Ay</Badge>
                         )}
                       </td>
                       <td className="py-2 px-3 text-right">

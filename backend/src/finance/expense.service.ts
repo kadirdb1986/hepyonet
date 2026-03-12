@@ -13,15 +13,68 @@ export class ExpenseService {
   constructor(private prisma: PrismaService) {}
 
   async create(restaurantId: string, dto: CreateExpenseDto) {
-    return this.prisma.expense.create({
+    const expense = await this.prisma.expense.create({
       data: {
         restaurantId,
         title: dto.title,
         amount: dto.amount,
         category: dto.category,
         paymentDate: new Date(dto.paymentDate),
+        effectiveMonth: dto.effectiveMonth || null,
+        effectiveEndMonth: dto.effectiveEndMonth || null,
       },
     });
+
+    // Farklı ay: tek ay dağıtımı oluştur
+    if (dto.effectiveMonth && !dto.effectiveEndMonth) {
+      await this.prisma.$transaction([
+        this.prisma.expenseDistribution.create({
+          data: {
+            expenseId: expense.id,
+            month: dto.effectiveMonth,
+            amount: dto.amount,
+          },
+        }),
+        this.prisma.expense.update({
+          where: { id: expense.id },
+          data: {
+            isDistributed: true,
+            distributionType: 'NONE',
+            distributionMonths: 1,
+          },
+        }),
+      ]);
+    }
+
+    // Birden fazla ay: eşit dağıtım oluştur
+    if (dto.effectiveMonth && dto.effectiveEndMonth) {
+      const months = this.getMonthRange(dto.effectiveMonth, dto.effectiveEndMonth);
+      const totalAmount = Number(dto.amount);
+      const perMonth = Math.floor((totalAmount * 100) / months.length) / 100;
+      const remainder = Math.round((totalAmount - perMonth * months.length) * 100) / 100;
+
+      const distributions = months.map((month, i) => ({
+        expenseId: expense.id,
+        month,
+        amount: i === 0 ? perMonth + remainder : perMonth,
+      }));
+
+      await this.prisma.$transaction([
+        ...distributions.map((d) =>
+          this.prisma.expenseDistribution.create({ data: d }),
+        ),
+        this.prisma.expense.update({
+          where: { id: expense.id },
+          data: {
+            isDistributed: true,
+            distributionType: 'EQUAL',
+            distributionMonths: months.length,
+          },
+        }),
+      ]);
+    }
+
+    return this.findOne(restaurantId, expense.id);
   }
 
   async findAll(restaurantId: string, params?: { category?: string; startDate?: string; endDate?: string }) {
@@ -293,5 +346,22 @@ export class ExpenseService {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     return `${year}-${month}`;
+  }
+
+  private getMonthRange(start: string, end: string): string[] {
+    const [sy, sm] = start.split('-').map(Number);
+    const [ey, em] = end.split('-').map(Number);
+    const months: string[] = [];
+    let y = sy;
+    let m = sm;
+    while (y < ey || (y === ey && m <= em)) {
+      months.push(`${y}-${m.toString().padStart(2, '0')}`);
+      m++;
+      if (m > 12) {
+        m = 1;
+        y++;
+      }
+    }
+    return months;
   }
 }
