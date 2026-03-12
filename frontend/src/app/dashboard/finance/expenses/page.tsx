@@ -250,21 +250,16 @@ export default function ExpensesPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="category">Kategori</Label>
-                <Select
+                <select
+                  id="category"
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   value={form.category}
-                  onValueChange={(value) => value && setForm({ ...form, category: value })}
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
                 >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.map((cat) => (
-                      <SelectItem key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat.value} value={cat.value}>{cat.label}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="paymentDate">Odeme Tarihi</Label>
@@ -280,21 +275,15 @@ export default function ExpensesPage() {
               </div>
               <div className="space-y-2">
                 <Label>Ait Oldugu Donem</Label>
-                <Select
+                <select
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   value={form.periodType}
-                  onValueChange={(value) =>
-                    value && setForm({ ...form, periodType: value as PeriodType })
-                  }
+                  onChange={(e) => setForm({ ...form, periodType: e.target.value as PeriodType })}
                 >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="SAME_MONTH">Ayni Ay (odeme tarihi)</SelectItem>
-                    <SelectItem value="DIFFERENT_MONTH">Farkli Ay</SelectItem>
-                    <SelectItem value="MULTI_MONTH">Birden Fazla Ay</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <option value="SAME_MONTH">Ayni Ay (odeme tarihi)</option>
+                  <option value="DIFFERENT_MONTH">Farkli Ay</option>
+                  <option value="MULTI_MONTH">Birden Fazla Ay</option>
+                </select>
               </div>
               {form.periodType === 'DIFFERENT_MONTH' && (
                 <div className="space-y-2">
@@ -397,21 +386,16 @@ export default function ExpensesPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-category">Kategori</Label>
-              <Select
+              <select
+                id="edit-category"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 value={form.category}
-                onValueChange={(value) => value && setForm({ ...form, category: value })}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
               >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map((cat) => (
-                    <SelectItem key={cat.value} value={cat.value}>
-                      {cat.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                {CATEGORIES.map((cat) => (
+                  <option key={cat.value} value={cat.value}>{cat.label}</option>
+                ))}
+              </select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-paymentDate">Odeme Tarihi</Label>
