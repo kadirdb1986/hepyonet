@@ -56,8 +56,8 @@ export default function StockMovementsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({
     rawMaterialId: '',
-    quantity: 0,
-    unitPrice: 0,
+    quantity: '' as string | number,
+    unitPrice: '' as string | number,
     type: 'IN' as 'IN' | 'OUT',
     supplier: '',
     invoiceNo: '',
@@ -78,6 +78,8 @@ export default function StockMovementsPage() {
     mutationFn: (data: typeof form) =>
       api.post('/stock-movements', {
         ...data,
+        quantity: data.quantity === '' ? 0 : data.quantity,
+        unitPrice: data.unitPrice === '' ? 0 : data.unitPrice,
         supplier: data.supplier || undefined,
         invoiceNo: data.invoiceNo || undefined,
       }),
@@ -97,8 +99,8 @@ export default function StockMovementsPage() {
   function resetForm() {
     setForm({
       rawMaterialId: '',
-      quantity: 0,
-      unitPrice: 0,
+      quantity: '' as string | number,
+      unitPrice: '' as string | number,
       type: 'IN',
       supplier: '',
       invoiceNo: '',
@@ -165,7 +167,7 @@ export default function StockMovementsPage() {
                     step="0.001"
                     min="0.001"
                     value={form.quantity}
-                    onChange={(e) => setForm({ ...form, quantity: parseFloat(e.target.value) || 0 })}
+                    onChange={(e) => setForm({ ...form, quantity: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                     required
                   />
                 </div>
@@ -176,7 +178,7 @@ export default function StockMovementsPage() {
                     step="0.01"
                     min="0"
                     value={form.unitPrice}
-                    onChange={(e) => setForm({ ...form, unitPrice: parseFloat(e.target.value) || 0 })}
+                    onChange={(e) => setForm({ ...form, unitPrice: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                     required
                   />
                 </div>

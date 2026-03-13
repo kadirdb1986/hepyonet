@@ -20,7 +20,7 @@ export default function NewProductPage() {
     code: '',
     description: '',
     image: '',
-    price: 0,
+    price: '' as string | number,
     categoryId: '',
     isMenuItem: false,
   });
@@ -37,7 +37,7 @@ export default function NewProductPage() {
         code: data.code || undefined,
         description: data.description || undefined,
         image: data.image || undefined,
-        price: data.price,
+        price: data.price === '' ? 0 : data.price,
         categoryId: data.categoryId || undefined,
         isMenuItem: data.isMenuItem,
         isComposite: false,
@@ -58,7 +58,7 @@ export default function NewProductPage() {
       toast.error('Urun adi zorunludur');
       return;
     }
-    if (form.isMenuItem && form.price <= 0) {
+    if (form.isMenuItem && (form.price === '' || Number(form.price) <= 0)) {
       toast.error('Menude gosterilen urunler icin satis fiyati zorunludur');
       return;
     }
@@ -161,7 +161,7 @@ export default function NewProductPage() {
                   step="0.01"
                   min="0.01"
                   value={form.price || ''}
-                  onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
+                  onChange={(e) => setForm({ ...form, price: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                   placeholder="Ornek: 150,00"
                   required
                 />
@@ -174,7 +174,7 @@ export default function NewProductPage() {
                   step="0.01"
                   min="0"
                   value={form.price || ''}
-                  onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
+                  onChange={(e) => setForm({ ...form, price: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                   placeholder="Opsiyonel - ara urun ise bos birakilabilir"
                 />
               </div>

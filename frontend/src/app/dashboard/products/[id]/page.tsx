@@ -156,7 +156,7 @@ export default function ProductDetailPage() {
   const [ingredientForm, setIngredientForm] = useState({
     rawMaterialId: '',
     subProductId: '',
-    quantity: 0,
+    quantity: '' as string | number,
     unit: 'KG',
   });
   const [form, setForm] = useState({
@@ -164,7 +164,7 @@ export default function ProductDetailPage() {
     code: '',
     description: '',
     image: '',
-    price: 0,
+    price: '' as string | number,
     categoryId: '',
     isMenuItem: false,
   });
@@ -202,7 +202,7 @@ export default function ProductDetailPage() {
         code: data.code || undefined,
         description: data.description || undefined,
         image: data.image || undefined,
-        price: data.price,
+        price: data.price === '' ? 0 : data.price,
         categoryId: data.categoryId || undefined,
         isMenuItem: data.isMenuItem,
       }),
@@ -259,7 +259,7 @@ export default function ProductDetailPage() {
   }
 
   function resetIngredientForm() {
-    setIngredientForm({ rawMaterialId: '', subProductId: '', quantity: 0, unit: 'KG' });
+    setIngredientForm({ rawMaterialId: '', subProductId: '', quantity: '' as string | number, unit: 'KG' });
     setIngredientType('raw');
   }
 
@@ -271,7 +271,7 @@ export default function ProductDetailPage() {
   function handleAddIngredient(e: React.FormEvent) {
     e.preventDefault();
     const data: { rawMaterialId?: string; subProductId?: string; quantity: number; unit: string } = {
-      quantity: ingredientForm.quantity,
+      quantity: ingredientForm.quantity === '' ? 0 : Number(ingredientForm.quantity),
       unit: ingredientForm.unit,
     };
     if (ingredientType === 'raw') {
@@ -376,7 +376,7 @@ export default function ProductDetailPage() {
                     step="0.01"
                     min="0.01"
                     value={form.price || ''}
-                    onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
+                    onChange={(e) => setForm({ ...form, price: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                     required
                   />
                 </div>
@@ -389,7 +389,7 @@ export default function ProductDetailPage() {
                     step="0.01"
                     min="0"
                     value={form.price || ''}
-                    onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
+                    onChange={(e) => setForm({ ...form, price: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                     placeholder="Opsiyonel - ara urun ise bos birakilabilir"
                   />
                 </div>
@@ -694,7 +694,7 @@ export default function ProductDetailPage() {
                   step="0.001"
                   min="0.001"
                   value={ingredientForm.quantity || ''}
-                  onChange={(e) => setIngredientForm({ ...ingredientForm, quantity: parseFloat(e.target.value) || 0 })}
+                  onChange={(e) => setIngredientForm({ ...ingredientForm, quantity: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                   placeholder="Ornek: 200"
                   required
                 />

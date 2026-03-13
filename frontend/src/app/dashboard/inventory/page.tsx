@@ -83,9 +83,9 @@ export default function InventoryPage() {
     name: '',
     type: 'GIDA' as string,
     unit: 'KG' as string,
-    currentStock: 0,
-    lastPurchasePrice: 0,
-    minStockLevel: 0,
+    currentStock: '' as string | number,
+    lastPurchasePrice: '' as string | number,
+    minStockLevel: '' as string | number,
   });
 
   const { data: materials = [], isLoading } = useQuery<RawMaterial[]>({
@@ -126,7 +126,7 @@ export default function InventoryPage() {
   });
 
   function resetForm() {
-    setForm({ name: '', type: 'GIDA', unit: 'KG', currentStock: 0, lastPurchasePrice: 0, minStockLevel: 0 });
+    setForm({ name: '', type: 'GIDA', unit: 'KG', currentStock: '', lastPurchasePrice: '', minStockLevel: '' });
     setEditingMaterial(null);
     setDialogOpen(false);
   }
@@ -151,10 +151,16 @@ export default function InventoryPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const submitData = {
+      ...form,
+      currentStock: form.currentStock === '' ? 0 : Number(form.currentStock),
+      lastPurchasePrice: form.lastPurchasePrice === '' ? 0 : Number(form.lastPurchasePrice),
+      minStockLevel: form.minStockLevel === '' ? 0 : Number(form.minStockLevel),
+    };
     if (editingMaterial) {
-      updateMutation.mutate({ id: editingMaterial.id, data: form });
+      updateMutation.mutate({ id: editingMaterial.id, data: submitData });
     } else {
-      createMutation.mutate(form);
+      createMutation.mutate(submitData);
     }
   }
 
@@ -224,7 +230,7 @@ export default function InventoryPage() {
                     step="0.001"
                     min="0"
                     value={form.currentStock}
-                    onChange={(e) => setForm({ ...form, currentStock: parseFloat(e.target.value) || 0 })}
+                    onChange={(e) => setForm({ ...form, currentStock: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                   />
                 </div>
                 <div>
@@ -234,7 +240,7 @@ export default function InventoryPage() {
                     step="0.001"
                     min="0"
                     value={form.minStockLevel}
-                    onChange={(e) => setForm({ ...form, minStockLevel: parseFloat(e.target.value) || 0 })}
+                    onChange={(e) => setForm({ ...form, minStockLevel: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                   />
                 </div>
               </div>
@@ -245,7 +251,7 @@ export default function InventoryPage() {
                   step="0.01"
                   min="0"
                   value={form.lastPurchasePrice}
-                  onChange={(e) => setForm({ ...form, lastPurchasePrice: parseFloat(e.target.value) || 0 })}
+                  onChange={(e) => setForm({ ...form, lastPurchasePrice: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                 />
               </div>
               <div className="flex justify-end gap-2">

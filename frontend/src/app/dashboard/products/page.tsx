@@ -98,7 +98,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState('');
   const [directSaleDialogOpen, setDirectSaleDialogOpen] = useState(false);
   const [selectedRawMaterialId, setSelectedRawMaterialId] = useState('');
-  const [directSalePrice, setDirectSalePrice] = useState<number>(0);
+  const [directSalePrice, setDirectSalePrice] = useState<number | string>('');
 
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ['products'],
@@ -128,7 +128,7 @@ export default function ProductsPage() {
 
       const res = await api.post('/products', {
         name: rm.name,
-        price: directSalePrice,
+        price: directSalePrice === '' ? 0 : directSalePrice,
         isMenuItem: true,
         isComposite: false,
       });
@@ -145,7 +145,7 @@ export default function ProductsPage() {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       setDirectSaleDialogOpen(false);
       setSelectedRawMaterialId('');
-      setDirectSalePrice(0);
+      setDirectSalePrice('');
       toast.success('Direkt satis urunu olusturuldu');
       router.push(`/dashboard/products/${data.id}`);
     },
@@ -170,7 +170,7 @@ export default function ProductsPage() {
       toast.error('Lutfen bir ham madde secin');
       return;
     }
-    if (directSalePrice <= 0) {
+    if (directSalePrice === '' || Number(directSalePrice) <= 0) {
       toast.error('Lutfen gecerli bir satis fiyati girin');
       return;
     }
@@ -197,7 +197,7 @@ export default function ProductsPage() {
             variant="outline"
             onClick={() => {
               setSelectedRawMaterialId('');
-              setDirectSalePrice(0);
+              setDirectSalePrice('');
               setDirectSaleDialogOpen(true);
             }}
           >
@@ -395,7 +395,7 @@ export default function ProductsPage() {
                 step="0.01"
                 min="0.01"
                 value={directSalePrice || ''}
-                onChange={(e) => setDirectSalePrice(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setDirectSalePrice(e.target.value === '' ? '' : parseFloat(e.target.value))}
                 placeholder="Ornek: 25.00"
                 required
               />
