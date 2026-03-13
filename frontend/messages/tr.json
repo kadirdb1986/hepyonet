@@ -182,9 +182,9 @@
   },
   "inventory": {
     "title": "Stok Yonetimi",
-    "rawMaterials": "Ham Maddeler",
-    "addMaterial": "Ham Madde Ekle",
-    "editMaterial": "Ham Madde Duzenle",
+    "rawMaterials": "Stok Kalemleri",
+    "addMaterial": "Stok Kalemi Ekle",
+    "editMaterial": "Stok Kalemi Duzenle",
     "name": "Adi",
     "unit": "Birim",
     "currentStock": "Mevcut Stok",
@@ -207,7 +207,7 @@
     "date": "Tarih",
     "totalValue": "Toplam Deger",
     "insufficientStock": "Yetersiz stok",
-    "materialNotFound": "Ham madde bulunamadi",
+    "materialNotFound": "Stok kalemi bulunamadi",
     "units": {
       "KG": "Kilogram",
       "GR": "Gram",
@@ -233,7 +233,7 @@
     "profitMargin": "Kar Marji",
     "ingredients": "Icerikler / Recete",
     "addIngredient": "Icerik Ekle",
-    "rawMaterial": "Ham Madde",
+    "rawMaterial": "Stok Kalemi",
     "subProduct": "Alt Urun",
     "quantity": "Miktar",
     "unit": "Birim",
@@ -244,7 +244,7 @@
     "noIngredients": "Henuz icerik eklenmedi",
     "circularError": "Dongusel bagimlilk tespit edildi",
     "selectType": "Icerik Tipi Secin",
-    "selectMaterial": "Ham Madde Secin",
+    "selectMaterial": "Stok Kalemi Secin",
     "selectProduct": "Alt Urun Secin"
   },
   "menu": {

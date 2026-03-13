@@ -25,7 +25,7 @@ export class RawMaterialService {
       },
     });
     if (!material) {
-      throw new NotFoundException('Ham madde bulunamadi');
+      throw new NotFoundException('Stok kalemi bulunamadi');
     }
     return material;
   }
@@ -35,6 +35,7 @@ export class RawMaterialService {
       data: {
         restaurantId,
         name: dto.name,
+        type: dto.type || 'Gida',
         unit: dto.unit,
         currentStock: dto.currentStock ?? 0,
         lastPurchasePrice: dto.lastPurchasePrice ?? 0,
@@ -48,12 +49,13 @@ export class RawMaterialService {
       where: { id, restaurantId },
     });
     if (!material) {
-      throw new NotFoundException('Ham madde bulunamadi');
+      throw new NotFoundException('Stok kalemi bulunamadi');
     }
     return this.prisma.rawMaterial.update({
       where: { id },
       data: {
         ...(dto.name !== undefined && { name: dto.name }),
+        ...(dto.type !== undefined && { type: dto.type }),
         ...(dto.unit !== undefined && { unit: dto.unit }),
         ...(dto.currentStock !== undefined && { currentStock: dto.currentStock }),
         ...(dto.lastPurchasePrice !== undefined && { lastPurchasePrice: dto.lastPurchasePrice }),
@@ -67,7 +69,7 @@ export class RawMaterialService {
       where: { id, restaurantId },
     });
     if (!material) {
-      throw new NotFoundException('Ham madde bulunamadi');
+      throw new NotFoundException('Stok kalemi bulunamadi');
     }
     return this.prisma.rawMaterial.delete({ where: { id } });
   }

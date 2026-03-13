@@ -1,14 +1,14 @@
 import { IsString, IsNotEmpty, IsEnum, IsNumber, IsOptional, Min } from 'class-validator';
-import { MaterialUnit, MaterialType } from '@prisma/client';
+import { MaterialUnit } from '@prisma/client';
 
 export class CreateRawMaterialDto {
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @IsEnum(MaterialType)
+  @IsString()
   @IsOptional()
-  type?: MaterialType = MaterialType.GIDA;
+  type?: string;
 
   @IsEnum(MaterialUnit)
   unit: MaterialUnit;

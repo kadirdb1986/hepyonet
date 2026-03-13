@@ -23,14 +23,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Plus, Pencil, Trash2, AlertTriangle } from 'lucide-react';
+import { Plus, Pencil, Trash2, AlertTriangle, Settings2, X, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface RawMaterial {
@@ -43,6 +36,11 @@ interface RawMaterial {
   minStockLevel: number;
 }
 
+interface MaterialType {
+  id: string;
+  name: string;
+}
+
 const UNITS = ['KG', 'GR', 'LT', 'ML', 'ADET'] as const;
 
 const UNIT_LABELS: Record<string, string> = {
@@ -51,14 +49,6 @@ const UNIT_LABELS: Record<string, string> = {
   LT: 'Litre',
   ML: 'Mililitre',
   ADET: 'Adet',
-};
-
-const MATERIAL_TYPES = ['GIDA', 'AMBALAJ', 'SARF'] as const;
-
-const TYPE_LABELS: Record<string, string> = {
-  GIDA: 'Gida',
-  AMBALAJ: 'Ambalaj',
-  SARF: 'Sarf Malzeme',
 };
 
 /** Miktar formatla: tam sayıysa küsürat gösterme, varsa virgülle göster */
@@ -77,11 +67,15 @@ export default function InventoryPage() {
   const tc = useTranslations('common');
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [typeDialogOpen, setTypeDialogOpen] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<RawMaterial | null>(null);
   const [activeTab, setActiveTab] = useState<string>('ALL');
+  const [newTypeName, setNewTypeName] = useState('');
+  const [editingType, setEditingType] = useState<MaterialType | null>(null);
+  const [editingTypeName, setEditingTypeName] = useState('');
   const [form, setForm] = useState({
     name: '',
-    type: 'GIDA' as string,
+    type: '' as string,
     unit: 'KG' as string,
     currentStock: '' as string | number,
     lastPurchasePrice: '' as string | number,
@@ -96,6 +90,11 @@ export default function InventoryPage() {
   const { data: lowStockMaterials = [] } = useQuery<RawMaterial[]>({
     queryKey: ['raw-materials', 'low-stock'],
     queryFn: () => api.get('/raw-materials/low-stock').then((r) => r.data),
+  });
+
+  const { data: materialTypes = [] } = useQuery<MaterialType[]>({
+    queryKey: ['material-types'],
+    queryFn: () => api.get('/material-types').then((r) => r.data),
   });
 
   const createMutation = useMutation({
@@ -125,8 +124,50 @@ export default function InventoryPage() {
     },
   });
 
+  // Material type CRUD mutations
+  const createTypeMutation = useMutation({
+    mutationFn: (name: string) => api.post('/material-types', { name }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['material-types'] });
+      setNewTypeName('');
+      toast.success('Stok tipi eklendi');
+    },
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { message?: string } } };
+      toast.error(err?.response?.data?.message || 'Hata olustu');
+    },
+  });
+
+  const updateTypeMutation = useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      api.patch(`/material-types/${id}`, { name }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['material-types'] });
+      queryClient.invalidateQueries({ queryKey: ['raw-materials'] });
+      setEditingType(null);
+      setEditingTypeName('');
+      toast.success('Stok tipi guncellendi');
+    },
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { message?: string } } };
+      toast.error(err?.response?.data?.message || 'Hata olustu');
+    },
+  });
+
+  const deleteTypeMutation = useMutation({
+    mutationFn: (id: string) => api.delete(`/material-types/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['material-types'] });
+      toast.success('Stok tipi silindi');
+    },
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { message?: string } } };
+      toast.error(err?.response?.data?.message || 'Hata olustu');
+    },
+  });
+
   function resetForm() {
-    setForm({ name: '', type: 'GIDA', unit: 'KG', currentStock: '', lastPurchasePrice: '', minStockLevel: '' });
+    setForm({ name: '', type: materialTypes.length > 0 ? materialTypes[0].name : '', unit: 'KG', currentStock: '', lastPurchasePrice: '', minStockLevel: '' });
     setEditingMaterial(null);
     setDialogOpen(false);
   }
@@ -135,7 +176,7 @@ export default function InventoryPage() {
     setEditingMaterial(material);
     setForm({
       name: material.name,
-      type: material.type || 'GIDA',
+      type: material.type || '',
       unit: material.unit,
       currentStock: Number(material.currentStock),
       lastPurchasePrice: Number(material.lastPurchasePrice),
@@ -145,7 +186,8 @@ export default function InventoryPage() {
   }
 
   function openCreate() {
-    resetForm();
+    setForm({ name: '', type: materialTypes.length > 0 ? materialTypes[0].name : '', unit: 'KG', currentStock: '', lastPurchasePrice: '', minStockLevel: '' });
+    setEditingMaterial(null);
     setDialogOpen(true);
   }
 
@@ -176,95 +218,102 @@ export default function InventoryPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
-        <Dialog open={dialogOpen} onOpenChange={(open) => setDialogOpen(open)}>
-          <Button onClick={openCreate}>
-            <Plus className="mr-2 h-4 w-4" />
-            {t('addMaterial')}
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setTypeDialogOpen(true)}>
+            <Settings2 className="mr-2 h-4 w-4" />
+            Stok Tipleri
           </Button>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {editingMaterial ? t('editMaterial') : t('addMaterial')}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label>{t('name')}</Label>
-                <Input
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <Label>Malzeme Tipi</Label>
-                <select
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  value={form.type}
-                  onChange={(e) => setForm({ ...form, type: e.target.value })}
-                >
-                  {MATERIAL_TYPES.map((t) => (
-                    <option key={t} value={t}>{TYPE_LABELS[t]}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <Label>{t('unit')}</Label>
-                <select
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  value={form.unit}
-                  onChange={(e) => setForm({ ...form, unit: e.target.value })}
-                >
-                  {UNITS.map((u) => (
-                    <option key={u} value={u}>
-                      {t(`units.${u}`)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+          <Dialog open={dialogOpen} onOpenChange={(open) => setDialogOpen(open)}>
+            <Button onClick={openCreate}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t('addMaterial')}
+            </Button>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {editingMaterial ? t('editMaterial') : t('addMaterial')}
+                </DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label>{t('currentStock')}</Label>
+                  <Label>{t('name')}</Label>
                   <Input
-                    type="number"
-                    step="0.001"
-                    min="0"
-                    value={form.currentStock}
-                    onChange={(e) => setForm({ ...form, currentStock: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    required
                   />
                 </div>
                 <div>
-                  <Label>{t('minStockLevel')}</Label>
+                  <Label>Stok Tipi</Label>
+                  <select
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    value={form.type}
+                    onChange={(e) => setForm({ ...form, type: e.target.value })}
+                  >
+                    {materialTypes.length === 0 && <option value="">Tip tanimlanmamis</option>}
+                    {materialTypes.map((mt) => (
+                      <option key={mt.id} value={mt.name}>{mt.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Label>{t('unit')}</Label>
+                  <select
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    value={form.unit}
+                    onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                  >
+                    {UNITS.map((u) => (
+                      <option key={u} value={u}>
+                        {t(`units.${u}`)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>{t('currentStock')}</Label>
+                    <Input
+                      type="number"
+                      step="0.001"
+                      min="0"
+                      value={form.currentStock}
+                      onChange={(e) => setForm({ ...form, currentStock: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                    />
+                  </div>
+                  <div>
+                    <Label>{t('minStockLevel')}</Label>
+                    <Input
+                      type="number"
+                      step="0.001"
+                      min="0"
+                      value={form.minStockLevel}
+                      onChange={(e) => setForm({ ...form, minStockLevel: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label>{t('lastPurchasePrice')} (TL)</Label>
                   <Input
                     type="number"
-                    step="0.001"
+                    step="0.01"
                     min="0"
-                    value={form.minStockLevel}
-                    onChange={(e) => setForm({ ...form, minStockLevel: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                    value={form.lastPurchasePrice}
+                    onChange={(e) => setForm({ ...form, lastPurchasePrice: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                   />
                 </div>
-              </div>
-              <div>
-                <Label>{t('lastPurchasePrice')} (TL)</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={form.lastPurchasePrice}
-                  onChange={(e) => setForm({ ...form, lastPurchasePrice: e.target.value === '' ? '' : parseFloat(e.target.value) })}
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  {tc('cancel')}
-                </Button>
-                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                  {tc('save')}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={resetForm}>
+                    {tc('cancel')}
+                  </Button>
+                  <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                    {tc('save')}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Low stock alert */}
@@ -289,8 +338,8 @@ export default function InventoryPage() {
       )}
 
       {/* Filter tabs */}
-      <div className="flex gap-2">
-        {[{ key: 'ALL', label: 'Tumu' }, ...MATERIAL_TYPES.map((t) => ({ key: t, label: TYPE_LABELS[t] }))].map((tab) => (
+      <div className="flex gap-2 flex-wrap">
+        {[{ key: 'ALL', label: 'Tumu' }, ...materialTypes.map((mt) => ({ key: mt.name, label: mt.name }))].map((tab) => (
           <Button
             key={tab.key}
             variant={activeTab === tab.key ? 'default' : 'outline'}
@@ -309,7 +358,7 @@ export default function InventoryPage() {
       <Card>
         <CardHeader>
           <CardTitle>
-            {activeTab === 'ALL' ? t('rawMaterials') : TYPE_LABELS[activeTab]}
+            {activeTab === 'ALL' ? t('rawMaterials') : activeTab}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -332,7 +381,7 @@ export default function InventoryPage() {
                   <TableRow key={material.id}>
                     <TableCell className="font-medium">{material.name}</TableCell>
                     <TableCell className="text-center">
-                      <Badge variant="outline">{TYPE_LABELS[material.type] || 'Gida'}</Badge>
+                      <Badge variant="outline">{material.type || '-'}</Badge>
                     </TableCell>
                     <TableCell className="text-center">
                       <span className="inline-block w-16 text-right tabular-nums">{formatQuantity(Number(material.currentStock))}</span>
@@ -385,6 +434,108 @@ export default function InventoryPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Stok Tipleri Yonetim Dialogu */}
+      <Dialog open={typeDialogOpen} onOpenChange={setTypeDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Stok Tiplerini Yonet</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Yeni tip ekleme */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (newTypeName.trim()) {
+                  createTypeMutation.mutate(newTypeName.trim());
+                }
+              }}
+              className="flex gap-2"
+            >
+              <Input
+                placeholder="Yeni stok tipi adi..."
+                value={newTypeName}
+                onChange={(e) => setNewTypeName(e.target.value)}
+              />
+              <Button type="submit" size="sm" disabled={createTypeMutation.isPending || !newTypeName.trim()}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </form>
+
+            {/* Mevcut tipler listesi */}
+            <div className="space-y-2">
+              {materialTypes.map((mt) => (
+                <div key={mt.id} className="flex items-center gap-2 p-2 border rounded-md">
+                  {editingType?.id === mt.id ? (
+                    <>
+                      <Input
+                        value={editingTypeName}
+                        onChange={(e) => setEditingTypeName(e.target.value)}
+                        className="h-8"
+                        autoFocus
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0"
+                        onClick={() => {
+                          if (editingTypeName.trim()) {
+                            updateTypeMutation.mutate({ id: mt.id, name: editingTypeName.trim() });
+                          }
+                        }}
+                        disabled={updateTypeMutation.isPending}
+                      >
+                        <Check className="h-4 w-4 text-green-600" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0"
+                        onClick={() => { setEditingType(null); setEditingTypeName(''); }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="flex-1 text-sm font-medium">{mt.name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        ({materials.filter((m) => m.type === mt.name).length} kalem)
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0"
+                        onClick={() => { setEditingType(mt); setEditingTypeName(mt.name); }}
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0"
+                        onClick={() => {
+                          if (confirm(`"${mt.name}" tipini silmek istediginize emin misiniz?`)) {
+                            deleteTypeMutation.mutate(mt.id);
+                          }
+                        }}
+                        disabled={deleteTypeMutation.isPending}
+                      >
+                        <Trash2 className="h-3 w-3 text-red-500" />
+                      </Button>
+                    </>
+                  )}
+                </div>
+              ))}
+              {materialTypes.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Henuz stok tipi tanimlanmamis
+                </p>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -38,6 +38,7 @@ model Restaurant {
   expenses           Expense[]
   expenseCategories  ExpenseCategoryConfig[]
   revenues           Revenue[]
+  materialTypes    MaterialTypeConfig[]
   rawMaterials   RawMaterial[]
   products       Product[]
   categories     Category[]
@@ -192,17 +193,24 @@ enum MaterialUnit {
   ADET
 }
 
-enum MaterialType {
-  GIDA
-  AMBALAJ
-  SARF
+model MaterialTypeConfig {
+  id           String   @id @default(uuid())
+  restaurantId String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@unique([restaurantId, name])
+  @@map("material_types")
 }
 
 model RawMaterial {
   id                String       @id @default(uuid())
   restaurantId      String
   name              String
-  type              MaterialType @default(GIDA)
+  type              String       @default("Gida")
   unit              MaterialUnit
   currentStock      Decimal      @db.Decimal(10, 3) @default(0)
   lastPurchasePrice Decimal      @db.Decimal(10, 2) @default(0)

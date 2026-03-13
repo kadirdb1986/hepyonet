@@ -140,7 +140,7 @@ export default function StockMovementsPage() {
                   onChange={(e) => setForm({ ...form, rawMaterialId: e.target.value })}
                   required
                 >
-                  <option value="">{t('rawMaterials')}</option>
+                  <option value="">Stok Kalemi Secin</option>
                   {materials.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name} ({m.unit})

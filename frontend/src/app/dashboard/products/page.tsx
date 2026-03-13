@@ -167,7 +167,7 @@ export default function ProductsPage() {
   function handleDirectSaleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!selectedRawMaterialId) {
-      toast.error('Lutfen bir ham madde secin');
+      toast.error('Lutfen bir stok kalemi secin');
       return;
     }
     if (directSalePrice === '' || Number(directSalePrice) <= 0) {
@@ -202,7 +202,7 @@ export default function ProductsPage() {
             }}
           >
             <Package className="mr-2 h-4 w-4" />
-            Ham Maddeden Urun Olustur
+            Stok Kaleminden Urun Olustur
           </Button>
           <Button onClick={() => router.push('/dashboard/products/new')}>
             <Plus className="mr-2 h-4 w-4" />
@@ -362,25 +362,25 @@ export default function ProductsPage() {
         </CardContent>
       </Card>
 
-      {/* Ham Maddeden Direkt Satis Urunu Olusturma Dialogu */}
+      {/* Stok Kaleminden Direkt Satis Urunu Olusturma Dialogu */}
       <Dialog open={directSaleDialogOpen} onOpenChange={setDirectSaleDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Ham Maddeden Urun Olustur</DialogTitle>
+            <DialogTitle>Stok Kaleminden Urun Olustur</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Sectiginiz ham madde, 1 ADET olarak urunun icerigi haline gelir. Ornegin &quot;Sise Kola&quot; ham maddesini secip satis fiyati belirleyebilirsiniz.
+            Sectiginiz stok kalemi, 1 ADET olarak urunun icerigi haline gelir. Ornegin &quot;Sise Kola&quot; stok kalemini secip satis fiyati belirleyebilirsiniz.
           </p>
           <form onSubmit={handleDirectSaleSubmit} className="space-y-4">
             <div>
-              <Label>Ham Madde</Label>
+              <Label>Stok Kalemi</Label>
               <select
                 className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 value={selectedRawMaterialId}
                 onChange={(e) => setSelectedRawMaterialId(e.target.value)}
                 required
               >
-                <option value="">Ham madde secin...</option>
+                <option value="">Stok kalemi secin...</option>
                 {rawMaterials.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.name} ({m.unit}) - {formatCurrency(Number(m.lastPurchasePrice))} TL

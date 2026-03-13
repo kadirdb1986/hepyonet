@@ -514,7 +514,7 @@ export default function ProductDetailPage() {
                     <TableCell className="font-medium">{name}</TableCell>
                     <TableCell className="text-center">
                       <Badge variant={isRaw ? 'secondary' : 'outline'}>
-                        {isRaw ? 'Ham Madde' : 'Alt Urun'}
+                        {isRaw ? 'Stok Kalemi' : 'Alt Urun'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -546,7 +546,7 @@ export default function ProductDetailPage() {
               {product.ingredients.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                    Henuz icerik eklenmemis. &quot;Icerik Ekle&quot; butonunu kullanarak ham madde veya alt urun ekleyebilirsiniz.
+                    Henuz icerik eklenmemis. &quot;Icerik Ekle&quot; butonunu kullanarak stok kalemi veya alt urun ekleyebilirsiniz.
                   </TableCell>
                 </TableRow>
               )}
@@ -639,14 +639,14 @@ export default function ProductDetailPage() {
                 value={ingredientType}
                 onChange={(e) => setIngredientType(e.target.value as 'raw' | 'sub')}
               >
-                <option value="raw">Ham Madde</option>
+                <option value="raw">Stok Kalemi</option>
                 <option value="sub">Alt Urun</option>
               </select>
             </div>
 
             {ingredientType === 'raw' ? (
               <div>
-                <Label>Ham Madde Sec</Label>
+                <Label>Stok Kalemi Sec</Label>
                 <select
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   value={ingredientForm.rawMaterialId}
@@ -659,7 +659,7 @@ export default function ProductDetailPage() {
                   }}
                   required
                 >
-                  <option value="">Ham madde secin...</option>
+                  <option value="">Stok kalemi secin...</option>
                   {rawMaterials.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name} ({UNIT_LABELS[m.unit] || m.unit}) - {formatCurrency(Number(m.lastPurchasePrice))} TL/{m.unit}
