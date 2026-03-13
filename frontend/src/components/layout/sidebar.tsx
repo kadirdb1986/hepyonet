@@ -12,6 +12,7 @@ import {
   BarChart3,
   Settings,
   UserCog,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -27,15 +28,25 @@ const menuItems = [
   { href: '/dashboard/users', label: 'Kullanicilar', icon: UserCog },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
+}
+
+export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const pathname = usePathname();
 
-  return (
-    <aside className="w-64 border-r bg-white h-screen sticky top-0 flex flex-col">
-      <div className="p-6 border-b">
+  const navContent = (
+    <>
+      <div className="p-6 border-b flex items-center justify-between">
         <h1 className="text-xl font-bold">HepYonet</h1>
+        {onMobileClose && (
+          <button onClick={onMobileClose} className="md:hidden p-1 rounded-md hover:bg-gray-100">
+            <X className="h-5 w-5" />
+          </button>
+        )}
       </div>
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {menuItems.map((item) => {
           const isActive = pathname === item.href ||
             (item.href !== '/dashboard' && pathname.startsWith(item.href));
@@ -43,6 +54,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onMobileClose}
               className={cn(
                 'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
                 isActive
@@ -56,6 +68,25 @@ export function Sidebar() {
           );
         })}
       </nav>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex w-64 border-r bg-white h-screen sticky top-0 flex-col">
+        {navContent}
+      </aside>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div className="absolute inset-0 bg-black/50" onClick={onMobileClose} />
+          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-white flex flex-col shadow-xl animate-in slide-in-from-left duration-200">
+            {navContent}
+          </aside>
+        </div>
+      )}
+    </>
   );
 }
