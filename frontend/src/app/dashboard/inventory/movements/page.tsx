@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { handleNumericInput, displayNumericValue, parseNumericValue } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -78,8 +79,8 @@ export default function StockMovementsPage() {
     mutationFn: (data: typeof form) =>
       api.post('/stock-movements', {
         ...data,
-        quantity: data.quantity === '' ? 0 : data.quantity,
-        unitPrice: data.unitPrice === '' ? 0 : data.unitPrice,
+        quantity: parseNumericValue(data.quantity),
+        unitPrice: parseNumericValue(data.unitPrice),
         supplier: data.supplier || undefined,
         invoiceNo: data.invoiceNo || undefined,
       }),
@@ -163,22 +164,20 @@ export default function StockMovementsPage() {
                 <div>
                   <Label>{t('quantity')}</Label>
                   <Input
-                    type="number"
-                    step="0.001"
-                    min="0.001"
-                    value={form.quantity}
-                    onChange={(e) => setForm({ ...form, quantity: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                    type="text"
+                    inputMode="decimal"
+                    value={displayNumericValue(form.quantity)}
+                    onChange={(e) => setForm({ ...form, quantity: handleNumericInput(e.target.value) })}
                     required
                   />
                 </div>
                 <div>
                   <Label>{t('unitPrice')} (TL)</Label>
                   <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={form.unitPrice}
-                    onChange={(e) => setForm({ ...form, unitPrice: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                    type="text"
+                    inputMode="decimal"
+                    value={displayNumericValue(form.unitPrice)}
+                    onChange={(e) => setForm({ ...form, unitPrice: handleNumericInput(e.target.value) })}
                     required
                   />
                 </div>

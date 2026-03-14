@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { handleNumericInput, displayNumericValue, parseNumericValue } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -195,9 +196,9 @@ export default function InventoryPage() {
     e.preventDefault();
     const submitData = {
       ...form,
-      currentStock: form.currentStock === '' ? 0 : Number(form.currentStock),
-      lastPurchasePrice: form.lastPurchasePrice === '' ? 0 : Number(form.lastPurchasePrice),
-      minStockLevel: form.minStockLevel === '' ? 0 : Number(form.minStockLevel),
+      currentStock: parseNumericValue(form.currentStock),
+      lastPurchasePrice: parseNumericValue(form.lastPurchasePrice),
+      minStockLevel: parseNumericValue(form.minStockLevel),
     };
     if (editingMaterial) {
       updateMutation.mutate({ id: editingMaterial.id, data: submitData });
@@ -274,32 +275,29 @@ export default function InventoryPage() {
                   <div>
                     <Label>{t('currentStock')}</Label>
                     <Input
-                      type="number"
-                      step="0.001"
-                      min="0"
-                      value={form.currentStock}
-                      onChange={(e) => setForm({ ...form, currentStock: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                      type="text"
+                      inputMode="decimal"
+                      value={displayNumericValue(form.currentStock)}
+                      onChange={(e) => setForm({ ...form, currentStock: handleNumericInput(e.target.value) })}
                     />
                   </div>
                   <div>
                     <Label>{t('minStockLevel')}</Label>
                     <Input
-                      type="number"
-                      step="0.001"
-                      min="0"
-                      value={form.minStockLevel}
-                      onChange={(e) => setForm({ ...form, minStockLevel: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                      type="text"
+                      inputMode="decimal"
+                      value={displayNumericValue(form.minStockLevel)}
+                      onChange={(e) => setForm({ ...form, minStockLevel: handleNumericInput(e.target.value) })}
                     />
                   </div>
                 </div>
                 <div>
                   <Label>{t('lastPurchasePrice')} (TL)</Label>
                   <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={form.lastPurchasePrice}
-                    onChange={(e) => setForm({ ...form, lastPurchasePrice: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                    type="text"
+                    inputMode="decimal"
+                    value={displayNumericValue(form.lastPurchasePrice)}
+                    onChange={(e) => setForm({ ...form, lastPurchasePrice: handleNumericInput(e.target.value) })}
                   />
                 </div>
                 <div className="flex justify-end gap-2">

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
+import { handleNumericInput, displayNumericValue, parseNumericValue } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -98,7 +99,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState('');
   const [directSaleDialogOpen, setDirectSaleDialogOpen] = useState(false);
   const [selectedRawMaterialId, setSelectedRawMaterialId] = useState('');
-  const [directSalePrice, setDirectSalePrice] = useState<number | string>('');
+  const [directSalePrice, setDirectSalePrice] = useState<string>('');
 
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ['products'],
@@ -128,7 +129,7 @@ export default function ProductsPage() {
 
       const res = await api.post('/products', {
         name: rm.name,
-        price: directSalePrice === '' ? 0 : directSalePrice,
+        price: parseNumericValue(directSalePrice),
         isMenuItem: true,
         isComposite: false,
       });
@@ -170,7 +171,7 @@ export default function ProductsPage() {
       toast.error('Lutfen bir stok kalemi secin');
       return;
     }
-    if (directSalePrice === '' || Number(directSalePrice) <= 0) {
+    if (parseNumericValue(directSalePrice) <= 0) {
       toast.error('Lutfen gecerli bir satis fiyati girin');
       return;
     }
@@ -391,12 +392,11 @@ export default function ProductsPage() {
             <div>
               <Label>Satis Fiyati (TL)</Label>
               <Input
-                type="number"
-                step="0.01"
-                min="0.01"
-                value={directSalePrice || ''}
-                onChange={(e) => setDirectSalePrice(e.target.value === '' ? '' : parseFloat(e.target.value))}
-                placeholder="Ornek: 25.00"
+                type="text"
+                inputMode="decimal"
+                value={displayNumericValue(directSalePrice)}
+                onChange={(e) => setDirectSalePrice(handleNumericInput(e.target.value))}
+                placeholder="Ornek: 25,00"
                 required
               />
             </div>

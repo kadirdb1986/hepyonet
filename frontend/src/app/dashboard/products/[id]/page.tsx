@@ -26,6 +26,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Pencil, Plus, Trash2, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { handleNumericInput, displayNumericValue, parseNumericValue } from '@/lib/utils';
 
 interface RawMaterial {
   id: string;
@@ -202,7 +203,7 @@ export default function ProductDetailPage() {
         code: data.code || undefined,
         description: data.description || undefined,
         image: data.image || undefined,
-        price: data.price === '' ? 0 : data.price,
+        price: parseNumericValue(data.price),
         categoryId: data.categoryId || undefined,
         isMenuItem: data.isMenuItem,
       }),
@@ -271,7 +272,7 @@ export default function ProductDetailPage() {
   function handleAddIngredient(e: React.FormEvent) {
     e.preventDefault();
     const data: { rawMaterialId?: string; subProductId?: string; quantity: number; unit: string } = {
-      quantity: ingredientForm.quantity === '' ? 0 : Number(ingredientForm.quantity),
+      quantity: parseNumericValue(ingredientForm.quantity),
       unit: ingredientForm.unit,
     };
     if (ingredientType === 'raw') {
@@ -372,11 +373,10 @@ export default function ProductDetailPage() {
                 <div>
                   <Label>Satis Fiyati (TL) <span className="text-red-500">*</span></Label>
                   <Input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    value={form.price || ''}
-                    onChange={(e) => setForm({ ...form, price: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                    type="text"
+                    inputMode="decimal"
+                    value={displayNumericValue(form.price)}
+                    onChange={(e) => setForm({ ...form, price: handleNumericInput(e.target.value) })}
                     required
                   />
                 </div>
@@ -385,11 +385,10 @@ export default function ProductDetailPage() {
                 <div>
                   <Label>Satis Fiyati (TL)</Label>
                   <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={form.price || ''}
-                    onChange={(e) => setForm({ ...form, price: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                    type="text"
+                    inputMode="decimal"
+                    value={displayNumericValue(form.price)}
+                    onChange={(e) => setForm({ ...form, price: handleNumericInput(e.target.value) })}
                     placeholder="Opsiyonel - ara urun ise bos birakilabilir"
                   />
                 </div>
@@ -690,11 +689,10 @@ export default function ProductDetailPage() {
               <div>
                 <Label>Miktar</Label>
                 <Input
-                  type="number"
-                  step="0.001"
-                  min="0.001"
-                  value={ingredientForm.quantity || ''}
-                  onChange={(e) => setIngredientForm({ ...ingredientForm, quantity: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                  type="text"
+                  inputMode="decimal"
+                  value={displayNumericValue(ingredientForm.quantity)}
+                  onChange={(e) => setIngredientForm({ ...ingredientForm, quantity: handleNumericInput(e.target.value) })}
                   placeholder="Ornek: 200"
                   required
                 />
