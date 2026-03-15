@@ -24,7 +24,15 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2, AlertTriangle, Settings2, X, Check, Search, Truck } from 'lucide-react';
+import { Plus, Pencil, Trash2, AlertTriangle, Settings2, X, Check, Search, Truck, SlidersHorizontal } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
@@ -60,6 +68,17 @@ const UNIT_LABELS: Record<string, string> = {
   ML: 'Mililitre',
   ADET: 'Adet',
 };
+
+const TOGGLEABLE_COLUMNS = [
+  { key: 'type', label: 'Tip' },
+  { key: 'supplier', label: 'Tedarikci' },
+  { key: 'currentStock', label: 'Mevcut Stok' },
+  { key: 'minStockLevel', label: 'Minimum Stok' },
+  { key: 'lastPurchasePrice', label: 'Son Alis Fiyati' },
+  { key: 'stockStatus', label: 'Stok Durumu' },
+] as const;
+
+const DEFAULT_VISIBLE_COLUMNS = ['currentStock', 'lastPurchasePrice', 'supplier'];
 
 /** Miktar formatla: tam sayıysa küsürat gösterme, varsa virgülle göster */
 function formatQuantity(val: number): string {
@@ -119,6 +138,33 @@ export default function InventoryPage() {
     queryKey: ['suppliers'],
     queryFn: () => api.get('/suppliers').then((r) => r.data),
   });
+
+  const { data: restaurantData } = useQuery<{ settings: Record<string, unknown> }>({
+    queryKey: ['restaurant'],
+    queryFn: () => api.get('/restaurant').then((r) => r.data),
+  });
+
+  const savedColumns = restaurantData?.settings?.inventoryColumns as string[] | undefined;
+  const visibleColumns = savedColumns ?? DEFAULT_VISIBLE_COLUMNS;
+
+  const columnSettingsMutation = useMutation({
+    mutationFn: (columns: string[]) =>
+      api.patch('/restaurant/settings', { settings: { inventoryColumns: columns } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['restaurant'] });
+    },
+  });
+
+  function toggleColumn(key: string) {
+    const next = visibleColumns.includes(key)
+      ? visibleColumns.filter((c) => c !== key)
+      : [...visibleColumns, key];
+    columnSettingsMutation.mutate(next);
+  }
+
+  function isColumnVisible(key: string) {
+    return visibleColumns.includes(key);
+  }
 
   const createMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => api.post('/raw-materials', data),
@@ -460,21 +506,43 @@ export default function InventoryPage() {
 
       {/* Materials table */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle>
             {activeTab === 'ALL' ? t('rawMaterials') : activeTab}
           </CardTitle>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              Sutunlar
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel>Gorunur Sutunlar</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {TOGGLEABLE_COLUMNS.map((col) => (
+                <DropdownMenuCheckboxItem
+                  key={col.key}
+                  checked={isColumnVisible(col.key)}
+                  onCheckedChange={() => toggleColumn(col.key)}
+                >
+                  {col.label}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>{t('name')}</TableHead>
-                <TableHead className="text-center">Tip</TableHead>
-                <TableHead className="text-center">{t('currentStock')}</TableHead>
-
-                <TableHead className="text-center">{t('lastPurchasePrice')}</TableHead>
-                <TableHead className="text-center">{t('stockStatus')}</TableHead>
+                {isColumnVisible('type') && <TableHead className="text-center">Tip</TableHead>}
+                {isColumnVisible('supplier') && <TableHead className="text-center">Tedarikci</TableHead>}
+                {isColumnVisible('currentStock') && <TableHead className="text-center">{t('currentStock')}</TableHead>}
+                {isColumnVisible('minStockLevel') && <TableHead className="text-center">{t('minStockLevel')}</TableHead>}
+                {isColumnVisible('lastPurchasePrice') && <TableHead className="text-center">{t('lastPurchasePrice')}</TableHead>}
+                {isColumnVisible('stockStatus') && <TableHead className="text-center">{t('stockStatus')}</TableHead>}
                 <TableHead className="text-right">{tc('actions')}</TableHead>
               </TableRow>
             </TableHeader>
@@ -484,25 +552,43 @@ export default function InventoryPage() {
                 return (
                   <TableRow key={material.id}>
                     <TableCell className="font-medium">{material.name}</TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant="outline">{material.type || '-'}</Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <span className="inline-block w-16 text-right tabular-nums">{formatQuantity(Number(material.currentStock))}</span>
-                      <span className="inline-block w-20 text-left text-muted-foreground ml-1">{unitLabel}</span>
-                    </TableCell>
-
-                    <TableCell className="text-center">
-                      <span className="inline-block w-24 text-right tabular-nums">{formatCurrency(Number(material.lastPurchasePrice))} TL</span>
-                      <span className="inline-block w-20 text-left text-muted-foreground ml-1">/{unitLabel}</span>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {isLowStock(material) ? (
-                        <Badge variant="destructive">{t('critical')}</Badge>
-                      ) : (
-                        <Badge variant="secondary">{t('normal')}</Badge>
-                      )}
-                    </TableCell>
+                    {isColumnVisible('type') && (
+                      <TableCell className="text-center">
+                        <Badge variant="outline">{material.type || '-'}</Badge>
+                      </TableCell>
+                    )}
+                    {isColumnVisible('supplier') && (
+                      <TableCell className="text-center">
+                        {material.supplier ? material.supplier.name : <span className="text-muted-foreground">-</span>}
+                      </TableCell>
+                    )}
+                    {isColumnVisible('currentStock') && (
+                      <TableCell className="text-center">
+                        <span className="inline-block w-16 text-right tabular-nums">{formatQuantity(Number(material.currentStock))}</span>
+                        <span className="inline-block w-20 text-left text-muted-foreground ml-1">{unitLabel}</span>
+                      </TableCell>
+                    )}
+                    {isColumnVisible('minStockLevel') && (
+                      <TableCell className="text-center">
+                        <span className="inline-block w-16 text-right tabular-nums">{formatQuantity(Number(material.minStockLevel))}</span>
+                        <span className="inline-block w-20 text-left text-muted-foreground ml-1">{unitLabel}</span>
+                      </TableCell>
+                    )}
+                    {isColumnVisible('lastPurchasePrice') && (
+                      <TableCell className="text-center">
+                        <span className="inline-block w-24 text-right tabular-nums">{formatCurrency(Number(material.lastPurchasePrice))} TL</span>
+                        <span className="inline-block w-20 text-left text-muted-foreground ml-1">/{unitLabel}</span>
+                      </TableCell>
+                    )}
+                    {isColumnVisible('stockStatus') && (
+                      <TableCell className="text-center">
+                        {isLowStock(material) ? (
+                          <Badge variant="destructive">{t('critical')}</Badge>
+                        ) : (
+                          <Badge variant="secondary">{t('normal')}</Badge>
+                        )}
+                      </TableCell>
+                    )}
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="icon" onClick={() => openEdit(material)}>
@@ -526,7 +612,7 @@ export default function InventoryPage() {
               })}
               {materials.filter((m) => (activeTab === 'ALL' || m.type === activeTab) && (!searchQuery || m.name.toLocaleLowerCase('tr-TR').includes(searchQuery.toLocaleLowerCase('tr-TR')))).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={2 + visibleColumns.length} className="text-center text-muted-foreground py-8">
                     {searchQuery ? `"${searchQuery}" ile eslesen stok kalemi bulunamadi` : t('materialNotFound')}
                   </TableCell>
                 </TableRow>

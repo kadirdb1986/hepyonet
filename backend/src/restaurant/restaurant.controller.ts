@@ -14,7 +14,7 @@ export class RestaurantController {
   constructor(private restaurantService: RestaurantService) {}
 
   @Get()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.STOCK_MANAGER)
   getMyRestaurant(@CurrentUser('restaurantId') restaurantId: string) {
     return this.restaurantService.findById(restaurantId);
   }
@@ -29,7 +29,7 @@ export class RestaurantController {
   }
 
   @Patch('settings')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.STOCK_MANAGER)
   updateSettings(
     @CurrentUser('restaurantId') restaurantId: string,
     @Body() dto: UpdateRestaurantSettingsDto,

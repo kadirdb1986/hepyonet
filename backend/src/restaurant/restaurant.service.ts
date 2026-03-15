@@ -24,9 +24,12 @@ export class RestaurantService {
   }
 
   async updateSettings(id: string, dto: UpdateRestaurantSettingsDto) {
+    const restaurant = await this.prisma.restaurant.findUnique({ where: { id } });
+    const currentSettings = (restaurant?.settings as Record<string, any>) || {};
+    const mergedSettings = { ...currentSettings, ...dto.settings };
     return this.prisma.restaurant.update({
       where: { id },
-      data: { settings: dto.settings },
+      data: { settings: mergedSettings },
     });
   }
 }
