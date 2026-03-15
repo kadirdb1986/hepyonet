@@ -31,14 +31,15 @@ Mevcut sisteme Google OAuth eklenecek, restoran sahiplik kavramı getirilecek, k
 
 - Email/şifre ile mevcut akış korunur.
 - Google ile giriş eklenir.
-- Google ile ilk kez giren kullanıcı `users` tablosunda yoksa otomatik oluşturulur.
+- Google ile ilk kez giren kullanıcı `users` tablosunda yoksa otomatik oluşturulur (auto-provisioning).
 
 ### 1.3 Supabase Konfigürasyonu
 
 - Supabase Dashboard > Authentication > Providers > Google etkinleştirilir.
 - Google Cloud Console'dan OAuth Client ID/Secret alınır.
 - Frontend'de Supabase JS client ile `signInWithOAuth({ provider: 'google' })` çağrılır.
-- OAuth callback sonrası backend'e token gönderilir, `users` kaydı oluşturulur/güncellenir.
+- OAuth sonrası frontend Supabase session alır. Mevcut `GET /auth/me` akışı ile backend'e Authorization header'da Supabase access token gönderilir.
+- `JwtAuthGuard` token'ı doğrular, `users` tablosunda kayıt yoksa otomatik oluşturur (auto-provisioning). Ayrı bir `POST /auth/google` endpoint'i gerekmez.
 
 ## 2. Veritabani Degisiklikleri
 
@@ -88,12 +89,14 @@ enum MemberRole {
 }
 ```
 
-Mevcut `Role` enum'u `MemberRole` ile değiştirilir.
+Mevcut `Role` enum'u `MemberRole` ile değiştirilir. `@Roles()` dekoratörü de `MemberRole` kullanacak şekilde güncellenir.
 
 ### 2.4 `Restaurant` tablosu
 
-Eklenecek alan:
-- `ownerId: String` (User'a FK — sahip)
+`ownerId` alanı eklenmez. Sahiplik tek kaynak olarak `RestaurantMember.role = OWNER` üzerinden belirlenir. Sahibi bulmak için:
+```sql
+SELECT user_id FROM restaurant_members WHERE restaurant_id = ? AND role = 'OWNER'
+```
 
 ### 2.5 `Personnel` tablosu
 
@@ -105,16 +108,20 @@ Eklenecek alan:
 ### 3.1 Restoran Oluşturma
 
 - Kullanıcı yeni restoran oluşturduğunda otomatik olarak `OWNER` rolüyle `restaurant_members`'a eklenir.
-- `Restaurant.ownerId` bu kullanıcıya set edilir.
 
 ### 3.2 Sahiplik Devri
 
 - Sadece mevcut sahip (`OWNER`) devredebilir.
-- Hedef kullanıcı aynı restoranda `restaurant_members` kaydı olan biri olmalı.
-- İşlem:
-  1. Yeni sahip: `restaurant_members.role` → `OWNER`, `restaurant.ownerId` → yeni sahip
+- Hedef kullanıcı aynı restoranda aktif `restaurant_members` kaydı olan biri olmalı.
+- İşlem (tek transaction):
+  1. Yeni sahip: `restaurant_members.role` → `OWNER`
   2. Eski sahip: `restaurant_members.role` → `ADMIN`
-- Tek bir transaction içinde yapılır.
+
+### 3.3 Sahiplik Koruması
+
+- `OWNER` rolündeki kullanıcı, üyelik yönetimi endpoint'leri ile devre dışı bırakılamaz veya rolü değiştirilemez.
+- Sahipliği değiştirmenin tek yolu `transfer-ownership` endpoint'idir.
+- Her restoranda tam olarak bir `OWNER` olmalıdır.
 
 ## 4. Coklu Restoran ve Gecis
 
@@ -126,7 +133,7 @@ Eklenecek alan:
 ### 4.2 Frontend Geçiş
 
 - Header'da aktif restoran ismiyle bir dropdown gösterilir.
-- Kullanıcının üye olduğu tüm restoranlar listelenir.
+- Sadece `isActive: true` olan üyelikler listelenir.
 - Seçim değiştiğinde Zustand store güncellenir.
 - `activeRestaurantId` localStorage'da da saklanır (sayfa yenilenince korunması için).
 
@@ -150,25 +157,36 @@ Eklenecek alan:
 - Eklenen kullanıcı, bir sonraki girişinde header dropdown'unda yeni restoranı görür.
 - O restorana geçiş yaparak erişebilir.
 
+### 5.3 Devre Dışı Bırakma ve Yeniden Ekleme
+
+- `DELETE` ile üyelik `isActive: false` yapılır. Kullanıcı o restoranı dropdown'da görmez.
+- Aynı email tekrar eklenirse `isActive: true` yapılarak yeniden aktifleştirilir.
+- `OWNER` devre dışı bırakılamaz (bkz. 3.3).
+
 ## 6. Guard/Middleware Degisiklikleri
 
 ### 6.1 `JwtAuthGuard`
 
-- Değişiklik yok. Supabase token doğrulaması aynı kalır.
+- Supabase token doğrulaması aynı kalır.
 - Kullanıcıyı `users` tablosundan `supabaseId` ile bulur.
+- **Değişiklik:** `include: { restaurant: true }` kaldırılır. Sadece base User yüklenir.
+- **Değişiklik:** Token'dan gelen `supabaseId` ile `users` tablosunda kayıt bulunamazsa ve token geçerliyse (Google OAuth ilk giriş), kullanıcı otomatik oluşturulur (auto-provisioning).
 
 ### 6.2 `RestaurantGuard`
 
 - `request.headers['x-restaurant-id']` header'ından restoran ID'sini alır.
-- `restaurant_members` tablosunda `userId + restaurantId` kombinasyonunu kontrol eder.
+- **Async guard olur** — `PrismaService` inject eder.
+- `restaurant_members` tablosunda `userId + restaurantId` kombinasyonunu kontrol eder, aynı sorguda `restaurant` bilgisini de join ile yükler.
 - Üyelik yoksa veya `isActive: false` ise → `403 Forbidden`.
 - Restoran `status !== APPROVED` ise → `403`.
-- `request.user` nesnesine `restaurantId` ve `memberRole` ekler.
+- `request.user` nesnesine `restaurantId`, `memberRole` ve `restaurant` entity ekler.
+- **SuperAdmin:** `isSuperAdmin: true` ise üyelik kontrolü atlanır. `x-restaurant-id` header'ı hala gereklidir (hangi restoran üzerinde işlem yapıldığını belirler). `memberRole` set edilmez, `RolesGuard` SuperAdmin'i zaten bypass eder.
 
 ### 6.3 `RolesGuard`
 
 - `request.user.memberRole` üzerinden kontrol yapar (eski `user.role` yerine).
-- `OWNER` rolü tüm yetkilere sahiptir.
+- `OWNER` rolü tüm yetkilere sahiptir (tüm `@Roles()` kontrollerini geçer).
+- `isSuperAdmin` olan kullanıcılar rol kontrolünü bypass eder (mevcut davranış korunur).
 
 ## 7. Frontend Degisiklikleri
 
@@ -181,12 +199,12 @@ Eklenecek alan:
 ### 7.2 Auth Store (Zustand)
 
 - `activeRestaurantId` state'e eklenir.
-- `restaurants` listesi (üye olunan restoranlar) state'e eklenir.
+- `memberships` listesi state'e eklenir (her biri: `restaurantId`, `restaurantName`, `restaurantSlug`, `restaurantStatus`, `role`).
 - `switchRestaurant(id)` action eklenir.
 
 ### 7.3 Header
 
-- Restoran seçici dropdown eklenir (birden fazla restoran varsa görünür).
+- Restoran seçici dropdown eklenir (birden fazla restoran varsa görünür, tek restoran varsa sadece isim gösterilir).
 - Aktif restoran ismi gösterilir.
 
 ### 7.4 Dashboard Layout
@@ -206,28 +224,49 @@ Eklenecek alan:
 
 ## 8. API Endpoint Degisiklikleri
 
-### 8.1 Yeni Auth Endpoints
+### 8.1 Auth Endpoints
 
 ```
-POST /auth/google          - Google OAuth callback işleme
 POST /auth/register        - Güncellenir: restoran opsiyonel
+POST /auth/login           - Aynı kalır
+GET  /auth/me              - Güncellenir: memberships listesi döner
+```
+
+`GET /auth/me` yeni response formatı:
+```json
+{
+  "id": "...",
+  "email": "...",
+  "name": "...",
+  "avatarUrl": "...",
+  "isSuperAdmin": false,
+  "memberships": [
+    {
+      "restaurantId": "...",
+      "restaurantName": "...",
+      "restaurantSlug": "...",
+      "restaurantStatus": "APPROVED",
+      "role": "OWNER"
+    }
+  ]
+}
 ```
 
 ### 8.2 Yeni Restaurant Endpoints
 
 ```
-POST /restaurants                    - Yeni restoran oluştur
-GET  /restaurants/my                 - Kullanıcının üye olduğu restoranlar
-POST /restaurants/:id/transfer-ownership - Sahiplik devret
+POST /restaurants                    - Yeni restoran oluştur (OWNER olarak)
+GET  /restaurants/my                 - Kullanıcının üye olduğu restoranlar (isActive: true)
+POST /restaurants/:id/transfer-ownership - Sahiplik devret (body: { targetUserId })
 ```
 
-### 8.3 Güncellenen User Endpoints
+### 8.3 Üye Yönetimi Endpoints
 
 ```
-GET  /users                - restaurant_members üzerinden listele (x-restaurant-id header)
-POST /users                - Email ile kullanıcı ara ve restaurant_members'a ekle
-PATCH /users/:id/role      - restaurant_members.role güncelle
-DELETE /users/:id          - restaurant_members.isActive = false
+GET    /restaurants/:id/members              - Üyeleri listele
+POST   /restaurants/:id/members              - Üye ekle (body: { email, role })
+PATCH  /restaurants/:id/members/:userId/role - Rol güncelle (OWNER hariç)
+DELETE /restaurants/:id/members/:userId      - Üyelik devre dışı bırak (OWNER hariç)
 ```
 
 ## 9. Migrasyon Stratejisi
@@ -235,8 +274,8 @@ DELETE /users/:id          - restaurant_members.isActive = false
 Mevcut verilerin korunması için migrasyon adımları:
 
 1. `RestaurantMember` tablosu oluştur.
-2. `Restaurant` tablosuna `ownerId` ekle.
-3. Mevcut `users` tablosundaki her kayıt için `restaurant_members` kaydı oluştur (aynı `restaurantId` ve `role` ile).
-4. Her restoranın `ownerId`'sini, o restoranda `ADMIN` rolündeki ilk kullanıcıya set et.
-5. `User` tablosundan `restaurantId` ve `role` alanlarını kaldır.
-6. `Role` enum'unu `MemberRole` ile değiştir.
+2. Mevcut `users` tablosundaki `restaurantId` NOT NULL olan her kayıt için `restaurant_members` kaydı oluştur (aynı `restaurantId` ve `role` ile). `restaurantId` NULL olan kullanıcılar sıfır üyelikle kalır — bu "restoransız kayıt" akışının beklenen durumudur.
+3. Her restoranın sahibini belirle: o restoranda `ADMIN` rolündeki ilk kullanıcının `restaurant_members.role` değerini `OWNER` olarak güncelle. Eğer `ADMIN` yoksa, o restoranda herhangi bir rolde olan ilk kullanıcıyı `OWNER` yap ve logla.
+4. `User` tablosundan `restaurantId` ve `role` alanlarını kaldır.
+5. `Role` enum'unu `MemberRole` ile değiştir.
+6. `Personnel` tablosuna nullable `userId` alanı ekle.
