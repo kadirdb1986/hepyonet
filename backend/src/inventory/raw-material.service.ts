@@ -10,6 +10,7 @@ export class RawMaterialService {
   async findAll(restaurantId: string) {
     return this.prisma.rawMaterial.findMany({
       where: { restaurantId },
+      include: { supplier: true },
       orderBy: { name: 'asc' },
     });
   }
@@ -40,6 +41,7 @@ export class RawMaterialService {
         currentStock: dto.currentStock ?? 0,
         lastPurchasePrice: dto.lastPurchasePrice ?? 0,
         minStockLevel: dto.minStockLevel ?? 0,
+        supplierId: dto.supplierId || null,
       },
     });
   }
@@ -60,6 +62,7 @@ export class RawMaterialService {
         ...(dto.currentStock !== undefined && { currentStock: dto.currentStock }),
         ...(dto.lastPurchasePrice !== undefined && { lastPurchasePrice: dto.lastPurchasePrice }),
         ...(dto.minStockLevel !== undefined && { minStockLevel: dto.minStockLevel }),
+        ...(dto.supplierId !== undefined && { supplierId: dto.supplierId || null }),
       },
     });
   }

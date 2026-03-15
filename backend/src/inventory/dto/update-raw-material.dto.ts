@@ -28,4 +28,8 @@ export class UpdateRawMaterialDto {
   @Min(0)
   @IsOptional()
   minStockLevel?: number;
+
+  @IsString()
+  @IsOptional()
+  supplierId?: string | null;
 }

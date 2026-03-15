@@ -27,4 +27,8 @@ export class CreateRawMaterialDto {
   @Min(0)
   @IsOptional()
   minStockLevel?: number = 0;
+
+  @IsString()
+  @IsOptional()
+  supplierId?: string | null;
 }
