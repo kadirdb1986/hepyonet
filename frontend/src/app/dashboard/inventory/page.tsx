@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
@@ -25,14 +25,6 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Pencil, Trash2, AlertTriangle, Settings2, X, Check, Search, Truck, SlidersHorizontal } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
@@ -109,6 +101,8 @@ export default function InventoryPage() {
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [editingSupplierName, setEditingSupplierName] = useState('');
   const [editingSupplierDesc, setEditingSupplierDesc] = useState('');
+  const [columnMenuOpen, setColumnMenuOpen] = useState(false);
+  const columnMenuRef = useRef<HTMLDivElement>(null);
   const [form, setForm] = useState({
     name: '',
     type: '' as string,
@@ -118,6 +112,18 @@ export default function InventoryPage() {
     minStockLevel: '' as string | number,
     supplierId: '' as string,
   });
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (columnMenuRef.current && !columnMenuRef.current.contains(e.target as Node)) {
+        setColumnMenuOpen(false);
+      }
+    }
+    if (columnMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [columnMenuOpen]);
 
   const { data: materials = [], isLoading } = useQuery<RawMaterial[]>({
     queryKey: ['raw-materials'],
@@ -510,27 +516,36 @@ export default function InventoryPage() {
           <CardTitle>
             {activeTab === 'ALL' ? t('rawMaterials') : activeTab}
           </CardTitle>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
+          <div className="relative" ref={columnMenuRef}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setColumnMenuOpen((v) => !v)}
             >
-              <SlidersHorizontal className="h-4 w-4" />
+              <SlidersHorizontal className="mr-2 h-4 w-4" />
               Sutunlar
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Gorunur Sutunlar</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {TOGGLEABLE_COLUMNS.map((col) => (
-                <DropdownMenuCheckboxItem
-                  key={col.key}
-                  checked={isColumnVisible(col.key)}
-                  onCheckedChange={() => toggleColumn(col.key)}
-                >
-                  {col.label}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </Button>
+            {columnMenuOpen && (
+              <div className="absolute right-0 top-full mt-1 z-50 w-52 rounded-md border bg-popover p-1 shadow-md">
+                <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Gorunur Sutunlar</p>
+                <div className="h-px bg-border my-1" />
+                {TOGGLEABLE_COLUMNS.map((col) => (
+                  <label
+                    key={col.key}
+                    className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-accent"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isColumnVisible(col.key)}
+                      onChange={() => toggleColumn(col.key)}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                    {col.label}
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
