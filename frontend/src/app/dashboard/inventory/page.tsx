@@ -387,7 +387,7 @@ export default function InventoryPage() {
                 <TableHead>{t('name')}</TableHead>
                 <TableHead className="text-center">Tip</TableHead>
                 <TableHead className="text-center">{t('currentStock')}</TableHead>
-                <TableHead className="text-center">{t('minStockLevel')}</TableHead>
+
                 <TableHead className="text-center">{t('lastPurchasePrice')}</TableHead>
                 <TableHead className="text-center">{t('stockStatus')}</TableHead>
                 <TableHead className="text-right">{tc('actions')}</TableHead>
@@ -406,10 +406,7 @@ export default function InventoryPage() {
                       <span className="inline-block w-16 text-right tabular-nums">{formatQuantity(Number(material.currentStock))}</span>
                       <span className="inline-block w-20 text-left text-muted-foreground ml-1">{unitLabel}</span>
                     </TableCell>
-                    <TableCell className="text-center">
-                      <span className="inline-block w-16 text-right tabular-nums">{formatQuantity(Number(material.minStockLevel))}</span>
-                      <span className="inline-block w-20 text-left text-muted-foreground ml-1">{unitLabel}</span>
-                    </TableCell>
+
                     <TableCell className="text-center">
                       <span className="inline-block w-24 text-right tabular-nums">{formatCurrency(Number(material.lastPurchasePrice))} TL</span>
                       <span className="inline-block w-20 text-left text-muted-foreground ml-1">/{unitLabel}</span>
@@ -444,7 +441,7 @@ export default function InventoryPage() {
               })}
               {materials.filter((m) => (activeTab === 'ALL' || m.type === activeTab) && (!searchQuery || m.name.toLocaleLowerCase('tr-TR').includes(searchQuery.toLocaleLowerCase('tr-TR')))).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                     {searchQuery ? `"${searchQuery}" ile eslesen stok kalemi bulunamadi` : t('materialNotFound')}
                   </TableCell>
                 </TableRow>
