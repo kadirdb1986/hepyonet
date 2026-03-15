@@ -24,7 +24,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2, AlertTriangle, Settings2, X, Check } from 'lucide-react';
+import { Plus, Pencil, Trash2, AlertTriangle, Settings2, X, Check, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface RawMaterial {
@@ -74,6 +74,7 @@ export default function InventoryPage() {
   const [newTypeName, setNewTypeName] = useState('');
   const [editingType, setEditingType] = useState<MaterialType | null>(null);
   const [editingTypeName, setEditingTypeName] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [form, setForm] = useState({
     name: '',
     type: '' as string,
@@ -335,21 +336,41 @@ export default function InventoryPage() {
         </Card>
       )}
 
-      {/* Filter tabs */}
-      <div className="flex gap-2 flex-wrap">
-        {[{ key: 'ALL', label: 'Tumu' }, ...materialTypes.map((mt) => ({ key: mt.name, label: mt.name }))].map((tab) => (
-          <Button
-            key={tab.key}
-            variant={activeTab === tab.key ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setActiveTab(tab.key)}
-          >
-            {tab.label}
-            <span className="ml-1.5 text-xs opacity-70">
-              ({tab.key === 'ALL' ? materials.length : materials.filter((m) => m.type === tab.key).length})
-            </span>
-          </Button>
-        ))}
+      {/* Filter tabs and search */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex gap-2 flex-wrap">
+          {[{ key: 'ALL', label: 'Tumu' }, ...materialTypes.map((mt) => ({ key: mt.name, label: mt.name }))].map((tab) => (
+            <Button
+              key={tab.key}
+              variant={activeTab === tab.key ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setActiveTab(tab.key)}
+            >
+              {tab.label}
+              <span className="ml-1.5 text-xs opacity-70">
+                ({tab.key === 'ALL' ? materials.length : materials.filter((m) => m.type === tab.key).length})
+              </span>
+            </Button>
+          ))}
+        </div>
+        <div className="relative w-64">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Stok kalemi ara..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 h-9"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Materials table */}
@@ -373,7 +394,7 @@ export default function InventoryPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {materials.filter((m) => activeTab === 'ALL' || m.type === activeTab).map((material) => {
+              {materials.filter((m) => (activeTab === 'ALL' || m.type === activeTab) && (!searchQuery || m.name.toLocaleLowerCase('tr-TR').includes(searchQuery.toLocaleLowerCase('tr-TR')))).map((material) => {
                 const unitLabel = UNIT_LABELS[material.unit] || material.unit;
                 return (
                   <TableRow key={material.id}>
@@ -421,10 +442,10 @@ export default function InventoryPage() {
                   </TableRow>
                 );
               })}
-              {materials.length === 0 && (
+              {materials.filter((m) => (activeTab === 'ALL' || m.type === activeTab) && (!searchQuery || m.name.toLocaleLowerCase('tr-TR').includes(searchQuery.toLocaleLowerCase('tr-TR')))).length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                    {t('materialNotFound')}
+                    {searchQuery ? `"${searchQuery}" ile eslesen stok kalemi bulunamadi` : t('materialNotFound')}
                   </TableCell>
                 </TableRow>
               )}
