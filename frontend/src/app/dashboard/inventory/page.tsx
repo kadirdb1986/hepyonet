@@ -86,8 +86,9 @@ function formatQuantity(val: number): string {
   return val.toLocaleString('tr-TR', { maximumFractionDigits: 3 });
 }
 
-/** Para formatla: her zaman 2 küsürat, Türkiye formatı (1.000,00) */
+/** Para formatla: küsürat varsa 2 hane göster, yoksa tam sayı */
 function formatCurrency(val: number): string {
+  if (Number.isInteger(val)) return val.toLocaleString('tr-TR');
   return val.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
