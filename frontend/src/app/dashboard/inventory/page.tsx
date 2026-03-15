@@ -61,6 +61,14 @@ const UNIT_LABELS: Record<string, string> = {
   ADET: 'Adet',
 };
 
+const UNIT_SHORT: Record<string, string> = {
+  KG: 'kg',
+  GR: 'gr',
+  LT: 'lt',
+  ML: 'ml',
+  ADET: 'adet',
+};
+
 const TOGGLEABLE_COLUMNS = [
   { key: 'type', label: 'Tip' },
   { key: 'supplier', label: 'Tedarikci' },
@@ -449,21 +457,33 @@ export default function InventoryPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label>{t('currentStock')}</Label>
-                    <Input
-                      type="text"
-                      inputMode="decimal"
-                      value={displayNumericValue(form.currentStock)}
-                      onChange={(e) => setForm({ ...form, currentStock: handleNumericInput(e.target.value) })}
-                    />
+                    <div className="relative">
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        value={displayNumericValue(form.currentStock)}
+                        onChange={(e) => setForm({ ...form, currentStock: handleNumericInput(e.target.value) })}
+                        className="pr-12"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                        {UNIT_SHORT[form.unit] || form.unit}
+                      </span>
+                    </div>
                   </div>
                   <div>
                     <Label>{t('minStockLevel')}</Label>
-                    <Input
-                      type="text"
-                      inputMode="decimal"
-                      value={displayNumericValue(form.minStockLevel)}
-                      onChange={(e) => setForm({ ...form, minStockLevel: handleNumericInput(e.target.value) })}
-                    />
+                    <div className="relative">
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        value={displayNumericValue(form.minStockLevel)}
+                        onChange={(e) => setForm({ ...form, minStockLevel: handleNumericInput(e.target.value) })}
+                        className="pr-12"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                        {UNIT_SHORT[form.unit] || form.unit}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div>
