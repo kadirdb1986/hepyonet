@@ -660,7 +660,7 @@ export default function InventoryPage() {
                     {isColumnVisible('lastPurchasePrice') && (
                       <TableCell className="text-center">
                         <span className="inline-block w-24 text-right tabular-nums">{formatCurrency(Number(material.lastPurchasePrice))} TL</span>
-                        <span className="inline-block w-20 text-left text-muted-foreground ml-1">/{unitLabel}</span>
+                        <span className="inline-block w-20 text-left text-muted-foreground ml-1">/{UNIT_SHORT[material.unit] || material.unit}</span>
                       </TableCell>
                     )}
                     {isColumnVisible('stockStatus') && (
