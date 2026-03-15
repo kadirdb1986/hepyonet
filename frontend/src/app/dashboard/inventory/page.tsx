@@ -83,6 +83,43 @@ function formatCurrency(val: number): string {
   return val.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function SupplierPopover({ supplier }: { supplier: Supplier }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [open]);
+
+  return (
+    <div className="relative inline-block" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="text-sm font-medium underline decoration-dotted underline-offset-2 cursor-pointer hover:text-primary"
+      >
+        {supplier.name}
+      </button>
+      {open && (
+        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 w-64 rounded-lg border bg-popover p-3 shadow-lg">
+          <div className="absolute left-1/2 -translate-x-1/2 -top-2 w-3 h-3 rotate-45 border-l border-t bg-popover" />
+          <p className="font-semibold text-sm">{supplier.name}</p>
+          {supplier.description ? (
+            <p className="text-xs text-muted-foreground mt-1.5 whitespace-pre-wrap">{supplier.description}</p>
+          ) : (
+            <p className="text-xs text-muted-foreground mt-1.5 italic">Aciklama eklenmemis</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function InventoryPage() {
   const t = useTranslations('inventory');
   const tc = useTranslations('common');
@@ -574,7 +611,11 @@ export default function InventoryPage() {
                     )}
                     {isColumnVisible('supplier') && (
                       <TableCell className="text-center">
-                        {material.supplier ? material.supplier.name : <span className="text-muted-foreground">-</span>}
+                        {material.supplier ? (
+                          <SupplierPopover supplier={material.supplier} />
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
                       </TableCell>
                     )}
                     {isColumnVisible('currentStock') && (
