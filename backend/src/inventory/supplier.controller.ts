@@ -32,8 +32,10 @@ export class SupplierController {
     @CurrentUser('restaurantId') restaurantId: string,
     @Body('name') name: string,
     @Body('description') description?: string,
+    @Body('deliveryType') deliveryType?: string,
+    @Body('phone') phone?: string,
   ) {
-    return this.service.create(restaurantId, name, description);
+    return this.service.create(restaurantId, name, description, deliveryType, phone);
   }
 
   @Patch(':id')
@@ -42,8 +44,10 @@ export class SupplierController {
     @Param('id') id: string,
     @Body('name') name: string,
     @Body('description') description?: string,
+    @Body('deliveryType') deliveryType?: string,
+    @Body('phone') phone?: string,
   ) {
-    return this.service.update(restaurantId, id, name, description);
+    return this.service.update(restaurantId, id, name, description, deliveryType, phone);
   }
 
   @Delete(':id')

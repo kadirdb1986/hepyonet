@@ -212,6 +212,8 @@ model Supplier {
   restaurantId String
   name         String
   description  String?
+  deliveryType String?
+  phone        String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

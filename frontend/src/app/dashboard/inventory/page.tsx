@@ -32,6 +32,27 @@ interface Supplier {
   id: string;
   name: string;
   description: string | null;
+  deliveryType: string | null;
+  phone: string | null;
+}
+
+const DELIVERY_TYPES = ['Kargo', 'Ayaga Hizmet', 'Kendin Gidip Aliyorsun'] as const;
+
+/** Telefon numarasını 0 (5xx) xxx xx xx formatına çevir */
+function formatPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, '').slice(0, 11);
+  if (digits.length === 0) return '';
+  let result = digits.slice(0, 1);
+  if (digits.length > 1) result += ' (' + digits.slice(1, 4);
+  if (digits.length > 4) result += ') ' + digits.slice(4, 7);
+  if (digits.length > 7) result += ' ' + digits.slice(7, 9);
+  if (digits.length > 9) result += ' ' + digits.slice(9, 11);
+  return result;
+}
+
+/** Sadece rakamları al (kayıt için) */
+function stripPhone(formatted: string): string {
+  return formatted.replace(/\D/g, '');
 }
 
 interface RawMaterial {
@@ -118,6 +139,12 @@ function SupplierPopover({ supplier }: { supplier: Supplier }) {
         <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 w-64 rounded-lg border bg-popover p-3 shadow-lg">
           <div className="absolute left-1/2 -translate-x-1/2 -top-2 w-3 h-3 rotate-45 border-l border-t bg-popover" />
           <p className="font-semibold text-sm">{supplier.name}</p>
+          {supplier.deliveryType && (
+            <p className="text-xs mt-1.5"><span className="text-muted-foreground">Tedarik Tipi:</span> {supplier.deliveryType}</p>
+          )}
+          {supplier.phone && (
+            <p className="text-xs mt-1"><span className="text-muted-foreground">Tel:</span> {formatPhone(supplier.phone)}</p>
+          )}
           {supplier.description ? (
             <p className="text-xs text-muted-foreground mt-1.5 whitespace-pre-wrap">{supplier.description}</p>
           ) : (
@@ -144,9 +171,13 @@ export default function InventoryPage() {
   const [supplierDialogOpen, setSupplierDialogOpen] = useState(false);
   const [newSupplierName, setNewSupplierName] = useState('');
   const [newSupplierDesc, setNewSupplierDesc] = useState('');
+  const [newSupplierDeliveryType, setNewSupplierDeliveryType] = useState('');
+  const [newSupplierPhone, setNewSupplierPhone] = useState('');
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [editingSupplierName, setEditingSupplierName] = useState('');
   const [editingSupplierDesc, setEditingSupplierDesc] = useState('');
+  const [editingSupplierDeliveryType, setEditingSupplierDeliveryType] = useState('');
+  const [editingSupplierPhone, setEditingSupplierPhone] = useState('');
   const [columnMenuOpen, setColumnMenuOpen] = useState(false);
   const columnMenuRef = useRef<HTMLDivElement>(null);
   const [form, setForm] = useState({
@@ -289,11 +320,13 @@ export default function InventoryPage() {
 
   // Supplier CRUD mutations
   const createSupplierMutation = useMutation({
-    mutationFn: (data: { name: string; description?: string }) => api.post('/suppliers', data),
+    mutationFn: (data: { name: string; description?: string; deliveryType?: string; phone?: string }) => api.post('/suppliers', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       setNewSupplierName('');
       setNewSupplierDesc('');
+      setNewSupplierDeliveryType('');
+      setNewSupplierPhone('');
       toast.success('Tedarikci eklendi');
     },
     onError: (error: unknown) => {
@@ -303,14 +336,16 @@ export default function InventoryPage() {
   });
 
   const updateSupplierMutation = useMutation({
-    mutationFn: ({ id, name, description }: { id: string; name: string; description?: string }) =>
-      api.patch(`/suppliers/${id}`, { name, description }),
+    mutationFn: ({ id, name, description, deliveryType, phone }: { id: string; name: string; description?: string; deliveryType?: string; phone?: string }) =>
+      api.patch(`/suppliers/${id}`, { name, description, deliveryType, phone }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       queryClient.invalidateQueries({ queryKey: ['raw-materials'] });
       setEditingSupplier(null);
       setEditingSupplierName('');
       setEditingSupplierDesc('');
+      setEditingSupplierDeliveryType('');
+      setEditingSupplierPhone('');
       toast.success('Tedarikci guncellendi');
     },
     onError: (error: unknown) => {
@@ -720,6 +755,8 @@ export default function InventoryPage() {
                   createSupplierMutation.mutate({
                     name: newSupplierName.trim(),
                     description: newSupplierDesc.trim() || undefined,
+                    deliveryType: newSupplierDeliveryType || undefined,
+                    phone: stripPhone(newSupplierPhone) || undefined,
                   });
                 }
               }}
@@ -735,6 +772,22 @@ export default function InventoryPage() {
                 value={newSupplierDesc}
                 onChange={(e) => setNewSupplierDesc(e.target.value)}
                 rows={2}
+              />
+              <select
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                value={newSupplierDeliveryType}
+                onChange={(e) => setNewSupplierDeliveryType(e.target.value)}
+              >
+                <option value="">Tedarik tipi secin...</option>
+                {DELIVERY_TYPES.map((dt) => (
+                  <option key={dt} value={dt}>{dt}</option>
+                ))}
+              </select>
+              <Input
+                placeholder="0 (5xx) xxx xx xx"
+                value={formatPhone(newSupplierPhone)}
+                onChange={(e) => setNewSupplierPhone(stripPhone(e.target.value))}
+                type="tel"
               />
               <Button type="submit" size="sm" className="w-full" disabled={createSupplierMutation.isPending || !newSupplierName.trim()}>
                 <Plus className="mr-2 h-4 w-4" />
@@ -760,6 +813,23 @@ export default function InventoryPage() {
                         rows={2}
                         placeholder="Aciklama..."
                       />
+                      <select
+                        className="flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        value={editingSupplierDeliveryType}
+                        onChange={(e) => setEditingSupplierDeliveryType(e.target.value)}
+                      >
+                        <option value="">Tedarik tipi secin...</option>
+                        {DELIVERY_TYPES.map((dt) => (
+                          <option key={dt} value={dt}>{dt}</option>
+                        ))}
+                      </select>
+                      <Input
+                        placeholder="0 (5xx) xxx xx xx"
+                        value={formatPhone(editingSupplierPhone)}
+                        onChange={(e) => setEditingSupplierPhone(stripPhone(e.target.value))}
+                        type="tel"
+                        className="h-8"
+                      />
                       <div className="flex gap-1 justify-end">
                         <Button
                           variant="ghost"
@@ -771,6 +841,8 @@ export default function InventoryPage() {
                                 id: s.id,
                                 name: editingSupplierName.trim(),
                                 description: editingSupplierDesc.trim() || undefined,
+                                deliveryType: editingSupplierDeliveryType || undefined,
+                                phone: stripPhone(editingSupplierPhone) || undefined,
                               });
                             }
                           }}
@@ -782,7 +854,7 @@ export default function InventoryPage() {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => { setEditingSupplier(null); setEditingSupplierName(''); setEditingSupplierDesc(''); }}
+                          onClick={() => { setEditingSupplier(null); setEditingSupplierName(''); setEditingSupplierDesc(''); setEditingSupplierDeliveryType(''); setEditingSupplierPhone(''); }}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -803,7 +875,7 @@ export default function InventoryPage() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 shrink-0"
-                        onClick={() => { setEditingSupplier(s); setEditingSupplierName(s.name); setEditingSupplierDesc(s.description || ''); }}
+                        onClick={() => { setEditingSupplier(s); setEditingSupplierName(s.name); setEditingSupplierDesc(s.description || ''); setEditingSupplierDeliveryType(s.deliveryType || ''); setEditingSupplierPhone(s.phone || ''); }}
                       >
                         <Pencil className="h-3 w-3" />
                       </Button>

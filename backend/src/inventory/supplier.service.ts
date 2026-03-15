@@ -12,7 +12,7 @@ export class SupplierService {
     });
   }
 
-  async create(restaurantId: string, name: string, description?: string) {
+  async create(restaurantId: string, name: string, description?: string, deliveryType?: string, phone?: string) {
     const trimmed = name.trim();
     if (!trimmed) {
       throw new BadRequestException('Tedarikci adi bos olamaz');
@@ -31,11 +31,13 @@ export class SupplierService {
         restaurantId,
         name: trimmed,
         description: description?.trim() || null,
+        deliveryType: deliveryType || null,
+        phone: phone?.trim() || null,
       },
     });
   }
 
-  async update(restaurantId: string, id: string, name: string, description?: string) {
+  async update(restaurantId: string, id: string, name: string, description?: string, deliveryType?: string, phone?: string) {
     const trimmed = name.trim();
     if (!trimmed) {
       throw new BadRequestException('Tedarikci adi bos olamaz');
@@ -62,6 +64,8 @@ export class SupplierService {
       data: {
         name: trimmed,
         description: description?.trim() || null,
+        deliveryType: deliveryType || null,
+        phone: phone?.trim() || null,
       },
     });
   }
