@@ -487,14 +487,20 @@ export default function InventoryPage() {
                     </div>
                   </div>
                 </div>
-                <div>
-                  <Label>{t('lastPurchasePrice')} (TL)</Label>
-                  <Input
-                    type="text"
-                    inputMode="decimal"
-                    value={displayNumericValue(form.lastPurchasePrice)}
-                    onChange={(e) => setForm({ ...form, lastPurchasePrice: handleNumericInput(e.target.value) })}
-                  />
+                <div className="w-1/2">
+                  <Label>{t('lastPurchasePrice')}</Label>
+                  <div className="relative">
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      value={displayNumericValue(form.lastPurchasePrice)}
+                      onChange={(e) => setForm({ ...form, lastPurchasePrice: handleNumericInput(e.target.value) })}
+                      className="pr-12"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                      TL
+                    </span>
+                  </div>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={resetForm}>
