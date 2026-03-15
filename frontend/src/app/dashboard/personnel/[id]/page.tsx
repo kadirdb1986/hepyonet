@@ -75,6 +75,17 @@ interface WorkDaysData {
   }[];
 }
 
+function formatPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, '').slice(0, 11);
+  if (digits.length === 0) return '';
+  let result = digits.slice(0, 1);
+  if (digits.length > 1) result += ' (' + digits.slice(1, 4);
+  if (digits.length > 4) result += ') ' + digits.slice(4, 7);
+  if (digits.length > 7) result += ' ' + digits.slice(7, 9);
+  if (digits.length > 9) result += ' ' + digits.slice(9, 11);
+  return result;
+}
+
 const leaveTypeMap = {
   ANNUAL: { label: 'Yillik Izin', variant: 'default' as const },
   SICK: { label: 'Hastalik Izni', variant: 'secondary' as const },
@@ -422,7 +433,7 @@ export default function PersonnelDetailPage() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Telefon</p>
-                    <p className="font-medium">{personnel.phone || '\u2014'}</p>
+                    <p className="font-medium">{personnel.phone ? formatPhone(personnel.phone) : '\u2014'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">TC Kimlik No</p>

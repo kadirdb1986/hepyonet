@@ -78,6 +78,17 @@ export default function PersonnelListPage() {
     }).format(Number(value));
   };
 
+  const formatPhone = (raw: string): string => {
+    const digits = raw.replace(/\D/g, '').slice(0, 11);
+    if (digits.length === 0) return '';
+    let result = digits.slice(0, 1);
+    if (digits.length > 1) result += ' (' + digits.slice(1, 4);
+    if (digits.length > 4) result += ') ' + digits.slice(4, 7);
+    if (digits.length > 7) result += ' ' + digits.slice(7, 9);
+    if (digits.length > 9) result += ' ' + digits.slice(9, 11);
+    return result;
+  };
+
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('tr-TR');
   };
@@ -140,7 +151,7 @@ export default function PersonnelListPage() {
                         {p.name} {p.surname}
                       </TableCell>
                       <TableCell>{p.position || '\u2014'}</TableCell>
-                      <TableCell>{p.phone || '\u2014'}</TableCell>
+                      <TableCell>{p.phone ? formatPhone(p.phone) : '\u2014'}</TableCell>
                       <TableCell>{formatDate(p.startDate)}</TableCell>
                       <TableCell>{formatCurrency(p.salary)}</TableCell>
                       <TableCell>
