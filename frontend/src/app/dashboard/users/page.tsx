@@ -22,26 +22,22 @@ import {
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/lib/api';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAuth } from '@/hooks/use-auth';
 
-const ROLES = ['ADMIN', 'ACCOUNTANT', 'HR', 'STOCK_MANAGER', 'MENU_MANAGER'] as const;
+const ROLES = ['ADMIN', 'ACCOUNTANT', 'HR', 'STOCK_MANAGER', 'MENU_MANAGER', 'WAITER'] as const;
 const ROLE_LABELS: Record<string, string> = {
+  OWNER: 'Sahip',
   ADMIN: 'Yonetici',
   ACCOUNTANT: 'Muhasebe',
   HR: 'Insan Kaynaklari',
   STOCK_MANAGER: 'Depocu',
   MENU_MANAGER: 'Menu Yoneticisi',
-};
-const ROLE_COLORS: Record<string, string> = {
-  ADMIN: 'default',
-  ACCOUNTANT: 'secondary',
-  HR: 'secondary',
-  STOCK_MANAGER: 'secondary',
-  MENU_MANAGER: 'secondary',
+  WAITER: 'Garson',
 };
 
-interface User {
+interface Member {
   id: string;
+  userId: string;
   email: string;
   name: string;
   role: string;
@@ -49,40 +45,41 @@ interface User {
 }
 
 export default function UsersPage() {
-  const currentUser = useAuthStore((s) => s.user);
-  const [users, setUsers] = useState<User[]>([]);
+  const { user, activeMembership } = useAuth();
+  const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
 
   const [newEmail, setNewEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [newName, setNewName] = useState('');
   const [newRole, setNewRole] = useState<string>('ACCOUNTANT');
 
-  const loadUsers = () => {
-    api.get('/users').then(({ data }) => {
-      setUsers(data);
+  const isOwner = activeMembership?.role === 'OWNER';
+
+  const loadMembers = () => {
+    api.get('/restaurants/current/members').then(({ data }) => {
+      setMembers(data);
       setLoading(false);
     }).catch(() => setLoading(false));
   };
 
-  useEffect(() => { loadUsers(); }, []);
+  useEffect(() => { loadMembers(); }, []);
 
-  const handleCreate = async () => {
-    if (!newEmail || !newPassword || !newName) {
-      toast.error('Tum alanlari doldurun.');
+  const handleAdd = async () => {
+    if (!newEmail) {
+      toast.error('E-posta adresini girin.');
       return;
     }
     setCreating(true);
     try {
-      await api.post('/users', { email: newEmail, password: newPassword, name: newName, role: newRole });
-      toast.success('Kullanici olusturuldu.');
+      await api.post('/restaurants/current/members', { email: newEmail, role: newRole });
+      toast.success('Kullanici eklendi.');
       setDialogOpen(false);
-      setNewEmail(''); setNewPassword(''); setNewName(''); setNewRole('ACCOUNTANT');
-      loadUsers();
-    } catch {
-      toast.error('Kullanici olusturulurken hata olustu.');
+      setNewEmail('');
+      setNewRole('ACCOUNTANT');
+      loadMembers();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Kullanici eklenirken hata olustu.');
     } finally {
       setCreating(false);
     }
@@ -90,22 +87,34 @@ export default function UsersPage() {
 
   const handleRoleChange = async (userId: string, role: string) => {
     try {
-      await api.patch(`/users/${userId}/role`, { role });
+      await api.patch(`/restaurants/current/members/${userId}/role`, { role });
       toast.success('Rol guncellendi.');
-      loadUsers();
-    } catch {
-      toast.error('Rol guncellenirken hata olustu.');
+      loadMembers();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Rol guncellenirken hata olustu.');
     }
   };
 
   const handleDeactivate = async (userId: string, userName: string) => {
-    if (!confirm(`${userName} adli kullaniciyi silmek istediginize emin misiniz?`)) return;
+    if (!confirm(`${userName} adli kullaniciyi cikarmak istediginize emin misiniz?`)) return;
     try {
-      await api.delete(`/users/${userId}`);
-      toast.success('Kullanici silindi.');
-      loadUsers();
-    } catch {
-      toast.error('Kullanici silinirken hata olustu.');
+      await api.delete(`/restaurants/current/members/${userId}`);
+      toast.success('Kullanici cikarildi.');
+      loadMembers();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Kullanici cikarilirken hata olustu.');
+    }
+  };
+
+  const handleTransferOwnership = async (userId: string, userName: string) => {
+    if (!confirm(`Sahipligi ${userName} adli kullaniciya devretmek istediginize emin misiniz? Bu islem geri alinamaz.`)) return;
+    try {
+      await api.post('/restaurants/current/transfer-ownership', { targetUserId: userId });
+      toast.success('Sahiplik devredildi.');
+      // Refresh auth to get updated membership
+      window.location.reload();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Sahiplik devredilirken hata olustu.');
     }
   };
 
@@ -122,7 +131,7 @@ export default function UsersPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Kullanicilar</h1>
         <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" /> Yeni Kullanici
+          <Plus className="h-4 w-4 mr-2" /> Kullanici Ekle
         </Button>
       </div>
 
@@ -138,25 +147,27 @@ export default function UsersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.length === 0 ? (
+            {members.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                   Henuz kullanici yok.
                 </TableCell>
               </TableRow>
             ) : (
-              users.map((u) => (
-                <TableRow key={u.id}>
-                  <TableCell className="font-medium">{u.name}</TableCell>
-                  <TableCell>{u.email}</TableCell>
+              members.map((m) => (
+                <TableRow key={m.id} className={!m.isActive ? 'opacity-50' : ''}>
+                  <TableCell className="font-medium">{m.name}</TableCell>
+                  <TableCell>{m.email}</TableCell>
                   <TableCell>
-                    {u.id === currentUser?.id ? (
-                      <Badge variant={ROLE_COLORS[u.role] as 'default' | 'secondary'}>{ROLE_LABELS[u.role]}</Badge>
+                    {m.role === 'OWNER' || m.userId === user?.id ? (
+                      <Badge variant={m.role === 'OWNER' ? 'default' : 'secondary'}>
+                        {ROLE_LABELS[m.role]}
+                      </Badge>
                     ) : (
                       <select
                         className="flex h-8 rounded-md border border-input bg-transparent px-2 py-1 text-sm"
-                        value={u.role}
-                        onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                        value={m.role}
+                        onChange={(e) => handleRoleChange(m.userId, e.target.value)}
                       >
                         {ROLES.map((r) => (
                           <option key={r} value={r}>{ROLE_LABELS[r]}</option>
@@ -165,16 +176,28 @@ export default function UsersPage() {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={u.isActive ? 'default' : 'secondary'}>
-                      {u.isActive ? 'Aktif' : 'Pasif'}
+                    <Badge variant={m.isActive ? 'default' : 'secondary'}>
+                      {m.isActive ? 'Aktif' : 'Pasif'}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {u.id !== currentUser?.id && (
-                      <Button variant="ghost" size="icon" onClick={() => handleDeactivate(u.id, u.name)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    )}
+                    <div className="flex items-center gap-1">
+                      {m.role !== 'OWNER' && m.userId !== user?.id && m.isActive && (
+                        <Button variant="ghost" size="icon" onClick={() => handleDeactivate(m.userId, m.name)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
+                      {isOwner && m.role !== 'OWNER' && m.userId !== user?.id && m.isActive && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs"
+                          onClick={() => handleTransferOwnership(m.userId, m.name)}
+                        >
+                          Sahiplik Devret
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -186,20 +209,15 @@ export default function UsersPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Yeni Kullanici Ekle</DialogTitle>
+            <DialogTitle>Kullanici Ekle</DialogTitle>
           </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Eklemek istediginiz kisinin sistemde kayitli e-posta adresini girin.
+          </p>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Ad Soyad</Label>
-              <Input value={newName} onChange={(e) => setNewName(e.target.value)} />
-            </div>
-            <div className="space-y-2">
               <Label>E-posta</Label>
-              <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Sifre</Label>
-              <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+              <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="kullanici@ornek.com" />
             </div>
             <div className="space-y-2">
               <Label>Rol</Label>
@@ -215,9 +233,9 @@ export default function UsersPage() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>Iptal</Button>
-              <Button onClick={handleCreate} disabled={creating}>
+              <Button onClick={handleAdd} disabled={creating}>
                 {creating && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                Olustur
+                Ekle
               </Button>
             </div>
           </div>

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { useWeeklyReport, useGenerateReport } from '@/hooks/use-reports';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAuth } from '@/hooks/use-auth';
 import { ReportTable } from './report-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,7 +27,7 @@ export function WeeklyReport() {
 
   const { data: report, isLoading, error } = useWeeklyReport(queryWeek);
   const generateReport = useGenerateReport();
-  const user = useAuthStore((s) => s.user);
+  const { user, activeMembership } = useAuth();
 
   const resetEdits = useCallback(() => { setRevenueEdits(new Map()); setExpenseEdits(new Map()); setTaxEdit(null); }, []);
   const handleFetchReport = () => { resetEdits(); setQueryWeek(selectedWeek); };
@@ -61,9 +61,9 @@ export function WeeklyReport() {
   }, [report, revenueEdits, expenseEdits, taxEdit]);
 
   const handleGenerate = () => {
-    if (!report || !computedValues || !user?.restaurant) return;
+    if (!report || !computedValues || !activeMembership) return;
     generateReport.mutate({
-      period: report.period, periodType: 'weekly', restaurantName: user.restaurant.name,
+      period: report.period, periodType: 'weekly', restaurantName: activeMembership.restaurantName,
       totalRevenue: computedValues.totalRevenue, totalRevenueEdited: computedValues.totalRevenueEdited,
       revenues: computedValues.revenues, expenses: computedValues.expenses,
       totalExpense: computedValues.totalExpense, totalExpenseEdited: computedValues.totalExpenseEdited,

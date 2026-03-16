@@ -224,7 +224,7 @@ export default function InventoryPage() {
 
   const { data: restaurantData } = useQuery<{ settings: Record<string, unknown> }>({
     queryKey: ['restaurant'],
-    queryFn: () => api.get('/restaurant').then((r) => r.data),
+    queryFn: () => api.get('/restaurants/current').then((r) => r.data),
   });
 
   const savedColumns = restaurantData?.settings?.inventoryColumns as string[] | undefined;
@@ -232,7 +232,7 @@ export default function InventoryPage() {
 
   const columnSettingsMutation = useMutation({
     mutationFn: (columns: string[]) =>
-      api.patch('/restaurant/settings', { settings: { inventoryColumns: columns } }),
+      api.patch('/restaurants/current/settings', { settings: { inventoryColumns: columns } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurant'] });
     },

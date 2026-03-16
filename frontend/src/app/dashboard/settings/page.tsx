@@ -32,7 +32,7 @@ export default function SettingsPage() {
   const [phone, setPhone] = useState('');
 
   useEffect(() => {
-    api.get('/restaurant').then(({ data }) => {
+    api.get('/restaurants/current').then(({ data }) => {
       setRestaurant(data);
       setName(data.name || '');
       setLogo(data.logo || '');
@@ -45,7 +45,7 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { data } = await api.patch('/restaurant', { name, logo: logo || undefined, address: address || undefined, phone: phone || undefined });
+      const { data } = await api.patch('/restaurants/current', { name, logo: logo || undefined, address: address || undefined, phone: phone || undefined });
       setRestaurant(data);
       toast.success('Restoran bilgileri guncellendi.');
     } catch {

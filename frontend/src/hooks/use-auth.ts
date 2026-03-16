@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 
 export function useAuth() {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading, setUser, setLoading, logout: clearAuth } = useAuthStore();
+  const { user, isAuthenticated, isLoading, activeRestaurantId, setUser, setLoading, switchRestaurant, logout: clearAuth } = useAuthStore();
 
   const login = async (email: string, password: string) => {
     const { data } = await api.post('/auth/login', { email, password });
@@ -21,7 +21,7 @@ export function useAuth() {
     email: string;
     password: string;
     name: string;
-    restaurantName: string;
+    restaurantName?: string;
   }) => {
     const { data } = await api.post('/auth/register', payload);
     return data;
@@ -52,5 +52,19 @@ export function useAuth() {
     }
   }, []);
 
-  return { user, isAuthenticated, isLoading, login, register, logout, checkAuth };
+  // Derive active membership for convenience
+  const activeMembership = user?.memberships.find((m) => m.restaurantId === activeRestaurantId) || null;
+
+  return {
+    user,
+    isAuthenticated,
+    isLoading,
+    activeRestaurantId,
+    activeMembership,
+    login,
+    register,
+    logout,
+    checkAuth,
+    switchRestaurant,
+  };
 }

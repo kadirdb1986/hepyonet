@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAuth } from '@/hooks/use-auth';
 import QRCode from 'qrcode';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -20,12 +20,12 @@ import { toast } from 'sonner';
 
 export default function QRMenuPage() {
   const t = useTranslations('menu');
-  const { user } = useAuthStore();
+  const { activeMembership } = useAuth();
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [qrSvg, setQrSvg] = useState<string>('');
   const [copied, setCopied] = useState(false);
 
-  const slug = user?.restaurant?.slug || '';
+  const slug = activeMembership?.restaurantSlug || '';
   const frontendUrl = typeof window !== 'undefined'
     ? (process.env.NEXT_PUBLIC_FRONTEND_URL || window.location.origin)
     : '';

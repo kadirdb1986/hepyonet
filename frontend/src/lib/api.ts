@@ -8,9 +8,16 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    const restaurantId = localStorage.getItem('activeRestaurantId');
+    if (restaurantId) {
+      config.headers['x-restaurant-id'] = restaurantId;
+    }
   }
   return config;
 });
@@ -35,6 +42,7 @@ api.interceptors.response.use(
         } catch {
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
+          localStorage.removeItem('activeRestaurantId');
           window.location.href = '/auth/login';
         }
       }

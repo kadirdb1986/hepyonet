@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { useMonthlyReport, useGenerateReport } from '@/hooks/use-reports';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAuth } from '@/hooks/use-auth';
 import { ReportTable } from './report-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +22,7 @@ export function MonthlyReport() {
 
   const { data: report, isLoading, error } = useMonthlyReport(queryMonth);
   const generateReport = useGenerateReport();
-  const user = useAuthStore((s) => s.user);
+  const { user, activeMembership } = useAuth();
 
   const resetEdits = useCallback(() => { setRevenueEdits(new Map()); setExpenseEdits(new Map()); setTaxEdit(null); }, []);
   const handleFetchReport = () => { resetEdits(); setQueryMonth(selectedMonth); };
@@ -56,9 +56,9 @@ export function MonthlyReport() {
   }, [report, revenueEdits, expenseEdits, taxEdit]);
 
   const handleGenerate = () => {
-    if (!report || !computedValues || !user?.restaurant) return;
+    if (!report || !computedValues || !activeMembership) return;
     generateReport.mutate({
-      period: report.period, periodType: 'monthly', restaurantName: user.restaurant.name,
+      period: report.period, periodType: 'monthly', restaurantName: activeMembership.restaurantName,
       totalRevenue: computedValues.totalRevenue, totalRevenueEdited: computedValues.totalRevenueEdited,
       revenues: computedValues.revenues, expenses: computedValues.expenses,
       totalExpense: computedValues.totalExpense, totalExpenseEdited: computedValues.totalExpenseEdited,
