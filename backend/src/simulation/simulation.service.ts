@@ -52,23 +52,7 @@ export class SimulationService {
         },
       });
 
-      // 2. Get active personnel -> create PERSONNEL expenses
-      const personnel = await tx.personnel.findMany({
-        where: { restaurantId, isActive: true },
-      });
-
-      if (personnel.length > 0) {
-        await tx.simulationExpense.createMany({
-          data: personnel.map((p) => ({
-            simulationId: simulation.id,
-            name: `${p.name} ${p.surname}`,
-            amount: p.salary,
-            type: SimExpenseType.PERSONNEL,
-          })),
-        });
-      }
-
-      // 3. Get fixed expenses -> create FIXED expenses
+      // 2. Get fixed expenses -> create FIXED expenses
       const fixedExpenses = await tx.simFixedExpense.findMany({
         where: { restaurantId },
         orderBy: { sortOrder: 'asc' },

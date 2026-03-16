@@ -144,11 +144,9 @@ export default function SimulationDetailPage() {
   const netProfit = profitBeforeTax - incomeTax;
 
   // ─── Expense groups ───
-  const personnelExpenses = expenses.filter((e) => e.type === 'PERSONNEL');
   const fixedExpenses = expenses.filter((e) => e.type === 'FIXED');
   const foodCostExpenses = expenses.filter((e) => e.type === 'FOOD_COST');
 
-  const personnelTotal = personnelExpenses.reduce((sum, e) => sum + e.amount, 0);
   const fixedTotal = fixedExpenses.reduce((sum, e) => sum + e.amount, 0);
   const foodCostTotal = foodCostExpenses.reduce((sum, e) => sum + e.amount, 0);
 
@@ -362,39 +360,6 @@ export default function SimulationDetailPage() {
             <CardTitle>Giderler</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Personel Giderleri */}
-            <div>
-              <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
-                Personel Giderleri
-              </h3>
-              {personnelExpenses.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-2">Personel gideri bulunmuyor</p>
-              ) : (
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Ad</TableHead>
-                        <TableHead className="text-right">Tutar</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {personnelExpenses.map((exp) => (
-                        <TableRow key={exp.id}>
-                          <TableCell>{exp.name}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(exp.amount)}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-              <div className="mt-2 flex items-center justify-between px-2 py-1.5 text-sm">
-                <span className="text-muted-foreground">Alt Toplam</span>
-                <span className="font-medium">{formatCurrency(personnelTotal)}</span>
-              </div>
-            </div>
-
             {/* Sabit Giderler */}
             <div>
               <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
