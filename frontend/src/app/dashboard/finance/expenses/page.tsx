@@ -110,14 +110,17 @@ export default function ExpensesPage() {
   });
 
   // ─── Tarih aralığı hesapla ───
+  const toLocalDate = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
   const dateRange = (() => {
     const [y, m] = selectedMonth.split('-').map(Number);
     const now = new Date();
     const isCurrentMonth = now.getFullYear() === y && now.getMonth() + 1 === m;
     const startDate = `${selectedMonth}-01`;
     const endDate = isCurrentMonth
-      ? now.toISOString().split('T')[0]
-      : new Date(y, m, 0).toISOString().split('T')[0]; // last day of month
+      ? toLocalDate(now)
+      : toLocalDate(new Date(y, m, 0)); // last day of month
     return { startDate, endDate };
   })();
 
