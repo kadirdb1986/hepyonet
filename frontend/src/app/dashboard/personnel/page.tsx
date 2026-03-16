@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Eye, UserX } from 'lucide-react';
+import { Plus, Eye, UserX, UserCheck } from 'lucide-react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -58,6 +58,15 @@ export default function PersonnelListPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['personnel'] });
       setDeactivateId(null);
+    },
+  });
+
+  const activateMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await api.patch(`/personnel/${id}`, { isActive: true });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['personnel'] });
     },
   });
 
@@ -166,13 +175,21 @@ export default function PersonnelListPage() {
                               <Eye className="h-4 w-4" />
                             </Button>
                           </Link>
-                          {p.isActive && (
+                          {p.isActive ? (
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => setDeactivateId(p.id)}
                             >
                               <UserX className="h-4 w-4 text-red-500" />
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => activateMutation.mutate(p.id)}
+                            >
+                              <UserCheck className="h-4 w-4 text-green-500" />
                             </Button>
                           )}
                         </div>
