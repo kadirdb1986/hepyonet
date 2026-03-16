@@ -11,6 +11,17 @@ export class PersonnelService {
   constructor(private prisma: PrismaService) {}
 
   async create(restaurantId: string, dto: CreatePersonnelDto) {
+    let position = dto.position;
+
+    if (dto.positionId) {
+      const positionConfig = await this.prisma.positionConfig.findFirst({
+        where: { id: dto.positionId, restaurantId },
+      });
+      if (positionConfig) {
+        position = positionConfig.name;
+      }
+    }
+
     return this.prisma.personnel.create({
       data: {
         restaurantId,
@@ -18,7 +29,8 @@ export class PersonnelService {
         surname: dto.surname,
         phone: dto.phone,
         tcNo: dto.tcNo,
-        position: dto.position,
+        position,
+        positionId: dto.positionId,
         startDate: new Date(dto.startDate),
         salary: new Prisma.Decimal(dto.salary),
       },
@@ -29,17 +41,7 @@ export class PersonnelService {
     return this.prisma.personnel.findMany({
       where: { restaurantId },
       orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        surname: true,
-        phone: true,
-        position: true,
-        startDate: true,
-        salary: true,
-        isActive: true,
-        createdAt: true,
-      },
+      include: { positionConfig: true },
     });
   }
 
@@ -47,6 +49,7 @@ export class PersonnelService {
     const personnel = await this.prisma.personnel.findFirst({
       where: { id, restaurantId },
       include: {
+        positionConfig: true,
         leaveRecords: {
           orderBy: { createdAt: 'desc' },
         },
@@ -75,6 +78,14 @@ export class PersonnelService {
     }
     if (dto.salary !== undefined) {
       data.salary = new Prisma.Decimal(dto.salary);
+    }
+    if (dto.positionId) {
+      const positionConfig = await this.prisma.positionConfig.findFirst({
+        where: { id: dto.positionId, restaurantId },
+      });
+      if (positionConfig) {
+        data.position = positionConfig.name;
+      }
     }
 
     return this.prisma.personnel.update({

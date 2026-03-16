@@ -22,6 +22,10 @@ export class CreatePersonnelDto {
   @IsOptional()
   position?: string;
 
+  @IsString()
+  @IsOptional()
+  positionId?: string;
+
   @IsDateString()
   startDate: string;
 

@@ -45,6 +45,11 @@ interface LeaveRecord {
   createdAt: string;
 }
 
+interface PositionConfig {
+  id: string;
+  name: string;
+}
+
 interface PersonnelDetail {
   id: string;
   name: string;
@@ -52,6 +57,7 @@ interface PersonnelDetail {
   phone: string | null;
   tcNo: string | null;
   position: string | null;
+  positionConfig?: PositionConfig | null;
   startDate: string;
   salary: string;
   isActive: boolean;
@@ -110,6 +116,7 @@ export default function PersonnelDetailPage() {
     phone: '',
     tcNo: '',
     position: '',
+    positionId: '',
     startDate: '',
     salary: '',
   });
@@ -135,6 +142,11 @@ export default function PersonnelDetailPage() {
       const { data } = await api.get(`/personnel/${id}`);
       return data;
     },
+  });
+
+  const { data: positions = [] } = useQuery<PositionConfig[]>({
+    queryKey: ['position-configs'],
+    queryFn: () => api.get('/position-configs').then((r) => r.data),
   });
 
   const { data: workDays } = useQuery<WorkDaysData>({
@@ -204,12 +216,18 @@ export default function PersonnelDetailPage() {
 
   const startEditing = () => {
     if (!personnel) return;
+    let initialPositionId = personnel.positionConfig?.id || '';
+    if (!initialPositionId && personnel.position) {
+      const match = positions.find((p) => p.name === personnel.position);
+      if (match) initialPositionId = match.id;
+    }
     setEditForm({
       name: personnel.name,
       surname: personnel.surname,
       phone: personnel.phone || '',
       tcNo: personnel.tcNo || '',
       position: personnel.position || '',
+      positionId: initialPositionId,
       startDate: new Date(personnel.startDate).toISOString().split('T')[0],
       salary: String(personnel.salary),
     });
@@ -228,8 +246,14 @@ export default function PersonnelDetailPage() {
       payload.phone = editForm.phone || undefined;
     if (editForm.tcNo !== (personnel?.tcNo || ''))
       payload.tcNo = editForm.tcNo || undefined;
-    if (editForm.position !== (personnel?.position || ''))
+    if (positions.length > 0) {
+      const currentPositionId = personnel?.positionConfig?.id || '';
+      if (editForm.positionId !== currentPositionId) {
+        payload.positionId = editForm.positionId || null;
+      }
+    } else if (editForm.position !== (personnel?.position || '')) {
       payload.position = editForm.position || undefined;
+    }
     if (
       editForm.startDate !==
       new Date(personnel?.startDate || '').toISOString().split('T')[0]
@@ -371,13 +395,31 @@ export default function PersonnelDetailPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="edit-position">Pozisyon</Label>
-                    <Input
-                      id="edit-position"
-                      value={editForm.position}
-                      onChange={(e) =>
-                        setEditForm({ ...editForm, position: e.target.value })
-                      }
-                    />
+                    {positions.length > 0 ? (
+                      <select
+                        id="edit-position"
+                        value={editForm.positionId}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, positionId: e.target.value })
+                        }
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                      >
+                        <option value="">Pozisyon Secin</option>
+                        {positions.map((pos) => (
+                          <option key={pos.id} value={pos.id}>
+                            {pos.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <Input
+                        id="edit-position"
+                        value={editForm.position}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, position: e.target.value })
+                        }
+                      />
+                    )}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -441,7 +483,7 @@ export default function PersonnelDetailPage() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Pozisyon</p>
-                    <p className="font-medium">{personnel.position || '\u2014'}</p>
+                    <p className="font-medium">{personnel.positionConfig?.name || personnel.position || '\u2014'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Baslangic Tarihi</p>

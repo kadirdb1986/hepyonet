@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Eye, UserX, UserCheck, Trash2 } from 'lucide-react';
+import { Plus, Eye, UserX, UserCheck, Trash2, Settings } from 'lucide-react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +32,7 @@ interface Personnel {
   surname: string;
   phone: string | null;
   position: string | null;
+  positionConfig?: { id: string; name: string } | null;
   startDate: string;
   salary: string;
   isActive: boolean;
@@ -129,12 +130,20 @@ export default function PersonnelListPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Personel Yonetimi</h1>
-        <Link href="/dashboard/personnel/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Yeni Personel Ekle
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/dashboard/personnel/positions">
+            <Button variant="outline">
+              <Settings className="h-4 w-4 mr-2" />
+              Pozisyonlar
+            </Button>
+          </Link>
+          <Link href="/dashboard/personnel/new">
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Yeni Personel Ekle
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Card>
@@ -174,7 +183,7 @@ export default function PersonnelListPage() {
                       <TableCell className="font-medium">
                         {p.name} {p.surname}
                       </TableCell>
-                      <TableCell>{p.position || '\u2014'}</TableCell>
+                      <TableCell>{p.positionConfig?.name || p.position || '\u2014'}</TableCell>
                       <TableCell>{p.phone ? formatPhone(p.phone) : '\u2014'}</TableCell>
                       <TableCell>{formatDate(p.startDate)}</TableCell>
                       <TableCell>{formatCurrency(p.salary)}</TableCell>

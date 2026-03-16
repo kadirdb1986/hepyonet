@@ -47,6 +47,7 @@ model Restaurant {
   menuItems      MenuItem[]
   stockMovements StockMovement[]
   suppliers      Supplier[]
+  positions      PositionConfig[]
 
   @@map("restaurants")
 }
@@ -84,6 +85,20 @@ model RestaurantMember {
   @@map("restaurant_members")
 }
 
+model PositionConfig {
+  id           String   @id @default(uuid())
+  restaurantId String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant Restaurant  @relation(fields: [restaurantId], references: [id])
+  personnel  Personnel[]
+
+  @@unique([restaurantId, name])
+  @@map("position_configs")
+}
+
 model Personnel {
   id           String   @id @default(uuid())
   restaurantId String
@@ -92,6 +107,7 @@ model Personnel {
   phone        String?
   tcNo         String?
   position     String?
+  positionId   String?
   userId       String?
   startDate    DateTime
   salary       Decimal  @db.Decimal(10, 2)
@@ -99,9 +115,10 @@ model Personnel {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
-  user         User?         @relation(fields: [userId], references: [id])
-  leaveRecords LeaveRecord[]
+  restaurant     Restaurant      @relation(fields: [restaurantId], references: [id])
+  positionConfig PositionConfig? @relation(fields: [positionId], references: [id])
+  user           User?           @relation(fields: [userId], references: [id])
+  leaveRecords   LeaveRecord[]
 
   @@map("personnel")
 }

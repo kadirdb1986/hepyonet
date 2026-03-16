@@ -22,6 +22,10 @@ export class UpdatePersonnelDto {
   @IsOptional()
   position?: string;
 
+  @IsString()
+  @IsOptional()
+  positionId?: string;
+
   @IsDateString()
   @IsOptional()
   startDate?: string;

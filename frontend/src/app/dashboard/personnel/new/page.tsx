@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api';
@@ -11,12 +11,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
+interface PositionConfig {
+  id: string;
+  name: string;
+}
+
 interface CreatePersonnelForm {
   name: string;
   surname: string;
   phone: string;
   tcNo: string;
   position: string;
+  positionId: string;
   startDate: string;
   salary: string;
 }
@@ -24,27 +30,39 @@ interface CreatePersonnelForm {
 export default function NewPersonnelPage() {
   const router = useRouter();
   const [error, setError] = useState('');
+
+  const { data: positions = [] } = useQuery<PositionConfig[]>({
+    queryKey: ['position-configs'],
+    queryFn: () => api.get('/position-configs').then((r) => r.data),
+  });
+
   const [form, setForm] = useState<CreatePersonnelForm>({
     name: '',
     surname: '',
     phone: '',
     tcNo: '',
     position: '',
+    positionId: '',
     startDate: new Date().toISOString().split('T')[0],
     salary: '',
   });
 
   const createMutation = useMutation({
     mutationFn: async (payload: CreatePersonnelForm) => {
-      const { data } = await api.post('/personnel', {
+      const body: Record<string, any> = {
         name: payload.name,
         surname: payload.surname,
         phone: payload.phone || undefined,
         tcNo: payload.tcNo || undefined,
-        position: payload.position || undefined,
         startDate: payload.startDate,
         salary: Number(payload.salary),
-      });
+      };
+      if (payload.positionId) {
+        body.positionId = payload.positionId;
+      } else if (payload.position) {
+        body.position = payload.position;
+      }
+      const { data } = await api.post('/personnel', body);
       return data;
     },
     onSuccess: () => {
@@ -148,13 +166,31 @@ export default function NewPersonnelPage() {
 
             <div className="space-y-2">
               <Label htmlFor="position">Pozisyon</Label>
-              <Input
-                id="position"
-                name="position"
-                value={form.position}
-                onChange={handleChange}
-                placeholder="Ornegin: Garson, Asci, Kasiyer"
-              />
+              {positions.length > 0 ? (
+                <select
+                  id="position"
+                  value={form.positionId}
+                  onChange={(e) =>
+                    setForm({ ...form, positionId: e.target.value })
+                  }
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                >
+                  <option value="">Pozisyon Secin</option>
+                  {positions.map((pos) => (
+                    <option key={pos.id} value={pos.id}>
+                      {pos.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <Input
+                  id="position"
+                  name="position"
+                  value={form.position}
+                  onChange={handleChange}
+                  placeholder="Ornegin: Garson, Asci, Kasiyer"
+                />
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
