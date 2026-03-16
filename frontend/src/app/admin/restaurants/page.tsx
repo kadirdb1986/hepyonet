@@ -20,7 +20,7 @@ interface Restaurant {
   slug: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   createdAt: string;
-  users: { id: string; email: string; name: string }[];
+  members: { user: { id: string; email: string; name: string } }[];
 }
 
 const statusMap = {
@@ -80,7 +80,7 @@ export default function AdminRestaurantsPage() {
               <TableRow key={r.id} className="border-gray-700">
                 <TableCell className="text-white font-medium cursor-pointer hover:underline" onClick={() => router.push(`/admin/restaurants/${r.id}`)}>{r.name}</TableCell>
                 <TableCell className="text-gray-300">
-                  {r.users[0]?.name} ({r.users[0]?.email})
+                  {r.members[0]?.user?.name} ({r.members[0]?.user?.email})
                 </TableCell>
                 <TableCell>
                   <Badge variant={statusMap[r.status].variant}>

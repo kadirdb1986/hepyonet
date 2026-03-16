@@ -12,13 +12,12 @@ export class AdminService {
       where,
       include: {
         members: {
-          where: { role: 'OWNER' },
           include: {
             user: {
               select: { id: true, email: true, name: true },
             },
           },
-          take: 1,
+          orderBy: { createdAt: 'asc' },
         },
       },
       orderBy: { createdAt: 'desc' },

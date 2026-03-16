@@ -17,7 +17,7 @@ interface Restaurant {
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   createdAt: string;
   settings: Record<string, unknown> | null;
-  users: { id: string; email: string; name: string; role: string; isActive: boolean }[];
+  members: { role: string; isActive: boolean; user: { id: string; email: string; name: string } }[];
 }
 
 const statusMap = {
@@ -27,11 +27,13 @@ const statusMap = {
 };
 
 const roleLabels: Record<string, string> = {
+  OWNER: 'Sahip',
   ADMIN: 'Yonetici',
   ACCOUNTANT: 'Muhasebe',
   HR: 'Insan Kaynaklari',
   STOCK_MANAGER: 'Depocu',
   MENU_MANAGER: 'Menu Yoneticisi',
+  WAITER: 'Garson',
 };
 
 export default function AdminRestaurantDetailPage() {
@@ -124,18 +126,18 @@ export default function AdminRestaurantDetailPage() {
         </div>
 
         <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">Kullanicilar ({restaurant.users.length})</h2>
+          <h2 className="text-lg font-semibold text-white mb-4">Kullanicilar ({restaurant.members.length})</h2>
           <div className="space-y-3">
-            {restaurant.users.map((u) => (
-              <div key={u.id} className="flex items-center justify-between py-2 border-b border-gray-700 last:border-0">
+            {restaurant.members.map((m) => (
+              <div key={m.user.id} className="flex items-center justify-between py-2 border-b border-gray-700 last:border-0">
                 <div>
-                  <p className="text-white font-medium">{u.name}</p>
-                  <p className="text-sm text-gray-400">{u.email}</p>
+                  <p className="text-white font-medium">{m.user.name}</p>
+                  <p className="text-sm text-gray-400">{m.user.email}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary">{roleLabels[u.role] || u.role}</Badge>
-                  <Badge variant={u.isActive ? 'default' : 'destructive'}>
-                    {u.isActive ? 'Aktif' : 'Pasif'}
+                  <Badge variant="secondary">{roleLabels[m.role] || m.role}</Badge>
+                  <Badge variant={m.isActive ? 'default' : 'destructive'}>
+                    {m.isActive ? 'Aktif' : 'Pasif'}
                   </Badge>
                 </div>
               </div>
