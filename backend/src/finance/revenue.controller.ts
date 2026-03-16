@@ -17,11 +17,11 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { RestaurantGuard } from '../common/guards/restaurant.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Role } from '../common/enums/role.enum';
+import { MemberRole } from '@prisma/client';
 
 @Controller('revenues')
 @UseGuards(JwtAuthGuard, RestaurantGuard, RolesGuard)
-@Roles(Role.ADMIN, Role.ACCOUNTANT)
+@Roles(MemberRole.ADMIN, MemberRole.ACCOUNTANT)
 export class RevenueController {
   constructor(private readonly revenueService: RevenueService) {}
 

@@ -6,14 +6,14 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { RestaurantGuard } from '../common/guards/restaurant.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { Role } from '@prisma/client';
+import { MemberRole } from '@prisma/client';
 import { ReportService } from './report.service';
 import { MonthlyReportQueryDto, WeeklyReportQueryDto, CompareQueryDto } from './dto/report-query.dto';
 import { GenerateReportDto } from './dto/generate-report.dto';
 
 @Controller('reports')
 @UseGuards(JwtAuthGuard, RolesGuard, RestaurantGuard)
-@Roles(Role.ADMIN, Role.ACCOUNTANT)
+@Roles(MemberRole.ADMIN, MemberRole.ACCOUNTANT)
 export class ReportController {
   constructor(private readonly reportService: ReportService) {}
 

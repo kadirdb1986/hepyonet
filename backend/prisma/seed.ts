@@ -49,7 +49,6 @@ async function main() {
       email: adminEmail,
       name: 'Super Admin',
       isSuperAdmin: true,
-      restaurantId: null,
     },
   });
 

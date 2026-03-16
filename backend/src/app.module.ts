@@ -5,7 +5,6 @@ import { PrismaModule } from './prisma/prisma.module';
 import { SupabaseModule } from './supabase/supabase.module';
 import { AuthModule } from './auth/auth.module';
 import { RestaurantModule } from './restaurant/restaurant.module';
-import { UserModule } from './user/user.module';
 import { AdminModule } from './admin/admin.module';
 import { PersonnelModule } from './personnel/personnel.module';
 import { FinanceModule } from './finance/finance.module';
@@ -23,7 +22,6 @@ import { ReportModule } from './report/report.module';
     SupabaseModule,
     AuthModule,
     RestaurantModule,
-    UserModule,
     AdminModule,
     PersonnelModule,
     FinanceModule,

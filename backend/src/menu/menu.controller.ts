@@ -7,7 +7,7 @@ import { RestaurantGuard } from '../common/guards/restaurant.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Role } from '@prisma/client';
+import { MemberRole } from '@prisma/client';
 
 @Controller('menu')
 export class MenuController {
@@ -15,14 +15,14 @@ export class MenuController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RestaurantGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   getMenuItems(@CurrentUser('restaurantId') restaurantId: string) {
     return this.menuService.getMenuItems(restaurantId);
   }
 
   @Patch('order')
   @UseGuards(JwtAuthGuard, RestaurantGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   updateOrder(
     @CurrentUser('restaurantId') restaurantId: string,
     @Body() dto: UpdateMenuOrderDto,
@@ -32,7 +32,7 @@ export class MenuController {
 
   @Patch(':productId/availability')
   @UseGuards(JwtAuthGuard, RestaurantGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   toggleAvailability(
     @CurrentUser('restaurantId') restaurantId: string,
     @Param('productId') productId: string,

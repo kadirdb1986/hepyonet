@@ -30,34 +30,46 @@ export class AuthService {
       throw new BadRequestException(authError.message);
     }
 
-    const slug = this.generateSlug(dto.restaurantName);
-
     const result = await this.prisma.$transaction(async (tx) => {
-      const restaurant = await tx.restaurant.create({
-        data: {
-          name: dto.restaurantName,
-          slug,
-          status: 'PENDING',
-        },
-      });
-
       const user = await tx.user.create({
         data: {
           supabaseId: authData.user.id,
           email: dto.email,
           name: dto.name,
-          restaurantId: restaurant.id,
-          role: 'ADMIN',
         },
       });
 
-      return { restaurant, user };
+      let restaurantId: string | null = null;
+      if (dto.restaurantName) {
+        const slug = this.generateSlug(dto.restaurantName);
+        const restaurant = await tx.restaurant.create({
+          data: {
+            name: dto.restaurantName,
+            slug,
+            status: 'PENDING',
+          },
+        });
+
+        await tx.restaurantMember.create({
+          data: {
+            userId: user.id,
+            restaurantId: restaurant.id,
+            role: 'OWNER',
+          },
+        });
+
+        restaurantId = restaurant.id;
+      }
+
+      return { user, restaurantId };
     });
 
     return {
-      message: 'Registration successful. Your restaurant is pending approval.',
-      restaurantId: result.restaurant.id,
+      message: dto.restaurantName
+        ? 'Registration successful. Your restaurant is pending approval.'
+        : 'Registration successful.',
       userId: result.user.id,
+      restaurantId: result.restaurantId,
     };
   }
 
@@ -69,13 +81,17 @@ export class AuthService {
     });
 
     if (error) {
-      console.error('Supabase login error:', error.message);
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const user = await this.prisma.user.findUnique({
       where: { supabaseId: data.user.id },
-      include: { restaurant: true },
+      include: {
+        memberships: {
+          where: { isActive: true },
+          include: { restaurant: true },
+        },
+      },
     });
 
     if (!user || !user.isActive) {
@@ -119,7 +135,12 @@ export class AuthService {
   async getMe(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      include: { restaurant: true },
+      include: {
+        memberships: {
+          where: { isActive: true },
+          include: { restaurant: true },
+        },
+      },
     });
 
     if (!user) {
@@ -134,16 +155,15 @@ export class AuthService {
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role,
+      avatarUrl: user.avatarUrl,
       isSuperAdmin: user.isSuperAdmin,
-      restaurant: user.restaurant
-        ? {
-            id: user.restaurant.id,
-            name: user.restaurant.name,
-            slug: user.restaurant.slug,
-            status: user.restaurant.status,
-          }
-        : null,
+      memberships: (user.memberships || []).map((m: any) => ({
+        restaurantId: m.restaurant.id,
+        restaurantName: m.restaurant.name,
+        restaurantSlug: m.restaurant.slug,
+        restaurantStatus: m.restaurant.status,
+        role: m.role,
+      })),
     };
   }
 

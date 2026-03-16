@@ -16,7 +16,7 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { RestaurantGuard } from '../common/guards/restaurant.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Role } from '@prisma/client';
+import { MemberRole } from '@prisma/client';
 
 @Controller('raw-materials')
 @UseGuards(JwtAuthGuard, RolesGuard, RestaurantGuard)
@@ -24,19 +24,19 @@ export class RawMaterialController {
   constructor(private readonly rawMaterialService: RawMaterialService) {}
 
   @Get()
-  @Roles(Role.ADMIN, Role.STOCK_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.STOCK_MANAGER)
   findAll(@CurrentUser('restaurantId') restaurantId: string) {
     return this.rawMaterialService.findAll(restaurantId);
   }
 
   @Get('low-stock')
-  @Roles(Role.ADMIN, Role.STOCK_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.STOCK_MANAGER)
   findLowStock(@CurrentUser('restaurantId') restaurantId: string) {
     return this.rawMaterialService.findLowStockRaw(restaurantId);
   }
 
   @Get(':id')
-  @Roles(Role.ADMIN, Role.STOCK_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.STOCK_MANAGER)
   findOne(
     @Param('id') id: string,
     @CurrentUser('restaurantId') restaurantId: string,
@@ -45,7 +45,7 @@ export class RawMaterialController {
   }
 
   @Post()
-  @Roles(Role.ADMIN, Role.STOCK_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.STOCK_MANAGER)
   create(
     @CurrentUser('restaurantId') restaurantId: string,
     @Body() dto: CreateRawMaterialDto,
@@ -54,7 +54,7 @@ export class RawMaterialController {
   }
 
   @Patch(':id')
-  @Roles(Role.ADMIN, Role.STOCK_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.STOCK_MANAGER)
   update(
     @Param('id') id: string,
     @CurrentUser('restaurantId') restaurantId: string,
@@ -64,7 +64,7 @@ export class RawMaterialController {
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN, Role.STOCK_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.STOCK_MANAGER)
   remove(
     @Param('id') id: string,
     @CurrentUser('restaurantId') restaurantId: string,

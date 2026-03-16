@@ -19,11 +19,11 @@ import { RestaurantGuard } from '../common/guards/restaurant.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Role } from '@prisma/client';
+import { MemberRole } from '@prisma/client';
 
 @Controller('personnel')
 @UseGuards(JwtAuthGuard, RestaurantGuard, RolesGuard)
-@Roles(Role.ADMIN, Role.HR)
+@Roles(MemberRole.ADMIN, MemberRole.HR)
 export class PersonnelController {
   constructor(private personnelService: PersonnelService) {}
 

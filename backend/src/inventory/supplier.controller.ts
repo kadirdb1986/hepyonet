@@ -14,11 +14,11 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { RestaurantGuard } from '../common/guards/restaurant.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Role } from '@prisma/client';
+import { MemberRole } from '@prisma/client';
 
 @Controller('suppliers')
 @UseGuards(JwtAuthGuard, RestaurantGuard, RolesGuard)
-@Roles(Role.ADMIN, Role.STOCK_MANAGER)
+@Roles(MemberRole.ADMIN, MemberRole.STOCK_MANAGER)
 export class SupplierController {
   constructor(private readonly service: SupplierService) {}
 

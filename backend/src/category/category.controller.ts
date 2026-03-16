@@ -14,7 +14,7 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { RestaurantGuard } from '../common/guards/restaurant.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Role } from '@prisma/client';
+import { MemberRole } from '@prisma/client';
 import { IsString, IsNotEmpty } from 'class-validator';
 
 class CategoryDto {
@@ -29,13 +29,13 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Get()
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   findAll(@CurrentUser('restaurantId') restaurantId: string) {
     return this.categoryService.findAll(restaurantId);
   }
 
   @Post()
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   create(
     @CurrentUser('restaurantId') restaurantId: string,
     @Body() dto: CategoryDto,
@@ -44,7 +44,7 @@ export class CategoryController {
   }
 
   @Patch('order')
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   updateOrder(
     @CurrentUser('restaurantId') restaurantId: string,
     @Body() dto: { items: { id: string; displayOrder: number }[] },
@@ -53,7 +53,7 @@ export class CategoryController {
   }
 
   @Patch(':id')
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   update(
     @Param('id') id: string,
     @CurrentUser('restaurantId') restaurantId: string,
@@ -63,7 +63,7 @@ export class CategoryController {
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   remove(
     @Param('id') id: string,
     @CurrentUser('restaurantId') restaurantId: string,

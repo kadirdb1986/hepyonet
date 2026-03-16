@@ -17,7 +17,7 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { RestaurantGuard } from '../common/guards/restaurant.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Role } from '@prisma/client';
+import { MemberRole } from '@prisma/client';
 
 @Controller('products')
 @UseGuards(JwtAuthGuard, RolesGuard, RestaurantGuard)
@@ -25,13 +25,13 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Get()
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   findAll(@CurrentUser('restaurantId') restaurantId: string) {
     return this.productService.findAll(restaurantId);
   }
 
   @Get(':id')
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   findOne(
     @Param('id') id: string,
     @CurrentUser('restaurantId') restaurantId: string,
@@ -40,7 +40,7 @@ export class ProductController {
   }
 
   @Get(':id/cost')
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   getCostBreakdown(
     @Param('id') id: string,
     @CurrentUser('restaurantId') restaurantId: string,
@@ -49,7 +49,7 @@ export class ProductController {
   }
 
   @Post()
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   create(
     @CurrentUser('restaurantId') restaurantId: string,
     @Body() dto: CreateProductDto,
@@ -58,7 +58,7 @@ export class ProductController {
   }
 
   @Patch(':id')
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   update(
     @Param('id') id: string,
     @CurrentUser('restaurantId') restaurantId: string,
@@ -68,7 +68,7 @@ export class ProductController {
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   remove(
     @Param('id') id: string,
     @CurrentUser('restaurantId') restaurantId: string,
@@ -79,7 +79,7 @@ export class ProductController {
   // --- Ingredient endpoints ---
 
   @Post(':id/ingredients')
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   addIngredient(
     @Param('id') productId: string,
     @CurrentUser('restaurantId') restaurantId: string,
@@ -89,7 +89,7 @@ export class ProductController {
   }
 
   @Patch(':id/ingredients/:ingredientId')
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   updateIngredient(
     @Param('id') productId: string,
     @Param('ingredientId') ingredientId: string,
@@ -105,7 +105,7 @@ export class ProductController {
   }
 
   @Delete(':id/ingredients/:ingredientId')
-  @Roles(Role.ADMIN, Role.MENU_MANAGER)
+  @Roles(MemberRole.ADMIN, MemberRole.MENU_MANAGER)
   removeIngredient(
     @Param('id') productId: string,
     @Param('ingredientId') ingredientId: string,

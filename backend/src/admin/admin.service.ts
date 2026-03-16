@@ -11,9 +11,13 @@ export class AdminService {
     return this.prisma.restaurant.findMany({
       where,
       include: {
-        users: {
-          where: { role: 'ADMIN' },
-          select: { id: true, email: true, name: true },
+        members: {
+          where: { role: 'OWNER' },
+          include: {
+            user: {
+              select: { id: true, email: true, name: true },
+            },
+          },
           take: 1,
         },
       },

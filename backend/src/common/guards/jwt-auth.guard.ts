@@ -24,13 +24,24 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException('Invalid token');
     }
 
-    const user = await this.prisma.user.findUnique({
+    let user = await this.prisma.user.findUnique({
       where: { supabaseId: supabaseUser.id },
-      include: { restaurant: true },
     });
 
-    if (!user || !user.isActive) {
-      throw new UnauthorizedException('User not found or inactive');
+    // Auto-provisioning: create user record for Google OAuth first-time login
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          supabaseId: supabaseUser.id,
+          email: supabaseUser.email!,
+          name: supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || supabaseUser.email!.split('@')[0],
+          avatarUrl: supabaseUser.user_metadata?.avatar_url || null,
+        },
+      });
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('User is inactive');
     }
 
     request.user = user;
