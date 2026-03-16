@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2, Settings } from 'lucide-react';
+import { Plus, Pencil, Trash2, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ExpenseCategory {
@@ -63,6 +63,10 @@ export default function ExpensesPage() {
   const [form, setForm] = useState<ExpenseForm>(emptyForm);
   const [error, setError] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('ALL');
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  });
   const [catName, setCatName] = useState('');
   const [editingCatId, setEditingCatId] = useState<string | null>(null);
   const [editingCatName, setEditingCatName] = useState('');
@@ -105,11 +109,38 @@ export default function ExpensesPage() {
     onError: () => toast.error('Kategori silinemedi'),
   });
 
+  // ─── Tarih aralığı hesapla ───
+  const dateRange = (() => {
+    const [y, m] = selectedMonth.split('-').map(Number);
+    const now = new Date();
+    const isCurrentMonth = now.getFullYear() === y && now.getMonth() + 1 === m;
+    const startDate = `${selectedMonth}-01`;
+    const endDate = isCurrentMonth
+      ? now.toISOString().split('T')[0]
+      : new Date(y, m, 0).toISOString().split('T')[0]; // last day of month
+    return { startDate, endDate };
+  })();
+
+  const prevMonth = () => {
+    const [y, m] = selectedMonth.split('-').map(Number);
+    const d = new Date(y, m - 2, 1);
+    setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  };
+
+  const nextMonth = () => {
+    const [y, m] = selectedMonth.split('-').map(Number);
+    const d = new Date(y, m, 1);
+    setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  };
+
   // ─── Giderler ───
   const { data: expenses = [], isLoading } = useQuery({
-    queryKey: ['expenses', filterCategory],
+    queryKey: ['expenses', filterCategory, selectedMonth],
     queryFn: async () => {
-      const params: any = {};
+      const params: any = {
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+      };
       if (filterCategory !== 'ALL') params.category = filterCategory;
       const { data } = await api.get('/expenses', { params });
       return data;
@@ -429,24 +460,45 @@ export default function ExpensesPage() {
       </Dialog>
 
       {/* ─── Filtre ─── */}
-      <div className="flex items-center gap-3">
-        <Label>Kategori Filtresi:</Label>
-        <select
-          className="flex h-9 w-48 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-        >
-          <option value="ALL">Tumu</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.name}>{cat.name}</option>
-          ))}
-        </select>
+      <div className="flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" onClick={prevMonth}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm font-medium w-24 text-center">{formatMonth(selectedMonth)}</span>
+          <Button variant="outline" size="icon" onClick={nextMonth}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="text-xs text-muted-foreground">
+          {new Date(dateRange.startDate).toLocaleDateString('tr-TR')} - {new Date(dateRange.endDate).toLocaleDateString('tr-TR')}
+        </div>
+        <div className="flex items-center gap-2">
+          <Label className="text-sm">Kategori:</Label>
+          <select
+            className="flex h-9 w-40 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+          >
+            <option value="ALL">Tumu</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.name}>{cat.name}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* ─── Tablo ─── */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Gider Listesi</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base">Gider Listesi</CardTitle>
+            {expenses.length > 0 && (
+              <span className="text-sm font-medium">
+                Toplam: {formatCurrency(expenses.reduce((sum: number, e: any) => sum + Number(e.amount), 0))}
+              </span>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
