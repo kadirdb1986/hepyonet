@@ -20,7 +20,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { MemberRole } from '@prisma/client';
 
 @Controller('products')
-@UseGuards(JwtAuthGuard, RolesGuard, RestaurantGuard)
+@UseGuards(JwtAuthGuard, RestaurantGuard, RolesGuard)
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 

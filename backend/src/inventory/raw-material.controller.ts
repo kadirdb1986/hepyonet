@@ -19,7 +19,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { MemberRole } from '@prisma/client';
 
 @Controller('raw-materials')
-@UseGuards(JwtAuthGuard, RolesGuard, RestaurantGuard)
+@UseGuards(JwtAuthGuard, RestaurantGuard, RolesGuard)
 export class RawMaterialController {
   constructor(private readonly rawMaterialService: RawMaterialService) {}
 

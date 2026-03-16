@@ -16,7 +16,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { MemberRole } from '@prisma/client';
 
 @Controller('stock-movements')
-@UseGuards(JwtAuthGuard, RolesGuard, RestaurantGuard)
+@UseGuards(JwtAuthGuard, RestaurantGuard, RolesGuard)
 export class StockMovementController {
   constructor(private readonly stockMovementService: StockMovementService) {}
 

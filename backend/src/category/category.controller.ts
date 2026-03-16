@@ -24,7 +24,7 @@ class CategoryDto {
 }
 
 @Controller('categories')
-@UseGuards(JwtAuthGuard, RolesGuard, RestaurantGuard)
+@UseGuards(JwtAuthGuard, RestaurantGuard, RolesGuard)
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 

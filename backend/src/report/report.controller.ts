@@ -12,7 +12,7 @@ import { MonthlyReportQueryDto, WeeklyReportQueryDto, CompareQueryDto } from './
 import { GenerateReportDto } from './dto/generate-report.dto';
 
 @Controller('reports')
-@UseGuards(JwtAuthGuard, RolesGuard, RestaurantGuard)
+@UseGuards(JwtAuthGuard, RestaurantGuard, RolesGuard)
 @Roles(MemberRole.ADMIN, MemberRole.ACCOUNTANT)
 export class ReportController {
   constructor(private readonly reportService: ReportService) {}
