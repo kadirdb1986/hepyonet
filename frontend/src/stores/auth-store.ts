@@ -56,6 +56,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   switchRestaurant: (restaurantId) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('activeRestaurantId', restaurantId);
+      window.location.reload();
     }
     set({ activeRestaurantId: restaurantId });
   },
