@@ -86,13 +86,26 @@ export default function SimulationDetailPage() {
     queryFn: () => api.get(`/simulations/${id}`).then((r) => r.data),
   });
 
-  // Initialize local state from fetched data
+  // Initialize local state from fetched data (convert Decimal strings to numbers)
   useEffect(() => {
     if (simulation && !initialized) {
-      setProducts(simulation.products.map((p) => ({ ...p })));
-      setExpenses(simulation.expenses.map((e) => ({ ...e })));
-      setKdvRate(simulation.kdvRate ?? 10);
-      setIncomeTaxRate(simulation.incomeTaxRate ?? 20);
+      setProducts(simulation.products.map((p: any) => ({
+        id: p.id,
+        productId: p.productId,
+        name: p.productName || p.name || '',
+        quantity: Number(p.quantity),
+        salePrice: Number(p.salePrice),
+        costPrice: Number(p.costPrice),
+      })));
+      setExpenses(simulation.expenses.map((e: any) => ({
+        id: e.id,
+        name: e.name,
+        amount: Number(e.amount),
+        type: e.type,
+        productId: e.productId,
+      })));
+      setKdvRate(Number(simulation.kdvRate) || 10);
+      setIncomeTaxRate(Number(simulation.incomeTaxRate) || 20);
       setInitialized(true);
     }
   }, [simulation, initialized]);
