@@ -102,6 +102,16 @@ export class RestaurantController {
     return this.restaurantService.deactivateMember(restaurantId, userId);
   }
 
+  @Delete('current/members/:userId/permanent')
+  @UseGuards(JwtAuthGuard, RestaurantGuard, RolesGuard)
+  @Roles(MemberRole.ADMIN)
+  removeMember(
+    @CurrentUser('restaurantId') restaurantId: string,
+    @Param('userId') userId: string,
+  ) {
+    return this.restaurantService.removeMember(restaurantId, userId);
+  }
+
   @Post('current/transfer-ownership')
   @UseGuards(JwtAuthGuard, RestaurantGuard)
   transferOwnership(

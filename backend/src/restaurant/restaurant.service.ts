@@ -177,6 +177,28 @@ export class RestaurantService {
     });
   }
 
+  async removeMember(restaurantId: string, userId: string) {
+    const membership = await this.prisma.restaurantMember.findUnique({
+      where: { userId_restaurantId: { userId, restaurantId } },
+    });
+
+    if (!membership) {
+      throw new NotFoundException('Member not found');
+    }
+
+    if (membership.role === 'OWNER') {
+      throw new ForbiddenException('Cannot remove OWNER. Transfer ownership first.');
+    }
+
+    if (membership.isActive) {
+      throw new BadRequestException('Aktif kullanici silinemez. Once pasife alin.');
+    }
+
+    return this.prisma.restaurantMember.delete({
+      where: { id: membership.id },
+    });
+  }
+
   async transferOwnership(restaurantId: string, currentUserId: string, dto: TransferOwnershipDto) {
     const currentMembership = await this.prisma.restaurantMember.findUnique({
       where: { userId_restaurantId: { userId: currentUserId, restaurantId } },

@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Trash2, UserCheck, UserX } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 import { useAuth } from '@/hooks/use-auth';
@@ -106,6 +106,27 @@ export default function UsersPage() {
     }
   };
 
+  const handleReactivate = async (userId: string) => {
+    try {
+      await api.post('/restaurants/current/members', { email: members.find(m => m.userId === userId)?.email, role: 'ADMIN' });
+      toast.success('Kullanici tekrar aktif edildi.');
+      loadMembers();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Kullanici aktif edilirken hata olustu.');
+    }
+  };
+
+  const handleRemove = async (userId: string, userName: string) => {
+    if (!confirm(`${userName} adli kullaniciyi kalici olarak silmek istediginize emin misiniz? Bu islem geri alinamaz.`)) return;
+    try {
+      await api.delete(`/restaurants/current/members/${userId}/permanent`);
+      toast.success('Kullanici kalici olarak silindi.');
+      loadMembers();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Kullanici silinirken hata olustu.');
+    }
+  };
+
   const handleTransferOwnership = async (userId: string, userName: string) => {
     if (!confirm(`Sahipligi ${userName} adli kullaniciya devretmek istediginize emin misiniz? Bu islem geri alinamaz.`)) return;
     try {
@@ -183,9 +204,19 @@ export default function UsersPage() {
                   <TableCell>
                     <div className="flex items-center gap-1">
                       {m.role !== 'OWNER' && m.userId !== user?.id && m.isActive && (
-                        <Button variant="ghost" size="icon" onClick={() => handleDeactivate(m.userId, m.name)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                        <Button variant="ghost" size="icon" onClick={() => handleDeactivate(m.userId, m.name)} title="Pasife al">
+                          <UserX className="h-4 w-4 text-destructive" />
                         </Button>
+                      )}
+                      {m.role !== 'OWNER' && m.userId !== user?.id && !m.isActive && (
+                        <>
+                          <Button variant="ghost" size="icon" onClick={() => handleReactivate(m.userId)} title="Aktif et">
+                            <UserCheck className="h-4 w-4 text-green-500" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleRemove(m.userId, m.name)} title="Kalici sil">
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </>
                       )}
                       {isOwner && m.role !== 'OWNER' && m.userId !== user?.id && m.isActive && (
                         <Button
