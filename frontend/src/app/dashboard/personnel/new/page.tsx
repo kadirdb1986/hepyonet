@@ -21,7 +21,6 @@ interface CreatePersonnelForm {
   surname: string;
   phone: string;
   tcNo: string;
-  position: string;
   positionId: string;
   startDate: string;
   salary: string;
@@ -41,7 +40,6 @@ export default function NewPersonnelPage() {
     surname: '',
     phone: '',
     tcNo: '',
-    position: '',
     positionId: '',
     startDate: new Date().toISOString().split('T')[0],
     salary: '',
@@ -59,8 +57,6 @@ export default function NewPersonnelPage() {
       };
       if (payload.positionId) {
         body.positionId = payload.positionId;
-      } else if (payload.position) {
-        body.position = payload.position;
       }
       const { data } = await api.post('/personnel', body);
       return data;
@@ -166,31 +162,21 @@ export default function NewPersonnelPage() {
 
             <div className="space-y-2">
               <Label htmlFor="position">Pozisyon</Label>
-              {positions.length > 0 ? (
-                <select
-                  id="position"
-                  value={form.positionId}
-                  onChange={(e) =>
-                    setForm({ ...form, positionId: e.target.value })
-                  }
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-                >
-                  <option value="">Pozisyon Secin</option>
-                  {positions.map((pos) => (
-                    <option key={pos.id} value={pos.id}>
-                      {pos.name}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <Input
-                  id="position"
-                  name="position"
-                  value={form.position}
-                  onChange={handleChange}
-                  placeholder="Ornegin: Garson, Asci, Kasiyer"
-                />
-              )}
+              <select
+                id="position"
+                value={form.positionId}
+                onChange={(e) =>
+                  setForm({ ...form, positionId: e.target.value })
+                }
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+              >
+                <option value="">Pozisyon Secin</option>
+                {positions.map((pos) => (
+                  <option key={pos.id} value={pos.id}>
+                    {pos.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

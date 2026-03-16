@@ -183,7 +183,7 @@ export default function PersonnelListPage() {
                       <TableCell className="font-medium">
                         {p.name} {p.surname}
                       </TableCell>
-                      <TableCell>{p.positionConfig?.name || p.position || '\u2014'}</TableCell>
+                      <TableCell>{p.positionConfig?.name || '\u2014'}</TableCell>
                       <TableCell>{p.phone ? formatPhone(p.phone) : '\u2014'}</TableCell>
                       <TableCell>{formatDate(p.startDate)}</TableCell>
                       <TableCell>{formatCurrency(p.salary)}</TableCell>

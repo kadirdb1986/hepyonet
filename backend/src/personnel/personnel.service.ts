@@ -11,17 +11,6 @@ export class PersonnelService {
   constructor(private prisma: PrismaService) {}
 
   async create(restaurantId: string, dto: CreatePersonnelDto) {
-    let position = dto.position;
-
-    if (dto.positionId) {
-      const positionConfig = await this.prisma.positionConfig.findFirst({
-        where: { id: dto.positionId, restaurantId },
-      });
-      if (positionConfig) {
-        position = positionConfig.name;
-      }
-    }
-
     return this.prisma.personnel.create({
       data: {
         restaurantId,
@@ -29,8 +18,7 @@ export class PersonnelService {
         surname: dto.surname,
         phone: dto.phone,
         tcNo: dto.tcNo,
-        position,
-        positionId: dto.positionId,
+        positionId: dto.positionId || null,
         startDate: new Date(dto.startDate),
         salary: new Prisma.Decimal(dto.salary),
       },
@@ -72,21 +60,15 @@ export class PersonnelService {
       throw new NotFoundException('Personel bulunamadi');
     }
 
-    const data: any = { ...dto };
-    if (dto.startDate) {
-      data.startDate = new Date(dto.startDate);
-    }
-    if (dto.salary !== undefined) {
-      data.salary = new Prisma.Decimal(dto.salary);
-    }
-    if (dto.positionId) {
-      const positionConfig = await this.prisma.positionConfig.findFirst({
-        where: { id: dto.positionId, restaurantId },
-      });
-      if (positionConfig) {
-        data.position = positionConfig.name;
-      }
-    }
+    const data: any = {};
+    if (dto.name !== undefined) data.name = dto.name;
+    if (dto.surname !== undefined) data.surname = dto.surname;
+    if (dto.phone !== undefined) data.phone = dto.phone;
+    if (dto.tcNo !== undefined) data.tcNo = dto.tcNo;
+    if (dto.startDate) data.startDate = new Date(dto.startDate);
+    if (dto.salary !== undefined) data.salary = new Prisma.Decimal(dto.salary);
+    if (dto.isActive !== undefined) data.isActive = dto.isActive;
+    if ('positionId' in dto) data.positionId = dto.positionId || null;
 
     return this.prisma.personnel.update({
       where: { id },

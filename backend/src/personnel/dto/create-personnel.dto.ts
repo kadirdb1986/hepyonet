@@ -20,10 +20,6 @@ export class CreatePersonnelDto {
 
   @IsString()
   @IsOptional()
-  position?: string;
-
-  @IsString()
-  @IsOptional()
   positionId?: string;
 
   @IsDateString()
