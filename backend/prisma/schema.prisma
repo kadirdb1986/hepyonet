@@ -47,7 +47,10 @@ model Restaurant {
   menuItems      MenuItem[]
   stockMovements StockMovement[]
   suppliers      Supplier[]
-  positions      PositionConfig[]
+  positions        PositionConfig[]
+  simFixedExpenses SimFixedExpense[]
+  simFixedRevenues SimFixedRevenue[]
+  simulations      Simulation[]
 
   @@map("restaurants")
 }
@@ -315,7 +318,8 @@ model Product {
   category    Category?           @relation(fields: [categoryId], references: [id])
   ingredients ProductIngredient[] @relation("ProductIngredients")
   usedIn      ProductIngredient[] @relation("SubProductIngredients")
-  menuItem    MenuItem?
+  menuItem         MenuItem?
+  simFixedRevenues SimFixedRevenue[]
 
   @@map("products")
 }
@@ -371,4 +375,86 @@ model StockMovement {
   rawMaterial RawMaterial @relation(fields: [rawMaterialId], references: [id])
 
   @@map("stock_movements")
+}
+
+// ─── Simulation Module ───
+
+model SimFixedExpense {
+  id           String   @id @default(uuid())
+  restaurantId String
+  name         String
+  amount       Decimal  @db.Decimal(10, 2) @default(0)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@unique([restaurantId, name])
+  @@map("sim_fixed_expenses")
+}
+
+model SimFixedRevenue {
+  id           String   @id @default(uuid())
+  restaurantId String
+  productId    String
+  quantity     Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  product    Product    @relation(fields: [productId], references: [id])
+
+  @@unique([restaurantId, productId])
+  @@map("sim_fixed_revenues")
+}
+
+model Simulation {
+  id            String   @id @default(uuid())
+  restaurantId  String
+  name          String
+  month         String
+  kdvRate       Decimal  @db.Decimal(5, 2) @default(10)
+  incomeTaxRate Decimal  @db.Decimal(5, 2) @default(20)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  restaurant Restaurant          @relation(fields: [restaurantId], references: [id])
+  products   SimulationProduct[]
+  expenses   SimulationExpense[]
+
+  @@map("simulations")
+}
+
+model SimulationProduct {
+  id           String  @id @default(uuid())
+  simulationId String
+  productId    String
+  productName  String
+  quantity     Int     @default(0)
+  salePrice    Decimal @db.Decimal(10, 2)
+  costPrice    Decimal @db.Decimal(10, 2)
+
+  simulation Simulation @relation(fields: [simulationId], references: [id], onDelete: Cascade)
+
+  @@unique([simulationId, productId])
+  @@map("simulation_products")
+}
+
+enum SimExpenseType {
+  PERSONNEL
+  FIXED
+  FOOD_COST
+}
+
+model SimulationExpense {
+  id           String         @id @default(uuid())
+  simulationId String
+  name         String
+  amount       Decimal        @db.Decimal(10, 2)
+  type         SimExpenseType
+
+  simulation Simulation @relation(fields: [simulationId], references: [id], onDelete: Cascade)
+
+  @@map("simulation_expenses")
 }
