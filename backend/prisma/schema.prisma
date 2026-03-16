@@ -6,12 +6,14 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Role {
+enum MemberRole {
+  OWNER
   ADMIN
   ACCOUNTANT
   HR
   STOCK_MANAGER
   MENU_MANAGER
+  WAITER
 }
 
 enum RestaurantStatus {
@@ -33,7 +35,7 @@ model Restaurant {
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
-  users          User[]
+  members        RestaurantMember[]
   personnel      Personnel[]
   expenses           Expense[]
   expenseCategories  ExpenseCategoryConfig[]
@@ -54,16 +56,32 @@ model User {
   supabaseId   String   @unique
   email        String   @unique
   name         String
-  restaurantId String?
-  role         Role     @default(ADMIN)
+  avatarUrl    String?
   isActive     Boolean  @default(true)
   isSuperAdmin Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  restaurant Restaurant? @relation(fields: [restaurantId], references: [id])
+  memberships RestaurantMember[]
+  personnel   Personnel[]
 
   @@map("users")
+}
+
+model RestaurantMember {
+  id           String     @id @default(uuid())
+  userId       String
+  restaurantId String
+  role         MemberRole
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  user       User       @relation(fields: [userId], references: [id])
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@unique([userId, restaurantId])
+  @@map("restaurant_members")
 }
 
 model Personnel {
@@ -74,6 +92,7 @@ model Personnel {
   phone        String?
   tcNo         String?
   position     String?
+  userId       String?
   startDate    DateTime
   salary       Decimal  @db.Decimal(10, 2)
   isActive     Boolean  @default(true)
@@ -81,6 +100,7 @@ model Personnel {
   updatedAt    DateTime @updatedAt
 
   restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
+  user         User?         @relation(fields: [userId], references: [id])
   leaveRecords LeaveRecord[]
 
   @@map("personnel")
