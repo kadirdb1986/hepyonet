@@ -7,7 +7,75 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useAuth } from '@/hooks/use-auth';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Loader2, LogOut } from 'lucide-react';
+import { toast } from 'sonner';
+import api from '@/lib/api';
 import messages from '../../../messages/tr.json';
+
+function CreateRestaurantScreen() {
+  const [name, setName] = useState('');
+  const [creating, setCreating] = useState(false);
+  const { user, logout, checkAuth } = useAuth();
+  const hasPending = user?.memberships.some((m) => m.restaurantStatus === 'PENDING');
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setCreating(true);
+    try {
+      await api.post('/restaurants', { name: name.trim() });
+      toast.success('Restoran olusturuldu! Onay bekleniyor.');
+      await checkAuth();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Restoran olusturulurken hata olustu.');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">Hosgeldiniz!</CardTitle>
+          <CardDescription>
+            {hasPending
+              ? 'Restoraniniz onay bekliyor. Onaylandiktan sonra erisim saglayabilirsiniz.'
+              : 'Yeni bir restoran olusturun veya bir restoran yoneticisinden davet bekleyin.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {!hasPending && (
+            <form onSubmit={handleCreate} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="restaurantName">Restoran Adi</Label>
+                <Input
+                  id="restaurantName"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Ornegin: Cafe Istanbul"
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={creating}>
+                {creating && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                Restoran Olustur
+              </Button>
+            </form>
+          )}
+          <Button variant="outline" className="w-full" onClick={logout}>
+            <LogOut className="h-4 w-4 mr-2" />
+            Cikis Yap
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, user, activeRestaurantId } = useAuthStore();
@@ -38,20 +106,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return null;
   }
 
-  // User has no approved restaurants
+  // User has no approved restaurants - show create form
   if (approvedMemberships.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center space-y-4 p-8">
-          <h1 className="text-2xl font-bold">Hosgeldiniz!</h1>
-          <p className="text-gray-500">
-            {user?.memberships.length
-              ? 'Restoraniniz henuz onaylanmadi. Onay sonrasi erisim saglayabilirsiniz.'
-              : 'Henuz bir restorana bagli degilsiniz. Bir restoran olusturun veya bir restoran yoneticisinden davet isteyin.'}
-          </p>
-        </div>
-      </div>
-    );
+    return <CreateRestaurantScreen />;
   }
 
   return (
