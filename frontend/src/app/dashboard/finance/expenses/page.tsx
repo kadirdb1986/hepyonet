@@ -135,7 +135,7 @@ export default function ExpensesPage() {
 
   // ─── Giderler ───
   const { data: expenses = [], isLoading } = useQuery({
-    queryKey: ['expenses', filterCategory, selectedMonth],
+    queryKey: ['expenses', filterCategory, dateRange.startDate, dateRange.endDate],
     queryFn: async () => {
       const params: any = {
         startDate: dateRange.startDate,

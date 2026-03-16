@@ -90,7 +90,9 @@ export class ExpenseService {
         where.paymentDate.gte = new Date(params.startDate);
       }
       if (params.endDate) {
-        where.paymentDate.lte = new Date(params.endDate);
+        const end = new Date(params.endDate);
+        end.setHours(23, 59, 59, 999);
+        where.paymentDate.lte = end;
       }
     }
 
