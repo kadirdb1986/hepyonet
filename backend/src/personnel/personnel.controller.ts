@@ -65,6 +65,14 @@ export class PersonnelController {
     return this.personnelService.remove(id, restaurantId);
   }
 
+  @Delete(':id/permanent')
+  permanentDelete(
+    @Param('id') id: string,
+    @CurrentUser('restaurantId') restaurantId: string,
+  ) {
+    return this.personnelService.permanentDelete(id, restaurantId);
+  }
+
   @Post(':id/leaves')
   createLeave(
     @Param('id') personnelId: string,

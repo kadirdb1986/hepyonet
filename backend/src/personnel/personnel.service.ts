@@ -98,6 +98,28 @@ export class PersonnelService {
     });
   }
 
+  async permanentDelete(id: string, restaurantId: string) {
+    const personnel = await this.prisma.personnel.findFirst({
+      where: { id, restaurantId },
+    });
+
+    if (!personnel) {
+      throw new NotFoundException('Personel bulunamadi');
+    }
+
+    if (personnel.isActive) {
+      throw new BadRequestException('Aktif personel silinemez. Once pasife alin.');
+    }
+
+    await this.prisma.leaveRecord.deleteMany({
+      where: { personnelId: id },
+    });
+
+    return this.prisma.personnel.delete({
+      where: { id },
+    });
+  }
+
   // --- Leave Management ---
 
   async createLeave(personnelId: string, restaurantId: string, dto: CreateLeaveDto) {

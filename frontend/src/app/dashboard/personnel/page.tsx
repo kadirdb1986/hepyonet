@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Eye, UserX, UserCheck } from 'lucide-react';
+import { Plus, Eye, UserX, UserCheck, Trash2 } from 'lucide-react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -69,6 +69,21 @@ export default function PersonnelListPage() {
       queryClient.invalidateQueries({ queryKey: ['personnel'] });
     },
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`/personnel/${id}/permanent`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['personnel'] });
+    },
+  });
+
+  const handleDelete = (id: string, name: string) => {
+    if (confirm(`${name} adli personeli kalici olarak silmek istediginize emin misiniz? Bu islem geri alinamaz.`)) {
+      deleteMutation.mutate(id);
+    }
+  };
 
   const filtered = personnel.filter((p) => {
     const fullName = `${p.name} ${p.surname}`.toLowerCase();
@@ -184,13 +199,22 @@ export default function PersonnelListPage() {
                               <UserX className="h-4 w-4 text-red-500" />
                             </Button>
                           ) : (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => activateMutation.mutate(p.id)}
-                            >
-                              <UserCheck className="h-4 w-4 text-green-500" />
-                            </Button>
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => activateMutation.mutate(p.id)}
+                              >
+                                <UserCheck className="h-4 w-4 text-green-500" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(p.id, `${p.name} ${p.surname}`)}
+                              >
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                              </Button>
+                            </>
                           )}
                         </div>
                       </TableCell>
