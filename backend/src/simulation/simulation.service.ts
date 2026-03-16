@@ -106,7 +106,7 @@ export class SimulationService {
         await tx.simulationExpense.createMany({
           data: productData.map((pd) => ({
             simulationId: simulation.id,
-            name: `${pd.productName} gida maliyeti`,
+            name: `${pd.productName} gıda maliyeti`,
             amount: pd.quantity * pd.costPrice,
             type: SimExpenseType.FOOD_COST,
           })),
@@ -183,7 +183,7 @@ export class SimulationService {
           await tx.simulationExpense.createMany({
             data: updatedProducts.map((p) => ({
               simulationId: id,
-              name: `${p.productName} gida maliyeti`,
+              name: `${p.productName} gıda maliyeti`,
               amount: Number(p.quantity) * Number(p.costPrice),
               type: SimExpenseType.FOOD_COST,
             })),

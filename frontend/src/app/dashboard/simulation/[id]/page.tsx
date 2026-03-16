@@ -404,13 +404,13 @@ export default function SimulationDetailPage() {
               </div>
             </div>
 
-            {/* Gida Maliyetleri */}
+            {/* Gıda Maliyetleri */}
             <div>
               <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
-                Gida Maliyetleri
+                Gıda Maliyetleri
               </h3>
               {foodCostExpenses.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-2">Gida maliyeti bulunmuyor</p>
+                <p className="text-sm text-muted-foreground py-2">Gıda maliyeti bulunmuyor</p>
               ) : (
                 <div className="rounded-md border">
                   <Table>
