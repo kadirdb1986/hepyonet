@@ -13,6 +13,7 @@ import { ProductModule } from './product/product.module';
 import { CategoryModule } from './category/category.module';
 import { MenuModule } from './menu/menu.module';
 import { ReportModule } from './report/report.module';
+import { SimulationModule } from './simulation/simulation.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ReportModule } from './report/report.module';
     CategoryModule,
     MenuModule,
     ReportModule,
+    SimulationModule,
   ],
 })
 export class AppModule {}
