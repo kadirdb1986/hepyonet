@@ -31,8 +31,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!isAuthenticated) return null;
 
-  // User has no approved restaurants
+  // Super admin goes to admin panel
   const approvedMemberships = user?.memberships.filter((m) => m.restaurantStatus === 'APPROVED') || [];
+  if (approvedMemberships.length === 0 && user?.isSuperAdmin) {
+    router.push('/admin');
+    return null;
+  }
+
+  // User has no approved restaurants
   if (approvedMemberships.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
