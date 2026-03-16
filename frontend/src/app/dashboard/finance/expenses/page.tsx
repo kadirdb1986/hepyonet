@@ -495,7 +495,7 @@ export default function ExpensesPage() {
                               : 'Dagitildi'}
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">Ayni Ay</Badge>
+                          <Badge variant="secondary">{formatMonth(expense.paymentDate.substring(0, 7))}</Badge>
                         )}
                       </td>
                       <td className="py-2 px-3 text-right">
