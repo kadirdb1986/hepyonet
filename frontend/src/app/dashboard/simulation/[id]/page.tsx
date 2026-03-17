@@ -224,9 +224,8 @@ export default function SimulationDetailPage() {
       expenses: { id: string; amount: number }[];
       dayWeights?: { day: string; weight: number }[];
     }) => api.patch(`/simulations/${id}`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['simulation', id] });
-      setInitialized(false);
+    onSuccess: async () => {
+      await reloadSimulation();
       toast.success('Simulasyon kaydedildi');
     },
     onError: (error: any) => {
