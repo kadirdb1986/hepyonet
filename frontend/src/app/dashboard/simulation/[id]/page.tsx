@@ -51,12 +51,50 @@ interface SimulationData {
 // ─── Helpers ───
 
 const formatCurrency = (amount: number) =>
-  new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount);
+  new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(amount));
 
 function formatMonth(ym: string): string {
   const [y, m] = ym.split('-');
   const months = ['Oca', 'Sub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Agu', 'Eyl', 'Eki', 'Kas', 'Ara'];
   return `${months[parseInt(m, 10) - 1]} ${y}`;
+}
+
+const formatNumber = (n: number) =>
+  new Intl.NumberFormat('tr-TR').format(n);
+
+function MoneyInput({ value, onChange, className = '' }: { value: number; onChange: (v: number) => void; className?: string }) {
+  return (
+    <div className={`relative ${className}`}>
+      <Input
+        type="text"
+        inputMode="decimal"
+        value={formatNumber(value)}
+        onChange={(e) => {
+          const raw = e.target.value.replace(/\./g, '').replace(',', '.');
+          const num = parseFloat(raw);
+          onChange(isNaN(num) ? 0 : num);
+        }}
+        className="h-8 text-right pr-7"
+      />
+      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">TL</span>
+    </div>
+  );
+}
+
+function NumberInput({ value, onChange, className = '' }: { value: number; onChange: (v: number) => void; className?: string }) {
+  return (
+    <Input
+      type="text"
+      inputMode="numeric"
+      value={formatNumber(value)}
+      onChange={(e) => {
+        const raw = e.target.value.replace(/\./g, '');
+        const num = parseInt(raw, 10);
+        onChange(isNaN(num) ? 0 : Math.max(0, num));
+      }}
+      className={`h-8 text-right ${className}`}
+    />
+  );
 }
 
 export default function SimulationDetailPage() {
@@ -281,27 +319,10 @@ export default function SimulationDetailPage() {
                       <TableRow key={product.id}>
                         <TableCell className="font-medium">{product.name}</TableCell>
                         <TableCell className="text-right">
-                          <Input
-                            type="number"
-                            min="0"
-                            value={product.quantity}
-                            onChange={(e) =>
-                              updateProductQuantity(product.id, parseInt(e.target.value, 10) || 0)
-                            }
-                            className="w-20 h-8 text-right ml-auto"
-                          />
+                          <NumberInput value={product.quantity} onChange={(v) => updateProductQuantity(product.id, v)} className="w-20 ml-auto" />
                         </TableCell>
                         <TableCell className="text-right">
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={product.salePrice}
-                            onChange={(e) =>
-                              updateProductSalePrice(product.id, parseFloat(e.target.value) || 0)
-                            }
-                            className="w-24 h-8 text-right ml-auto"
-                          />
+                          <MoneyInput value={product.salePrice} onChange={(v) => updateProductSalePrice(product.id, v)} className="w-28 ml-auto" />
                         </TableCell>
                         <TableCell className="text-right font-medium">
                           {formatCurrency(product.quantity * product.salePrice)}
@@ -342,16 +363,7 @@ export default function SimulationDetailPage() {
                         <TableRow key={exp.id}>
                           <TableCell>{exp.name}</TableCell>
                           <TableCell className="text-right">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              value={exp.amount}
-                              onChange={(e) =>
-                                updateFixedExpenseAmount(exp.id, parseFloat(e.target.value) || 0)
-                              }
-                              className="w-32 h-8 text-right ml-auto"
-                            />
+                            <MoneyInput value={exp.amount} onChange={(v) => updateFixedExpenseAmount(exp.id, v)} className="w-32 ml-auto" />
                           </TableCell>
                         </TableRow>
                       ))}
@@ -388,18 +400,9 @@ export default function SimulationDetailPage() {
                         <TableRow key={product.id}>
                           <TableCell>{product.name}</TableCell>
                           <TableCell className="text-right">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              value={product.costPrice}
-                              onChange={(e) =>
-                                updateProductCostPrice(product.id, parseFloat(e.target.value) || 0)
-                              }
-                              className="w-24 h-8 text-right ml-auto"
-                            />
+                            <MoneyInput value={product.costPrice} onChange={(v) => updateProductCostPrice(product.id, v)} className="w-28 ml-auto" />
                           </TableCell>
-                          <TableCell className="text-right text-muted-foreground">{product.quantity}</TableCell>
+                          <TableCell className="text-right text-muted-foreground">{formatNumber(product.quantity)}</TableCell>
                           <TableCell className="text-right font-medium">{formatCurrency(product.quantity * product.costPrice)}</TableCell>
                         </TableRow>
                       ))}
@@ -518,14 +521,10 @@ export default function SimulationDetailPage() {
                           <TableRow key={day}>
                             <TableCell className="font-medium">{day}</TableCell>
                             <TableCell className="text-right">
-                              <Input
-                                type="number"
-                                min="0"
+                              <NumberInput
                                 value={weight}
-                                onChange={(e) =>
-                                  setDayWeights((prev) => ({ ...prev, [day]: parseInt(e.target.value, 10) || 0 }))
-                                }
-                                className="w-16 h-8 text-right ml-auto"
+                                onChange={(v) => setDayWeights((prev) => ({ ...prev, [day]: v }))}
+                                className="w-16 ml-auto"
                               />
                             </TableCell>
                             <TableCell className="text-right font-medium">
