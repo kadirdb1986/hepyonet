@@ -511,22 +511,22 @@ export default function SimulationDetailPage() {
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead className="w-[70px]">Agirlik %</TableHead>
                           <TableHead>Gun</TableHead>
-                          <TableHead className="text-right w-[70px]">Agirlik %</TableHead>
                           <TableHead className="text-right">Tahmini Ciro</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {Object.entries(dayWeights).map(([day, weight]) => (
                           <TableRow key={day}>
-                            <TableCell className="font-medium">{day}</TableCell>
-                            <TableCell className="text-right">
+                            <TableCell>
                               <NumberInput
                                 value={weight}
                                 onChange={(v) => setDayWeights((prev) => ({ ...prev, [day]: v }))}
-                                className="w-16 ml-auto"
+                                className="w-16"
                               />
                             </TableCell>
+                            <TableCell className="font-medium">{day}</TableCell>
                             <TableCell className="text-right font-medium">
                               {formatCurrency(totalWeight > 0 ? weeklyCiro * weight / totalWeight : 0)}
                             </TableCell>
