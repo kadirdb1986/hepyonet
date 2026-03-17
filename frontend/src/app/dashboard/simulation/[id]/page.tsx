@@ -158,7 +158,9 @@ export default function SimulationDetailPage() {
 
   // ─── Expense groups ───
   const fixedExpenses = expenses.filter((e) => e.type === 'FIXED');
+  const otherExpenses = expenses.filter((e) => e.type === 'OTHER');
   const fixedTotal = fixedExpenses.reduce((sum, e) => sum + e.amount, 0);
+  const otherTotal = otherExpenses.reduce((sum, e) => sum + e.amount, 0);
   const foodCostTotal = products.reduce((sum, p) => sum + p.quantity * p.costPrice, 0);
 
   // ─── Calculations ───
@@ -168,8 +170,8 @@ export default function SimulationDetailPage() {
   );
 
   const totalExpense = useMemo(
-    () => fixedTotal + foodCostTotal,
-    [fixedTotal, foodCostTotal],
+    () => fixedTotal + foodCostTotal + otherTotal,
+    [fixedTotal, foodCostTotal, otherTotal],
   );
 
   const grossProfit = totalRevenue - totalExpense;
@@ -345,6 +347,9 @@ export default function SimulationDetailPage() {
             <CardTitle>Gelirler</CardTitle>
           </CardHeader>
           <CardContent>
+            <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
+              Urun Gelirleri
+            </h3>
             {products.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">Urun bulunmuyor</p>
             ) : (
@@ -400,47 +405,6 @@ export default function SimulationDetailPage() {
             <CardTitle>Giderler</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Sabit Giderler */}
-            <div>
-              <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
-                Sabit Giderler
-              </h3>
-              {fixedExpenses.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-2">Sabit gider bulunmuyor</p>
-              ) : (
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Ad</TableHead>
-                        <TableHead className="text-right w-[140px]">Tutar</TableHead>
-                        <TableHead className="w-[40px]"></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {fixedExpenses.map((exp) => (
-                        <TableRow key={exp.id}>
-                          <TableCell>{exp.name}</TableCell>
-                          <TableCell className="text-right">
-                            <MoneyInput value={exp.amount} onChange={(v) => updateFixedExpenseAmount(exp.id, v)} className="w-32 ml-auto" />
-                          </TableCell>
-                          <TableCell>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeExpenseMutation.mutate(exp.id)}>
-                              <Trash2 className="h-3.5 w-3.5 text-red-500" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-              <div className="mt-2 flex items-center justify-between px-2 py-1.5 text-sm">
-                <span className="text-muted-foreground">Alt Toplam</span>
-                <span className="font-medium">{formatCurrency(fixedTotal)}</span>
-              </div>
-            </div>
-
             {/* Gıda Maliyetleri */}
             <div>
               <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
@@ -486,14 +450,94 @@ export default function SimulationDetailPage() {
               </div>
             </div>
 
-            {/* Yeni Gider Ekle */}
-            <div className="mt-3 flex items-center gap-2">
-              <Input placeholder="Gider adi" value={newExpenseName} onChange={(e) => setNewExpenseName(e.target.value)} className="h-8 flex-1" />
-              <MoneyInput value={Number(newExpenseAmount) || 0} onChange={(v) => setNewExpenseAmount(String(v))} className="w-28" />
-              <Button size="sm" className="h-8" disabled={!newExpenseName.trim() || addExpenseMutation.isPending}
-                onClick={() => addExpenseMutation.mutate({ name: newExpenseName.trim(), amount: Number(newExpenseAmount) || 0 })}>
-                <Plus className="h-3.5 w-3.5 mr-1" /> Ekle
-              </Button>
+            {/* Sabit Giderler */}
+            <div>
+              <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
+                Sabit Giderler
+              </h3>
+              {fixedExpenses.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-2">Sabit gider bulunmuyor</p>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Ad</TableHead>
+                        <TableHead className="text-right w-[140px]">Tutar</TableHead>
+                        <TableHead className="w-[40px]"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {fixedExpenses.map((exp) => (
+                        <TableRow key={exp.id}>
+                          <TableCell>{exp.name}</TableCell>
+                          <TableCell className="text-right">
+                            <MoneyInput value={exp.amount} onChange={(v) => updateFixedExpenseAmount(exp.id, v)} className="w-32 ml-auto" />
+                          </TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeExpenseMutation.mutate(exp.id)}>
+                              <Trash2 className="h-3.5 w-3.5 text-red-500" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+              <div className="mt-2 flex items-center justify-between px-2 py-1.5 text-sm">
+                <span className="text-muted-foreground">Alt Toplam</span>
+                <span className="font-medium">{formatCurrency(fixedTotal)}</span>
+              </div>
+            </div>
+
+            {/* Diger Giderler */}
+            <div>
+              <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
+                Diger Giderler
+              </h3>
+              {otherExpenses.length > 0 && (
+                <div className="rounded-md border mb-2">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Ad</TableHead>
+                        <TableHead className="text-right w-[140px]">Tutar</TableHead>
+                        <TableHead className="w-[40px]"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {otherExpenses.map((exp) => (
+                        <TableRow key={exp.id}>
+                          <TableCell>{exp.name}</TableCell>
+                          <TableCell className="text-right">
+                            <MoneyInput value={exp.amount} onChange={(v) => updateFixedExpenseAmount(exp.id, v)} className="w-32 ml-auto" />
+                          </TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeExpenseMutation.mutate(exp.id)}>
+                              <Trash2 className="h-3.5 w-3.5 text-red-500" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+              {otherExpenses.length > 0 && (
+                <div className="mt-2 flex items-center justify-between px-2 py-1.5 text-sm">
+                  <span className="text-muted-foreground">Alt Toplam</span>
+                  <span className="font-medium">{formatCurrency(otherTotal)}</span>
+                </div>
+              )}
+              <div className="mt-2 flex items-center gap-2">
+                <Input placeholder="Gider adi" value={newExpenseName} onChange={(e) => setNewExpenseName(e.target.value)} className="h-8 flex-1" />
+                <MoneyInput value={Number(newExpenseAmount) || 0} onChange={(v) => setNewExpenseAmount(String(v))} className="w-28" />
+                <Button size="sm" className="h-8" disabled={!newExpenseName.trim() || addExpenseMutation.isPending}
+                  onClick={() => addExpenseMutation.mutate({ name: newExpenseName.trim(), amount: Number(newExpenseAmount) || 0 })}>
+                  <Plus className="h-3.5 w-3.5 mr-1" /> Ekle
+                </Button>
+              </div>
             </div>
 
           </CardContent>

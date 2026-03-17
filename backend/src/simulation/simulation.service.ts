@@ -237,7 +237,7 @@ export class SimulationService {
         simulationId: id,
         name: data.name,
         amount: data.amount,
-        type: (data.type as SimExpenseType) || SimExpenseType.FIXED,
+        type: (data.type as SimExpenseType) || SimExpenseType.OTHER,
       },
     });
   }

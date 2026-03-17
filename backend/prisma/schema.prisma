@@ -445,6 +445,7 @@ enum SimExpenseType {
   PERSONNEL
   FIXED
   FOOD_COST
+  OTHER
 }
 
 model SimulationExpense {
