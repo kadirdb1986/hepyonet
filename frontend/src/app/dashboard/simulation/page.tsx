@@ -364,10 +364,8 @@ export default function SimulationPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Ad</TableHead>
-                      <TableHead>Ay</TableHead>
                       <TableHead className="text-right">Ciro</TableHead>
                       <TableHead className="text-right">Net Kar</TableHead>
-                      <TableHead>Tarih</TableHead>
                       <TableHead className="text-right w-[80px]">Islemler</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -379,13 +377,9 @@ export default function SimulationPage() {
                         onClick={() => router.push(`/dashboard/simulation/${sim.id}`)}
                       >
                         <TableCell className="font-medium">{sim.name}</TableCell>
-                        <TableCell>{formatMonth(sim.month)}</TableCell>
                         <TableCell className="text-right">{formatCurrency(sim.totalRevenue ?? 0)}</TableCell>
                         <TableCell className={`text-right font-medium ${(sim.netProfit ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {formatCurrency(sim.netProfit ?? 0)}
-                        </TableCell>
-                        <TableCell>
-                          {new Date(sim.createdAt).toLocaleDateString('tr-TR')}
                         </TableCell>
                         <TableCell className="text-right">
                           <Button
@@ -482,7 +476,7 @@ export default function SimulationPage() {
                                 onKeyDown={(e) => {
                                   if (e.key === 'Enter') {
                                     e.preventDefault();
-                                    handleSaveExpenseAmount(exp.id);
+                                    handleSaveExpense(exp.id);
                                   }
                                   if (e.key === 'Escape') {
                                     setEditingExpenseId(null);
@@ -493,7 +487,7 @@ export default function SimulationPage() {
                               <Button
                                 size="sm"
                                 className="h-8"
-                                onClick={() => handleSaveExpenseAmount(exp.id)}
+                                onClick={() => handleSaveExpense(exp.id)}
                                 disabled={updateExpMutation.isPending}
                               >
                                 Kaydet
