@@ -23,7 +23,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
         {onMenuToggle && (
           <button
             onClick={onMenuToggle}
-            className="md:hidden p-2 -ml-2 rounded-md hover:bg-gray-100"
+            className="p-2 -ml-2 rounded-md hover:bg-gray-100"
           >
             <Menu className="h-5 w-5" />
           </button>
