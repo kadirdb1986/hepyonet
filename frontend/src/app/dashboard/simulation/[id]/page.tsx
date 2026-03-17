@@ -16,14 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { ArrowLeft, Save, Settings2, Pencil } from 'lucide-react';
+import { ArrowLeft, Save, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 
 // ─── Types ───
@@ -77,7 +70,6 @@ export default function SimulationDetailPage() {
   const [expenses, setExpenses] = useState<SimExpense[]>([]);
   const [kdvRate, setKdvRate] = useState<number>(10);
   const [incomeTaxRate, setIncomeTaxRate] = useState<number>(20);
-  const [isPriceDialogOpen, setIsPriceDialogOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [simName, setSimName] = useState('');
   const [isEditingName, setIsEditingName] = useState(false);
@@ -113,19 +105,6 @@ export default function SimulationDetailPage() {
     }
   }, [simulation, initialized]);
 
-  // ─── Recalculate food costs when products change ───
-  useEffect(() => {
-    if (!initialized) return;
-    setExpenses((prev) =>
-      prev.map((exp) => {
-        if (exp.type !== 'FOOD_COST') return exp;
-        const product = products.find((p) => p.id === exp.productId || p.productId === exp.productId);
-        if (!product) return exp;
-        return { ...exp, amount: product.quantity * product.costPrice };
-      }),
-    );
-  }, [products, initialized]);
-
   // ─── Calculations ───
   const totalRevenue = useMemo(
     () => products.reduce((sum, p) => sum + p.quantity * p.salePrice, 0),
@@ -133,8 +112,8 @@ export default function SimulationDetailPage() {
   );
 
   const totalExpense = useMemo(
-    () => expenses.reduce((sum, e) => sum + e.amount, 0),
-    [expenses],
+    () => fixedExpenses.reduce((sum, e) => sum + e.amount, 0) + products.reduce((sum, p) => sum + p.quantity * p.costPrice, 0),
+    [fixedExpenses, products],
   );
 
   const grossProfit = totalRevenue - totalExpense;
@@ -148,10 +127,8 @@ export default function SimulationDetailPage() {
 
   // ─── Expense groups ───
   const fixedExpenses = expenses.filter((e) => e.type === 'FIXED');
-  const foodCostExpenses = expenses.filter((e) => e.type === 'FOOD_COST');
-
   const fixedTotal = fixedExpenses.reduce((sum, e) => sum + e.amount, 0);
-  const foodCostTotal = foodCostExpenses.reduce((sum, e) => sum + e.amount, 0);
+  const foodCostTotal = products.reduce((sum, p) => sum + p.quantity * p.costPrice, 0);
 
   // ─── Product handlers ───
   const updateProductQuantity = (productId: string, quantity: number) => {
@@ -263,70 +240,12 @@ export default function SimulationDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setIsPriceDialogOpen(true)}>
-            <Settings2 className="mr-2 h-4 w-4" />
-            Urun Fiyatlari
-          </Button>
           <Button onClick={handleSave} disabled={saveMutation.isPending}>
             <Save className="mr-2 h-4 w-4" />
             {saveMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
           </Button>
         </div>
       </div>
-
-      {/* ─── Product Prices Dialog ─── */}
-      <Dialog open={isPriceDialogOpen} onOpenChange={setIsPriceDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Simulasyon Urun Fiyatlari</DialogTitle>
-            <DialogDescription>
-              Bu degisiklikler sadece bu simulasyona ozeldir
-            </DialogDescription>
-          </DialogHeader>
-          <div className="max-h-96 overflow-y-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Urun</TableHead>
-                  <TableHead className="text-right">Satis Fiyati</TableHead>
-                  <TableHead className="text-right">Maliyet Fiyati</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {products.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell className="text-right">
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={product.salePrice}
-                        onChange={(e) =>
-                          updateProductSalePrice(product.id, parseFloat(e.target.value) || 0)
-                        }
-                        className="w-28 h-8 text-right ml-auto"
-                      />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={product.costPrice}
-                        onChange={(e) =>
-                          updateProductCostPrice(product.id, parseFloat(e.target.value) || 0)
-                        }
-                        className="w-28 h-8 text-right ml-auto"
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* ─── Two Column Layout ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -344,8 +263,8 @@ export default function SimulationDetailPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Urun</TableHead>
-                      <TableHead className="text-right w-[90px]">Adet</TableHead>
-                      <TableHead className="text-right">Birim Fiyat</TableHead>
+                      <TableHead className="text-right w-[80px]">Adet</TableHead>
+                      <TableHead className="text-right w-[100px]">Birim Fiyat</TableHead>
                       <TableHead className="text-right">Toplam</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -365,7 +284,16 @@ export default function SimulationDetailPage() {
                           />
                         </TableCell>
                         <TableCell className="text-right">
-                          {formatCurrency(product.salePrice)}
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={product.salePrice}
+                            onChange={(e) =>
+                              updateProductSalePrice(product.id, parseFloat(e.target.value) || 0)
+                            }
+                            className="w-24 h-8 text-right ml-auto"
+                          />
                         </TableCell>
                         <TableCell className="text-right font-medium">
                           {formatCurrency(product.quantity * product.salePrice)}
@@ -438,22 +366,37 @@ export default function SimulationDetailPage() {
               <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
                 Gıda Maliyetleri
               </h3>
-              {foodCostExpenses.length === 0 ? (
+              {products.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-2">Gıda maliyeti bulunmuyor</p>
               ) : (
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Ad</TableHead>
-                        <TableHead className="text-right">Tutar</TableHead>
+                        <TableHead>Urun</TableHead>
+                        <TableHead className="text-right w-[100px]">Birim Maliyet</TableHead>
+                        <TableHead className="text-right w-[60px]">Adet</TableHead>
+                        <TableHead className="text-right">Toplam</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {foodCostExpenses.map((exp) => (
-                        <TableRow key={exp.id}>
-                          <TableCell>{exp.name}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(exp.amount)}</TableCell>
+                      {products.map((product) => (
+                        <TableRow key={product.id}>
+                          <TableCell>{product.name}</TableCell>
+                          <TableCell className="text-right">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={product.costPrice}
+                              onChange={(e) =>
+                                updateProductCostPrice(product.id, parseFloat(e.target.value) || 0)
+                              }
+                              className="w-24 h-8 text-right ml-auto"
+                            />
+                          </TableCell>
+                          <TableCell className="text-right text-muted-foreground">{product.quantity}</TableCell>
+                          <TableCell className="text-right font-medium">{formatCurrency(product.quantity * product.costPrice)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
