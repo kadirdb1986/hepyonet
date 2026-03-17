@@ -278,10 +278,12 @@ export default function SimulationDetailPage() {
         salePrice: p.salePrice,
         costPrice: p.costPrice,
       })),
-      expenses: expenses.map((e) => ({
-        id: e.id,
-        amount: e.amount,
-      })),
+      expenses: expenses
+        .filter((e) => e.type === 'FIXED' || e.type === 'OTHER')
+        .map((e) => ({
+          id: e.id,
+          amount: e.amount,
+        })),
     });
   };
 
