@@ -28,6 +28,10 @@ export class UpdateSimExpenseDto {
 
 export class UpdateSimulationDto {
   @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
   @IsNumber()
   kdvRate?: number;
 

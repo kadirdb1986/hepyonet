@@ -138,11 +138,12 @@ export class SimulationService {
     }
 
     return this.prisma.$transaction(async (tx) => {
-      // Update simulation-level fields (kdvRate, incomeTaxRate)
-      if (dto.kdvRate !== undefined || dto.incomeTaxRate !== undefined) {
+      // Update simulation-level fields (name, kdvRate, incomeTaxRate)
+      if (dto.name !== undefined || dto.kdvRate !== undefined || dto.incomeTaxRate !== undefined) {
         await tx.simulation.update({
           where: { id },
           data: {
+            ...(dto.name !== undefined && { name: dto.name }),
             ...(dto.kdvRate !== undefined && { kdvRate: dto.kdvRate }),
             ...(dto.incomeTaxRate !== undefined && {
               incomeTaxRate: dto.incomeTaxRate,

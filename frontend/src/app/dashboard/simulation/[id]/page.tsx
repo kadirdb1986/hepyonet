@@ -23,7 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Save, Settings2 } from 'lucide-react';
+import { ArrowLeft, Save, Settings2, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 
 // ─── Types ───
@@ -79,6 +79,8 @@ export default function SimulationDetailPage() {
   const [incomeTaxRate, setIncomeTaxRate] = useState<number>(20);
   const [isPriceDialogOpen, setIsPriceDialogOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [simName, setSimName] = useState('');
+  const [isEditingName, setIsEditingName] = useState(false);
 
   // ─── Fetch Simulation ───
   const { data: simulation, isLoading } = useQuery<SimulationData>({
@@ -106,6 +108,7 @@ export default function SimulationDetailPage() {
       })));
       setKdvRate(Number(simulation.kdvRate) || 10);
       setIncomeTaxRate(Number(simulation.incomeTaxRate) || 20);
+      setSimName(simulation.name);
       setInitialized(true);
     }
   }, [simulation, initialized]);
@@ -179,6 +182,7 @@ export default function SimulationDetailPage() {
   // ─── Save mutation ───
   const saveMutation = useMutation({
     mutationFn: (data: {
+      name?: string;
       kdvRate: number;
       incomeTaxRate: number;
       products: { id: string; quantity: number; salePrice: number; costPrice: number }[];
@@ -196,6 +200,7 @@ export default function SimulationDetailPage() {
 
   const handleSave = () => {
     saveMutation.mutate({
+      name: simName,
       kdvRate,
       incomeTaxRate,
       products: products.map((p) => ({
@@ -228,9 +233,33 @@ export default function SimulationDetailPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">
-              {simulation.name} - {formatMonth(simulation.month)}
-            </h1>
+            {isEditingName ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  value={simName}
+                  onChange={(e) => setSimName(e.target.value)}
+                  className="text-xl font-bold h-10 w-64"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') setIsEditingName(false);
+                    if (e.key === 'Escape') {
+                      setSimName(simulation.name);
+                      setIsEditingName(false);
+                    }
+                  }}
+                  onBlur={() => setIsEditingName(false)}
+                />
+                <span className="text-2xl font-bold">- {formatMonth(simulation.month)}</span>
+              </div>
+            ) : (
+              <h1
+                className="text-2xl font-bold cursor-pointer hover:text-muted-foreground flex items-center gap-2"
+                onClick={() => setIsEditingName(true)}
+              >
+                {simName} - {formatMonth(simulation.month)}
+                <Pencil className="h-4 w-4 text-muted-foreground" />
+              </h1>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">
