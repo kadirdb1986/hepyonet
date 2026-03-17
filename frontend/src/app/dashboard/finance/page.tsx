@@ -15,6 +15,8 @@ import {
   DollarSign,
   Receipt,
   PieChart,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import {
   BarChart,
@@ -43,13 +45,29 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 function getCurrentMonth(): string {
   const now = new Date();
-  const year = now.getFullYear();
-  const month = (now.getMonth() + 1).toString().padStart(2, '0');
-  return `${year}-${month}`;
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function formatMonth(ym: string): string {
+  const [y, m] = ym.split('-');
+  const months = ['Oca', 'Sub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Agu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+  return `${months[parseInt(m, 10) - 1]} ${y}`;
 }
 
 export default function FinanceOverviewPage() {
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
+
+  const prevMonth = () => {
+    const [y, m] = selectedMonth.split('-').map(Number);
+    const d = new Date(y, m - 2, 1);
+    setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  };
+
+  const nextMonth = () => {
+    const [y, m] = selectedMonth.split('-').map(Number);
+    const d = new Date(y, m, 1);
+    setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  };
 
   const { data: summary, isLoading } = useQuery({
     queryKey: ['finance-summary', selectedMonth],
@@ -80,13 +98,14 @@ export default function FinanceOverviewPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Finans Ozeti</h1>
-        <div className="flex items-center gap-3">
-          <Input
-            type="month"
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="w-48"
-          />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" onClick={prevMonth}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm font-medium w-24 text-center">{formatMonth(selectedMonth)}</span>
+          <Button variant="outline" size="icon" onClick={nextMonth}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
