@@ -34,7 +34,7 @@ interface SimExpense {
   id: string;
   name: string;
   amount: number;
-  type: 'PERSONNEL' | 'FIXED' | 'FOOD_COST';
+  type: 'PERSONNEL' | 'FIXED' | 'FOOD_COST' | 'OTHER';
   productId?: string;
 }
 
