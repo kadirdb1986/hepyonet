@@ -13,15 +13,37 @@ export class SimulationService {
   ) {}
 
   async findAll(restaurantId: string) {
-    return this.prisma.simulation.findMany({
+    const simulations = await this.prisma.simulation.findMany({
       where: { restaurantId },
       orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        month: true,
-        createdAt: true,
+      include: {
+        products: true,
+        expenses: true,
       },
+    });
+
+    return simulations.map((sim) => {
+      const totalRevenue = sim.products.reduce((sum, p) => sum + Number(p.quantity) * Number(p.salePrice), 0);
+      const totalExpense = sim.expenses
+        .filter((e) => e.type !== 'FOOD_COST')
+        .reduce((sum, e) => sum + Number(e.amount), 0)
+        + sim.products.reduce((sum, p) => sum + Number(p.quantity) * Number(p.costPrice), 0);
+      const grossProfit = totalRevenue - totalExpense;
+      const kdvRate = Number(sim.kdvRate);
+      const kdvNet = grossProfit * kdvRate / (100 + kdvRate);
+      const profitBeforeTax = grossProfit - kdvNet;
+      const incomeTaxRate = Number(sim.incomeTaxRate);
+      const incomeTax = Math.max(0, profitBeforeTax * incomeTaxRate / 100);
+      const netProfit = profitBeforeTax - incomeTax;
+
+      return {
+        id: sim.id,
+        name: sim.name,
+        month: sim.month,
+        createdAt: sim.createdAt,
+        totalRevenue: Math.round(totalRevenue),
+        netProfit: Math.round(netProfit),
+      };
     });
   }
 

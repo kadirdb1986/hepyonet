@@ -87,6 +87,7 @@ export default function SimulationPage() {
   const [expenseName, setExpenseName] = useState('');
   const [expenseAmount, setExpenseAmount] = useState('');
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
+  const [editingExpenseName, setEditingExpenseName] = useState('');
   const [editingExpenseAmount, setEditingExpenseAmount] = useState('');
 
   // Fixed revenue form
@@ -244,13 +245,17 @@ export default function SimulationPage() {
     createExpMutation.mutate({ name: trimmed, amount });
   };
 
-  const handleSaveExpenseAmount = (id: string) => {
+  const handleSaveExpense = (id: string) => {
     const amount = parseFloat(editingExpenseAmount);
-    if (isNaN(amount) || amount <= 0) {
+    if (isNaN(amount) || amount < 0) {
       toast.error('Gecerli bir tutar giriniz');
       return;
     }
-    updateExpMutation.mutate({ id, amount });
+    if (!editingExpenseName.trim()) {
+      toast.error('Ad bos birakilamaz');
+      return;
+    }
+    updateExpMutation.mutate({ id, name: editingExpenseName.trim(), amount });
   };
 
   const handleAddRevenue = (e: React.FormEvent) => {
@@ -360,12 +365,14 @@ export default function SimulationPage() {
                     <TableRow>
                       <TableHead>Ad</TableHead>
                       <TableHead>Ay</TableHead>
-                      <TableHead>Olusturulma Tarihi</TableHead>
+                      <TableHead className="text-right">Ciro</TableHead>
+                      <TableHead className="text-right">Net Kar</TableHead>
+                      <TableHead>Tarih</TableHead>
                       <TableHead className="text-right w-[80px]">Islemler</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {simulations.map((sim) => (
+                    {simulations.map((sim: any) => (
                       <TableRow
                         key={sim.id}
                         className="cursor-pointer"
@@ -373,6 +380,10 @@ export default function SimulationPage() {
                       >
                         <TableCell className="font-medium">{sim.name}</TableCell>
                         <TableCell>{formatMonth(sim.month)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(sim.totalRevenue ?? 0)}</TableCell>
+                        <TableCell className={`text-right font-medium ${(sim.netProfit ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {formatCurrency(sim.netProfit ?? 0)}
+                        </TableCell>
                         <TableCell>
                           {new Date(sim.createdAt).toLocaleDateString('tr-TR')}
                         </TableCell>
