@@ -260,6 +260,66 @@ export class SimulationService {
     return { message: 'Simulasyon silindi' };
   }
 
+  async duplicate(id: string, restaurantId: string, newName: string) {
+    const source = await this.prisma.simulation.findFirst({
+      where: { id, restaurantId },
+      include: { products: true, expenses: true, dayWeights: true },
+    });
+
+    if (!source) throw new NotFoundException('Simulasyon bulunamadi');
+
+    return this.prisma.$transaction(async (tx) => {
+      const sim = await tx.simulation.create({
+        data: {
+          restaurantId,
+          name: newName,
+          month: source.month,
+          kdvRate: source.kdvRate,
+          incomeTaxRate: source.incomeTaxRate,
+        },
+      });
+
+      if (source.products.length > 0) {
+        await tx.simulationProduct.createMany({
+          data: source.products.map((p) => ({
+            simulationId: sim.id,
+            productId: p.productId,
+            productName: p.productName,
+            quantity: p.quantity,
+            salePrice: p.salePrice,
+            costPrice: p.costPrice,
+          })),
+        });
+      }
+
+      if (source.expenses.length > 0) {
+        await tx.simulationExpense.createMany({
+          data: source.expenses.map((e) => ({
+            simulationId: sim.id,
+            name: e.name,
+            amount: e.amount,
+            type: e.type,
+          })),
+        });
+      }
+
+      if (source.dayWeights.length > 0) {
+        await tx.simulationDayWeight.createMany({
+          data: source.dayWeights.map((dw) => ({
+            simulationId: sim.id,
+            day: dw.day,
+            weight: dw.weight,
+          })),
+        });
+      }
+
+      return tx.simulation.findFirst({
+        where: { id: sim.id },
+        include: { products: true, expenses: true, dayWeights: true },
+      });
+    });
+  }
+
   async addExpense(id: string, restaurantId: string, data: { name: string; amount: number; type: string }) {
     const simulation = await this.prisma.simulation.findFirst({ where: { id, restaurantId } });
     if (!simulation) throw new NotFoundException('Simulasyon bulunamadi');

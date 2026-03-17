@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft, Save, Pencil, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Pencil, Plus, Trash2, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
 // ─── Types ───
@@ -286,6 +286,22 @@ export default function SimulationDetailPage() {
     },
   });
 
+  const duplicateMutation = useMutation({
+    mutationFn: (name: string) => api.post(`/simulations/${id}/duplicate`, { name }),
+    onSuccess: (res) => {
+      toast.success('Simulasyon kopyalandi');
+      router.push(`/dashboard/simulation/${res.data.id}`);
+    },
+    onError: () => toast.error('Kopyalama basarisiz'),
+  });
+
+  const handleDuplicate = () => {
+    const name = prompt('Yeni simulasyon adi:', `${simName} (Kopya)`);
+    if (name?.trim()) {
+      duplicateMutation.mutate(name.trim());
+    }
+  };
+
   const handleSave = () => {
     saveMutation.mutate({
       name: simName,
@@ -354,6 +370,10 @@ export default function SimulationDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleDuplicate} disabled={duplicateMutation.isPending}>
+            <Copy className="mr-2 h-4 w-4" />
+            Cogalt
+          </Button>
           <Button onClick={handleSave} disabled={saveMutation.isPending}>
             <Save className="mr-2 h-4 w-4" />
             {saveMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}

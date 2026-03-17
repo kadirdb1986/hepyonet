@@ -62,6 +62,15 @@ export class SimulationController {
     return this.service.remove(id, restaurantId);
   }
 
+  @Post(':id/duplicate')
+  duplicate(
+    @CurrentUser('restaurantId') restaurantId: string,
+    @Param('id') id: string,
+    @Body('name') name: string,
+  ) {
+    return this.service.duplicate(id, restaurantId, name);
+  }
+
   @Post(':id/expenses')
   addExpense(
     @CurrentUser('restaurantId') restaurantId: string,
