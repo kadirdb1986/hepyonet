@@ -535,9 +535,8 @@ export default function SimulationDetailPage() {
                       </TableBody>
                     </Table>
                   </div>
-                  <div className="flex items-center justify-between px-2 py-1.5 text-sm">
-                    <span className="text-muted-foreground">Toplam Agirlik</span>
-                    <span className="font-medium">%{totalWeight}</span>
+                  <div className="flex items-center px-2 py-1.5 text-sm">
+                    <span className="text-muted-foreground">Toplam Agirlik: %{totalWeight}</span>
                   </div>
                 </div>
               );
