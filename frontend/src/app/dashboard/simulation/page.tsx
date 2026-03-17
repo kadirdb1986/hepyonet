@@ -149,8 +149,8 @@ export default function SimulationPage() {
   });
 
   const updateExpMutation = useMutation({
-    mutationFn: ({ id, amount }: { id: string; amount: number }) =>
-      api.patch(`/sim-fixed-expenses/${id}`, { amount }),
+    mutationFn: ({ id, name, amount }: { id: string; name?: string; amount: number }) =>
+      api.patch(`/sim-fixed-expenses/${id}`, { name, amount }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sim-fixed-expenses'] });
       setEditingExpenseId(null);
