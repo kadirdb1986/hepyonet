@@ -123,10 +123,9 @@ export default function SimulationDetailPage() {
 
   const grossProfit = totalRevenue - totalExpense;
 
-  const kdvRevenue = totalRevenue * kdvRate / (100 + kdvRate);
-  const kdvExpense = totalExpense * kdvRate / (100 + kdvRate);
+  const kdvNet = (totalRevenue - totalExpense) * kdvRate / (100 + kdvRate);
 
-  const profitBeforeTax = grossProfit - (kdvRevenue - kdvExpense);
+  const profitBeforeTax = grossProfit - kdvNet;
   const incomeTax = Math.max(0, profitBeforeTax * incomeTaxRate / 100);
   const netProfit = profitBeforeTax - incomeTax;
 
@@ -304,10 +303,6 @@ export default function SimulationDetailPage() {
                 </Table>
               </div>
             )}
-            <div className="mt-4 flex items-center justify-between px-2 py-3 bg-muted/50 rounded-md">
-              <span className="font-medium">Toplam Ciro</span>
-              <span className="font-bold text-lg">{formatCurrency(totalRevenue)}</span>
-            </div>
           </CardContent>
         </Card>
 
@@ -409,93 +404,67 @@ export default function SimulationDetailPage() {
               </div>
             </div>
 
-            {/* Toplam Gider */}
-            <div className="flex items-center justify-between px-2 py-3 bg-muted/50 rounded-md">
-              <span className="font-medium">Toplam Gider</span>
-              <span className="font-bold text-lg">{formatCurrency(totalExpense)}</span>
-            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* ─── Bottom Summary ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="flex items-center justify-between px-4 py-4 bg-white border rounded-lg">
+          <span className="font-semibold text-lg">Toplam Ciro</span>
+          <span className="font-bold text-xl">{formatCurrency(totalRevenue)}</span>
+        </div>
+        <div className="flex items-center justify-between px-4 py-4 bg-white border rounded-lg">
+          <span className="font-semibold text-lg">Toplam Gider</span>
+          <span className="font-bold text-xl">{formatCurrency(totalExpense)}</span>
+        </div>
+      </div>
+
       <Card>
         <CardContent className="pt-6 space-y-4">
-          {/* Ciro & Gider */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Toplam Ciro (KDV dahil)</span>
-              <span className="font-medium">{formatCurrency(totalRevenue)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Toplam Gider (KDV dahil)</span>
-              <span className="font-medium">{formatCurrency(totalExpense)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Brut Kar</span>
-              <span
-                className={`font-bold ${grossProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}
-              >
-                {formatCurrency(grossProfit)}
-              </span>
-            </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Brut Kar</span>
+            <span className={`font-bold ${grossProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {formatCurrency(grossProfit)}
+            </span>
           </div>
 
           <hr />
 
-          {/* KDV */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-sm">KDV Orani:</span>
-                <Input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  value={kdvRate}
-                  onChange={(e) => setKdvRate(parseFloat(e.target.value) || 0)}
-                  className="w-20 h-8 text-right"
-                />
-                <span className="text-sm">%</span>
-              </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm">KDV Gider (%</span>
+              <Input
+                type="number"
+                step="0.1"
+                min="0"
+                value={kdvRate}
+                onChange={(e) => setKdvRate(parseFloat(e.target.value) || 0)}
+                className="w-16 h-8 text-right"
+              />
+              <span className="text-sm">)</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">KDV Geliri</span>
-              <span className="font-medium">{formatCurrency(kdvRevenue)}</span>
+            <span className="font-medium">{formatCurrency(kdvNet)}</span>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm">Gelir Vergisi (%</span>
+              <Input
+                type="number"
+                step="0.1"
+                min="0"
+                value={incomeTaxRate}
+                onChange={(e) => setIncomeTaxRate(parseFloat(e.target.value) || 0)}
+                className="w-16 h-8 text-right"
+              />
+              <span className="text-sm">)</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">KDV Gideri</span>
-              <span className="font-medium">{formatCurrency(kdvExpense)}</span>
-            </div>
+            <span className="font-medium">{formatCurrency(incomeTax)}</span>
           </div>
 
           <hr />
 
-          {/* Gelir Vergisi */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-sm">Gelir Vergisi Orani:</span>
-                <Input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  value={incomeTaxRate}
-                  onChange={(e) => setIncomeTaxRate(parseFloat(e.target.value) || 0)}
-                  className="w-20 h-8 text-right"
-                />
-                <span className="text-sm">%</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Gelir Vergisi</span>
-              <span className="font-medium">{formatCurrency(incomeTax)}</span>
-            </div>
-          </div>
-
-          <hr />
-
-          {/* Net Kar */}
           <div className="flex items-center justify-between py-2">
             <span className="text-lg font-bold">NET Kar</span>
             <span
