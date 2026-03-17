@@ -227,11 +227,24 @@ export default function SimulationDetailPage() {
     },
   });
 
+  const reloadSimulation = async () => {
+    const { data } = await api.get(`/simulations/${id}`);
+    setProducts(data.products.map((p: any) => ({
+      id: p.id, productId: p.productId, name: p.productName || p.name || '',
+      quantity: Number(p.quantity), salePrice: Number(p.salePrice), costPrice: Number(p.costPrice),
+    })));
+    setExpenses(data.expenses.map((e: any) => ({
+      id: e.id, name: e.name, amount: Number(e.amount), type: e.type, productId: e.productId,
+    })));
+    setSimName(data.name);
+    setKdvRate(Number(data.kdvRate) || 10);
+    setIncomeTaxRate(Number(data.incomeTaxRate) || 20);
+  };
+
   const addRevenueMutation = useMutation({
     mutationFn: (data: { name: string; amount: number }) => api.post(`/simulations/${id}/revenues`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['simulation', id] });
-      setInitialized(false);
+    onSuccess: async () => {
+      await reloadSimulation();
       setNewRevenueName('');
       setNewRevenueAmount('');
       toast.success('Gelir eklendi');
@@ -240,18 +253,16 @@ export default function SimulationDetailPage() {
 
   const removeRevenueMutation = useMutation({
     mutationFn: (productId: string) => api.delete(`/simulations/${id}/revenues/${productId}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['simulation', id] });
-      setInitialized(false);
+    onSuccess: async () => {
+      await reloadSimulation();
       toast.success('Gelir silindi');
     },
   });
 
   const addExpenseMutation = useMutation({
     mutationFn: (data: { name: string; amount: number }) => api.post(`/simulations/${id}/expenses`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['simulation', id] });
-      setInitialized(false);
+    onSuccess: async () => {
+      await reloadSimulation();
       setNewExpenseName('');
       setNewExpenseAmount('');
       toast.success('Gider eklendi');
@@ -260,9 +271,8 @@ export default function SimulationDetailPage() {
 
   const removeExpenseMutation = useMutation({
     mutationFn: (expenseId: string) => api.delete(`/simulations/${id}/expenses/${expenseId}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['simulation', id] });
-      setInitialized(false);
+    onSuccess: async () => {
+      await reloadSimulation();
       toast.success('Gider silindi');
     },
   });
