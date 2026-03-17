@@ -163,10 +163,8 @@ export default function SimulationDetailPage() {
   }, [simulation, initialized]);
 
   // ─── Expense groups ───
-  const fixedExpenses = expenses.filter((e) => e.type === 'FIXED');
-  const otherExpenses = expenses.filter((e) => e.type === 'OTHER');
-  const fixedTotal = fixedExpenses.reduce((sum, e) => sum + e.amount, 0);
-  const otherTotal = otherExpenses.reduce((sum, e) => sum + e.amount, 0);
+  const fixedAndOtherExpenses = expenses.filter((e) => e.type === 'FIXED' || e.type === 'OTHER');
+  const fixedAndOtherTotal = fixedAndOtherExpenses.reduce((sum, e) => sum + e.amount, 0);
   const foodCostTotal = products.reduce((sum, p) => sum + p.quantity * p.costPrice, 0);
 
   // ─── Calculations ───
@@ -176,8 +174,8 @@ export default function SimulationDetailPage() {
   );
 
   const totalExpense = useMemo(
-    () => fixedTotal + foodCostTotal + otherTotal,
-    [fixedTotal, foodCostTotal, otherTotal],
+    () => fixedAndOtherTotal + foodCostTotal,
+    [fixedAndOtherTotal, foodCostTotal],
   );
 
   const grossProfit = totalRevenue - totalExpense;
@@ -474,12 +472,12 @@ export default function SimulationDetailPage() {
               </div>
             </div>
 
-            {/* Sabit Giderler */}
+            {/* Sabit Giderler ve Diger Giderler */}
             <div>
               <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
-                Sabit Giderler
+                Sabit Giderler ve Diger Giderler
               </h3>
-              {fixedExpenses.length === 0 ? (
+              {fixedAndOtherExpenses.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-2">Sabit gider bulunmuyor</p>
               ) : (
                 <div className="rounded-md border">
@@ -492,7 +490,7 @@ export default function SimulationDetailPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {fixedExpenses.map((exp) => (
+                      {fixedAndOtherExpenses.map((exp) => (
                         <TableRow key={exp.id}>
                           <TableCell>{exp.name}</TableCell>
                           <TableCell className="text-right">
@@ -511,49 +509,8 @@ export default function SimulationDetailPage() {
               )}
               <div className="mt-2 flex items-center justify-between px-2 py-1.5 text-sm">
                 <span className="text-muted-foreground">Alt Toplam</span>
-                <span className="font-medium">{formatCurrency(fixedTotal)}</span>
+                <span className="font-medium">{formatCurrency(fixedAndOtherTotal)}</span>
               </div>
-            </div>
-
-            {/* Diger Giderler */}
-            <div>
-              <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
-                Diger Giderler
-              </h3>
-              {otherExpenses.length > 0 && (
-                <div className="rounded-md border mb-2">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Ad</TableHead>
-                        <TableHead className="text-right w-[140px]">Tutar</TableHead>
-                        <TableHead className="w-[40px]"></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {otherExpenses.map((exp) => (
-                        <TableRow key={exp.id}>
-                          <TableCell>{exp.name}</TableCell>
-                          <TableCell className="text-right">
-                            <MoneyInput value={exp.amount} onChange={(v) => updateFixedExpenseAmount(exp.id, v)} className="w-32 ml-auto" />
-                          </TableCell>
-                          <TableCell>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeExpenseMutation.mutate(exp.id)}>
-                              <Trash2 className="h-3.5 w-3.5 text-red-500" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-              {otherExpenses.length > 0 && (
-                <div className="mt-2 flex items-center justify-between px-2 py-1.5 text-sm">
-                  <span className="text-muted-foreground">Alt Toplam</span>
-                  <span className="font-medium">{formatCurrency(otherTotal)}</span>
-                </div>
-              )}
               <div className="mt-2 flex items-center gap-2">
                 <Input placeholder="Gider adi" value={newExpenseName} onChange={(e) => setNewExpenseName(e.target.value)} className="h-8 flex-1" />
                 <MoneyInput value={Number(newExpenseAmount) || 0} onChange={(v) => setNewExpenseAmount(String(v))} className="w-28" />
