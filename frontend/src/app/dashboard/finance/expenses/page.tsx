@@ -115,12 +115,8 @@ export default function ExpensesPage() {
 
   const dateRange = (() => {
     const [y, m] = selectedMonth.split('-').map(Number);
-    const now = new Date();
-    const isCurrentMonth = now.getFullYear() === y && now.getMonth() + 1 === m;
     const startDate = `${selectedMonth}-01`;
-    const endDate = isCurrentMonth
-      ? toLocalDate(now)
-      : toLocalDate(new Date(y, m, 0)); // last day of month
+    const endDate = toLocalDate(new Date(y, m, 0)); // last day of month
     return { startDate, endDate };
   })();
 
