@@ -98,16 +98,21 @@ export class RevenueService {
   }
 
   async getMonthlySummary(restaurantId: string, month: string) {
+    if (!month) {
+      const now = new Date();
+      month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    }
     const [yearStr, monthStr] = month.split('-');
     const year = parseInt(yearStr, 10);
     const m = parseInt(monthStr, 10);
-    const from = new Date(year, m - 1, 1);
-    const to = new Date(year, m, 1);
+    const from = new Date(`${year}-${String(m).padStart(2, '0')}-01T00:00:00`);
+    const lastDay = new Date(year, m, 0).getDate();
+    const to = new Date(`${year}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}T23:59:59.999`);
 
     const revenues = await this.prisma.revenue.findMany({
       where: {
         restaurantId,
-        date: { gte: from, lt: to },
+        date: { gte: from, lte: to },
       },
       orderBy: { date: 'asc' },
     });
@@ -121,7 +126,7 @@ export class RevenueService {
       where: {
         restaurantId,
         isDistributed: false,
-        paymentDate: { gte: from, lt: to },
+        paymentDate: { gte: from, lte: to },
       },
     });
 
