@@ -46,4 +46,8 @@ export class UpdateSimulationDto {
   @IsOptional()
   @IsArray()
   expenses?: UpdateSimExpenseDto[];
+
+  @IsOptional()
+  @IsArray()
+  dayWeights?: { day: string; weight: number }[];
 }

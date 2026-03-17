@@ -419,11 +419,24 @@ model Simulation {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  restaurant Restaurant          @relation(fields: [restaurantId], references: [id])
-  products   SimulationProduct[]
-  expenses   SimulationExpense[]
+  restaurant  Restaurant              @relation(fields: [restaurantId], references: [id])
+  products    SimulationProduct[]
+  expenses    SimulationExpense[]
+  dayWeights  SimulationDayWeight[]
 
   @@map("simulations")
+}
+
+model SimulationDayWeight {
+  id           String @id @default(uuid())
+  simulationId String
+  day          String
+  weight       Int    @default(0)
+
+  simulation Simulation @relation(fields: [simulationId], references: [id], onDelete: Cascade)
+
+  @@unique([simulationId, day])
+  @@map("simulation_day_weights")
 }
 
 model SimulationProduct {

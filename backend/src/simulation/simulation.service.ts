@@ -31,6 +31,7 @@ export class SimulationService {
       include: {
         products: true,
         expenses: true,
+        dayWeights: true,
       },
     });
 
@@ -113,12 +114,31 @@ export class SimulationService {
         });
       }
 
+      // Create default day weights
+      const defaultWeights = [
+        { day: 'Pazartesi', weight: 10 },
+        { day: 'Sali', weight: 12 },
+        { day: 'Carsamba', weight: 13 },
+        { day: 'Persembe', weight: 14 },
+        { day: 'Cuma', weight: 17 },
+        { day: 'Cumartesi', weight: 18 },
+        { day: 'Pazar', weight: 16 },
+      ];
+      await tx.simulationDayWeight.createMany({
+        data: defaultWeights.map((w) => ({
+          simulationId: simulation.id,
+          day: w.day,
+          weight: w.weight,
+        })),
+      });
+
       // Return the full simulation
       return tx.simulation.findFirst({
         where: { id: simulation.id },
         include: {
           products: true,
           expenses: true,
+          dayWeights: true,
         },
       });
     });
@@ -204,12 +224,24 @@ export class SimulationService {
         }
       }
 
+      // Update day weights
+      if (dto.dayWeights && dto.dayWeights.length > 0) {
+        for (const dw of dto.dayWeights) {
+          await tx.simulationDayWeight.upsert({
+            where: { simulationId_day: { simulationId: id, day: dw.day } },
+            update: { weight: dw.weight },
+            create: { simulationId: id, day: dw.day, weight: dw.weight },
+          });
+        }
+      }
+
       // Return the updated simulation
       return tx.simulation.findFirst({
         where: { id },
         include: {
           products: true,
           expenses: true,
+          dayWeights: true,
         },
       });
     });

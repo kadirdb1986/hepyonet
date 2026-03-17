@@ -46,6 +46,7 @@ interface SimulationData {
   incomeTaxRate: number;
   products: SimProduct[];
   expenses: SimExpense[];
+  dayWeights?: { id: string; day: string; weight: number }[];
 }
 
 // ─── Helpers ───
@@ -152,6 +153,11 @@ export default function SimulationDetailPage() {
       setKdvRate(Number(simulation.kdvRate) || 10);
       setIncomeTaxRate(Number(simulation.incomeTaxRate) || 20);
       setSimName(simulation.name);
+      if (simulation.dayWeights && simulation.dayWeights.length > 0) {
+        const loaded: Record<string, number> = {};
+        simulation.dayWeights.forEach((dw: any) => { loaded[dw.day] = Number(dw.weight); });
+        setDayWeights((prev) => ({ ...prev, ...loaded }));
+      }
       setInitialized(true);
     }
   }, [simulation, initialized]);
@@ -216,6 +222,7 @@ export default function SimulationDetailPage() {
       incomeTaxRate: number;
       products: { id: string; quantity: number; salePrice: number; costPrice: number }[];
       expenses: { id: string; amount: number }[];
+      dayWeights?: { day: string; weight: number }[];
     }) => api.patch(`/simulations/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['simulation', id] });
@@ -239,6 +246,11 @@ export default function SimulationDetailPage() {
     setSimName(data.name);
     setKdvRate(Number(data.kdvRate) || 10);
     setIncomeTaxRate(Number(data.incomeTaxRate) || 20);
+    if (data.dayWeights && data.dayWeights.length > 0) {
+      const loaded: Record<string, number> = {};
+      data.dayWeights.forEach((dw: any) => { loaded[dw.day] = Number(dw.weight); });
+      setDayWeights((prev) => ({ ...prev, ...loaded }));
+    }
   };
 
   const addRevenueMutation = useMutation({
@@ -294,6 +306,7 @@ export default function SimulationDetailPage() {
           id: e.id,
           amount: e.amount,
         })),
+      dayWeights: Object.entries(dayWeights).map(([day, weight]) => ({ day, weight })),
     });
   };
 
