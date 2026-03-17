@@ -105,6 +105,11 @@ export default function SimulationDetailPage() {
     }
   }, [simulation, initialized]);
 
+  // ─── Expense groups ───
+  const fixedExpenses = expenses.filter((e) => e.type === 'FIXED');
+  const fixedTotal = fixedExpenses.reduce((sum, e) => sum + e.amount, 0);
+  const foodCostTotal = products.reduce((sum, p) => sum + p.quantity * p.costPrice, 0);
+
   // ─── Calculations ───
   const totalRevenue = useMemo(
     () => products.reduce((sum, p) => sum + p.quantity * p.salePrice, 0),
@@ -112,8 +117,8 @@ export default function SimulationDetailPage() {
   );
 
   const totalExpense = useMemo(
-    () => fixedExpenses.reduce((sum, e) => sum + e.amount, 0) + products.reduce((sum, p) => sum + p.quantity * p.costPrice, 0),
-    [fixedExpenses, products],
+    () => fixedTotal + foodCostTotal,
+    [fixedTotal, foodCostTotal],
   );
 
   const grossProfit = totalRevenue - totalExpense;
@@ -124,11 +129,6 @@ export default function SimulationDetailPage() {
   const profitBeforeTax = grossProfit - (kdvRevenue - kdvExpense);
   const incomeTax = Math.max(0, profitBeforeTax * incomeTaxRate / 100);
   const netProfit = profitBeforeTax - incomeTax;
-
-  // ─── Expense groups ───
-  const fixedExpenses = expenses.filter((e) => e.type === 'FIXED');
-  const fixedTotal = fixedExpenses.reduce((sum, e) => sum + e.amount, 0);
-  const foodCostTotal = products.reduce((sum, p) => sum + p.quantity * p.costPrice, 0);
 
   // ─── Product handlers ───
   const updateProductQuantity = (productId: string, quantity: number) => {
