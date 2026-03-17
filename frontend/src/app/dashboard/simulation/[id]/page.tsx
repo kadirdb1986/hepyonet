@@ -73,6 +73,15 @@ export default function SimulationDetailPage() {
   const [initialized, setInitialized] = useState(false);
   const [simName, setSimName] = useState('');
   const [isEditingName, setIsEditingName] = useState(false);
+  const [dayWeights, setDayWeights] = useState({
+    Pazartesi: 10,
+    Sali: 12,
+    Carsamba: 13,
+    Persembe: 14,
+    Cuma: 17,
+    Cumartesi: 18,
+    Pazar: 16,
+  });
 
   // ─── Fetch Simulation ───
   const { data: simulation, isLoading } = useQuery<SimulationData>({
@@ -420,61 +429,123 @@ export default function SimulationDetailPage() {
         </div>
       </div>
 
-      <Card>
-        <CardContent className="pt-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Brut Kar</span>
-            <span className={`font-bold ${grossProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {formatCurrency(grossProfit)}
-            </span>
-          </div>
-
-          <hr />
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-sm">KDV Gider (%</span>
-              <Input
-                type="number"
-                step="0.1"
-                min="0"
-                value={kdvRate}
-                onChange={(e) => setKdvRate(parseFloat(e.target.value) || 0)}
-                className="w-16 h-8 text-right"
-              />
-              <span className="text-sm">)</span>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Sol: Brut Kar, KDV, Vergi, Net Kar */}
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Brut Kar</span>
+              <span className={`font-bold ${grossProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {formatCurrency(grossProfit)}
+              </span>
             </div>
-            <span className="font-medium">{formatCurrency(kdvNet)}</span>
-          </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-sm">Gelir Vergisi (%</span>
-              <Input
-                type="number"
-                step="0.1"
-                min="0"
-                value={incomeTaxRate}
-                onChange={(e) => setIncomeTaxRate(parseFloat(e.target.value) || 0)}
-                className="w-16 h-8 text-right"
-              />
-              <span className="text-sm">)</span>
+            <hr />
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-sm">KDV Gider (%</span>
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={kdvRate}
+                  onChange={(e) => setKdvRate(parseFloat(e.target.value) || 0)}
+                  className="w-16 h-8 text-right"
+                />
+                <span className="text-sm">)</span>
+              </div>
+              <span className="font-medium">{formatCurrency(kdvNet)}</span>
             </div>
-            <span className="font-medium">{formatCurrency(incomeTax)}</span>
-          </div>
 
-          <hr />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-sm">Gelir Vergisi (%</span>
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={incomeTaxRate}
+                  onChange={(e) => setIncomeTaxRate(parseFloat(e.target.value) || 0)}
+                  className="w-16 h-8 text-right"
+                />
+                <span className="text-sm">)</span>
+              </div>
+              <span className="font-medium">{formatCurrency(incomeTax)}</span>
+            </div>
 
-          <div className="flex items-center justify-between py-2">
-            <span className="text-lg font-bold">NET Kar</span>
-            <span
-              className={`text-xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}
-            >
-              {formatCurrency(netProfit)}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+            <hr />
+
+            <div className="flex items-center justify-between py-2">
+              <span className="text-lg font-bold">NET Kar</span>
+              <span
+                className={`text-xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}
+              >
+                {formatCurrency(netProfit)}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Sag: Haftalik Ciro Dagilimi */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Haftalik Tahmini Ciro Dagilimi</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              const [y, m] = (simulation?.month || '2026-01').split('-').map(Number);
+              const daysInMonth = new Date(y, m, 0).getDate();
+              const weeklyCiro = totalRevenue / daysInMonth * 7;
+              const totalWeight = Object.values(dayWeights).reduce((s, w) => s + w, 0);
+
+              return (
+                <div className="space-y-3">
+                  <div className="text-sm text-muted-foreground mb-2">
+                    Haftalik Ciro: <span className="font-medium text-foreground">{formatCurrency(weeklyCiro)}</span>
+                  </div>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Gun</TableHead>
+                          <TableHead className="text-right w-[70px]">Agirlik %</TableHead>
+                          <TableHead className="text-right">Tahmini Ciro</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {Object.entries(dayWeights).map(([day, weight]) => (
+                          <TableRow key={day}>
+                            <TableCell className="font-medium">{day}</TableCell>
+                            <TableCell className="text-right">
+                              <Input
+                                type="number"
+                                min="0"
+                                value={weight}
+                                onChange={(e) =>
+                                  setDayWeights((prev) => ({ ...prev, [day]: parseInt(e.target.value, 10) || 0 }))
+                                }
+                                className="w-16 h-8 text-right ml-auto"
+                              />
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatCurrency(totalWeight > 0 ? weeklyCiro * weight / totalWeight : 0)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <div className="flex items-center justify-between px-2 py-1.5 text-sm">
+                    <span className="text-muted-foreground">Toplam Agirlik</span>
+                    <span className="font-medium">%{totalWeight}</span>
+                  </div>
+                </div>
+              );
+            })()}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
