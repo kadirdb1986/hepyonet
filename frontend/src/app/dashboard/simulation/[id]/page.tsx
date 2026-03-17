@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft, Save, Pencil } from 'lucide-react';
+import { ArrowLeft, Save, Pencil, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 // ─── Types ───
@@ -111,6 +111,10 @@ export default function SimulationDetailPage() {
   const [initialized, setInitialized] = useState(false);
   const [simName, setSimName] = useState('');
   const [isEditingName, setIsEditingName] = useState(false);
+  const [newRevenueName, setNewRevenueName] = useState('');
+  const [newRevenueAmount, setNewRevenueAmount] = useState('');
+  const [newExpenseName, setNewExpenseName] = useState('');
+  const [newExpenseAmount, setNewExpenseAmount] = useState('');
   const [dayWeights, setDayWeights] = useState({
     Pazartesi: 10,
     Sali: 12,
@@ -221,6 +225,46 @@ export default function SimulationDetailPage() {
     },
   });
 
+  const addRevenueMutation = useMutation({
+    mutationFn: (data: { name: string; amount: number }) => api.post(`/simulations/${id}/revenues`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['simulation', id] });
+      setInitialized(false);
+      setNewRevenueName('');
+      setNewRevenueAmount('');
+      toast.success('Gelir eklendi');
+    },
+  });
+
+  const removeRevenueMutation = useMutation({
+    mutationFn: (productId: string) => api.delete(`/simulations/${id}/revenues/${productId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['simulation', id] });
+      setInitialized(false);
+      toast.success('Gelir silindi');
+    },
+  });
+
+  const addExpenseMutation = useMutation({
+    mutationFn: (data: { name: string; amount: number }) => api.post(`/simulations/${id}/expenses`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['simulation', id] });
+      setInitialized(false);
+      setNewExpenseName('');
+      setNewExpenseAmount('');
+      toast.success('Gider eklendi');
+    },
+  });
+
+  const removeExpenseMutation = useMutation({
+    mutationFn: (expenseId: string) => api.delete(`/simulations/${id}/expenses/${expenseId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['simulation', id] });
+      setInitialized(false);
+      toast.success('Gider silindi');
+    },
+  });
+
   const handleSave = () => {
     saveMutation.mutate({
       name: simName,
@@ -312,6 +356,7 @@ export default function SimulationDetailPage() {
                       <TableHead className="text-right w-[80px]">Adet</TableHead>
                       <TableHead className="text-right w-[100px]">Birim Fiyat</TableHead>
                       <TableHead className="text-right">Toplam</TableHead>
+                      <TableHead className="w-[40px]"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -327,12 +372,25 @@ export default function SimulationDetailPage() {
                         <TableCell className="text-right font-medium">
                           {formatCurrency(product.quantity * product.salePrice)}
                         </TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeRevenueMutation.mutate(product.id)}>
+                            <Trash2 className="h-3.5 w-3.5 text-red-500" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </div>
             )}
+            <div className="mt-3 flex items-center gap-2">
+              <Input placeholder="Gelir adi" value={newRevenueName} onChange={(e) => setNewRevenueName(e.target.value)} className="h-8 flex-1" />
+              <MoneyInput value={Number(newRevenueAmount) || 0} onChange={(v) => setNewRevenueAmount(String(v))} className="w-28" />
+              <Button size="sm" className="h-8" disabled={!newRevenueName.trim() || addRevenueMutation.isPending}
+                onClick={() => addRevenueMutation.mutate({ name: newRevenueName.trim(), amount: Number(newRevenueAmount) || 0 })}>
+                <Plus className="h-3.5 w-3.5 mr-1" /> Ekle
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
@@ -356,6 +414,7 @@ export default function SimulationDetailPage() {
                       <TableRow>
                         <TableHead>Ad</TableHead>
                         <TableHead className="text-right w-[140px]">Tutar</TableHead>
+                        <TableHead className="w-[40px]"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -364,6 +423,11 @@ export default function SimulationDetailPage() {
                           <TableCell>{exp.name}</TableCell>
                           <TableCell className="text-right">
                             <MoneyInput value={exp.amount} onChange={(v) => updateFixedExpenseAmount(exp.id, v)} className="w-32 ml-auto" />
+                          </TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeExpenseMutation.mutate(exp.id)}>
+                              <Trash2 className="h-3.5 w-3.5 text-red-500" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -393,6 +457,7 @@ export default function SimulationDetailPage() {
                         <TableHead className="text-right w-[100px]">Birim Maliyet</TableHead>
                         <TableHead className="text-right w-[60px]">Adet</TableHead>
                         <TableHead className="text-right">Toplam</TableHead>
+                        <TableHead className="w-[40px]"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -404,6 +469,11 @@ export default function SimulationDetailPage() {
                           </TableCell>
                           <TableCell className="text-right text-muted-foreground">{formatNumber(product.quantity)}</TableCell>
                           <TableCell className="text-right font-medium">{formatCurrency(product.quantity * product.costPrice)}</TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeRevenueMutation.mutate(product.id)}>
+                              <Trash2 className="h-3.5 w-3.5 text-red-500" />
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -414,6 +484,16 @@ export default function SimulationDetailPage() {
                 <span className="text-muted-foreground">Alt Toplam</span>
                 <span className="font-medium">{formatCurrency(foodCostTotal)}</span>
               </div>
+            </div>
+
+            {/* Yeni Gider Ekle */}
+            <div className="mt-3 flex items-center gap-2">
+              <Input placeholder="Gider adi" value={newExpenseName} onChange={(e) => setNewExpenseName(e.target.value)} className="h-8 flex-1" />
+              <MoneyInput value={Number(newExpenseAmount) || 0} onChange={(v) => setNewExpenseAmount(String(v))} className="w-28" />
+              <Button size="sm" className="h-8" disabled={!newExpenseName.trim() || addExpenseMutation.isPending}
+                onClick={() => addExpenseMutation.mutate({ name: newExpenseName.trim(), amount: Number(newExpenseAmount) || 0 })}>
+                <Plus className="h-3.5 w-3.5 mr-1" /> Ekle
+              </Button>
             </div>
 
           </CardContent>

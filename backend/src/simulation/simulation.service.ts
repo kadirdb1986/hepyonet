@@ -227,4 +227,62 @@ export class SimulationService {
     await this.prisma.simulation.delete({ where: { id } });
     return { message: 'Simulasyon silindi' };
   }
+
+  async addExpense(id: string, restaurantId: string, data: { name: string; amount: number; type: string }) {
+    const simulation = await this.prisma.simulation.findFirst({ where: { id, restaurantId } });
+    if (!simulation) throw new NotFoundException('Simulasyon bulunamadi');
+
+    return this.prisma.simulationExpense.create({
+      data: {
+        simulationId: id,
+        name: data.name,
+        amount: data.amount,
+        type: (data.type as SimExpenseType) || SimExpenseType.FIXED,
+      },
+    });
+  }
+
+  async removeExpense(id: string, expenseId: string, restaurantId: string) {
+    const simulation = await this.prisma.simulation.findFirst({ where: { id, restaurantId } });
+    if (!simulation) throw new NotFoundException('Simulasyon bulunamadi');
+
+    await this.prisma.simulationExpense.delete({ where: { id: expenseId } });
+    return { message: 'Gider silindi' };
+  }
+
+  async addRevenue(id: string, restaurantId: string, data: { name: string; amount: number }) {
+    const simulation = await this.prisma.simulation.findFirst({ where: { id, restaurantId } });
+    if (!simulation) throw new NotFoundException('Simulasyon bulunamadi');
+
+    return this.prisma.simulationProduct.create({
+      data: {
+        simulationId: id,
+        productId: `manual-${Date.now()}`,
+        productName: data.name,
+        quantity: 1,
+        salePrice: data.amount,
+        costPrice: 0,
+      },
+    });
+  }
+
+  async removeRevenue(id: string, productId: string, restaurantId: string) {
+    const simulation = await this.prisma.simulation.findFirst({ where: { id, restaurantId } });
+    if (!simulation) throw new NotFoundException('Simulasyon bulunamadi');
+
+    // Also remove related FOOD_COST expense
+    const product = await this.prisma.simulationProduct.findUnique({ where: { id: productId } });
+    if (product) {
+      await this.prisma.simulationExpense.deleteMany({
+        where: {
+          simulationId: id,
+          name: { contains: product.productName },
+          type: SimExpenseType.FOOD_COST,
+        },
+      });
+    }
+
+    await this.prisma.simulationProduct.delete({ where: { id: productId } });
+    return { message: 'Gelir silindi' };
+  }
 }

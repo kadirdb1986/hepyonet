@@ -61,4 +61,40 @@ export class SimulationController {
   ) {
     return this.service.remove(id, restaurantId);
   }
+
+  @Post(':id/expenses')
+  addExpense(
+    @CurrentUser('restaurantId') restaurantId: string,
+    @Param('id') id: string,
+    @Body() data: { name: string; amount: number; type?: string },
+  ) {
+    return this.service.addExpense(id, restaurantId, { name: data.name, amount: data.amount, type: data.type || 'FIXED' });
+  }
+
+  @Delete(':id/expenses/:expenseId')
+  removeExpense(
+    @CurrentUser('restaurantId') restaurantId: string,
+    @Param('id') id: string,
+    @Param('expenseId') expenseId: string,
+  ) {
+    return this.service.removeExpense(id, expenseId, restaurantId);
+  }
+
+  @Post(':id/revenues')
+  addRevenue(
+    @CurrentUser('restaurantId') restaurantId: string,
+    @Param('id') id: string,
+    @Body() data: { name: string; amount: number },
+  ) {
+    return this.service.addRevenue(id, restaurantId, data);
+  }
+
+  @Delete(':id/revenues/:productId')
+  removeRevenue(
+    @CurrentUser('restaurantId') restaurantId: string,
+    @Param('id') id: string,
+    @Param('productId') productId: string,
+  ) {
+    return this.service.removeRevenue(id, productId, restaurantId);
+  }
 }
