@@ -551,47 +551,8 @@ export default function ProductDetailPage() {
               )}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
-
-      {/* Maliyet Dokumu */}
-      {costBreakdown && costBreakdown.ingredients.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Maliyet Dokumu</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Icerik</TableHead>
-                  <TableHead className="text-right">Miktar</TableHead>
-                  <TableHead className="text-right">Birim Maliyet</TableHead>
-                  <TableHead className="text-right">Toplam Maliyet</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {costBreakdown.ingredients.map((item, idx) => {
-                  let displayUnitCost: number;
-                  if (item.type === 'raw_material' && item.unitPrice != null && item.baseUnit) {
-                    displayUnitCost = getUnitCostInIngredientUnit(item.unitPrice, item.unit, item.baseUnit);
-                  } else {
-                    displayUnitCost = item.unitCost ?? (item.quantity > 0 ? item.cost / item.quantity : 0);
-                  }
-                  const unitLabel = UNIT_LABELS[item.unit] || item.unit;
-                  return (
-                    <TableRow key={idx}>
-                      <TableCell className="font-medium">{item.name}</TableCell>
-                      <TableCell className="text-right">{formatQuantity(Number(item.quantity))} {unitLabel}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(displayUnitCost)} TL/{unitLabel}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.cost)} TL</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-
-            {/* Ozet */}
+          {/* Ozet */}
+          {costBreakdown && costBreakdown.ingredients.length > 0 && (
             <div className="mt-6 border-t pt-4 space-y-3 max-w-sm ml-auto">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Toplam Maliyet</span>
@@ -620,9 +581,9 @@ export default function ProductDetailPage() {
                 </>
               )}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
 
       {/* Icerik Ekleme Dialogu */}
       <Dialog open={ingredientDialogOpen} onOpenChange={setIngredientDialogOpen}>
