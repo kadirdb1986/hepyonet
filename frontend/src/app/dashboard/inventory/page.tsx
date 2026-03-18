@@ -610,7 +610,7 @@ export default function InventoryPage() {
       </div>
 
       {/* Materials table */}
-      <Card>
+      <Card className="overflow-visible">
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle>
             {activeTab === 'ALL' ? t('rawMaterials') : activeTab}
@@ -646,7 +646,7 @@ export default function InventoryPage() {
             )}
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="overflow-visible">
           <Table>
             <TableHeader>
               <TableRow>
