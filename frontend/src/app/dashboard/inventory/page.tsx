@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
@@ -25,7 +26,6 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Pencil, Trash2, AlertTriangle, Settings2, X, Check, Search, Truck, SlidersHorizontal } from 'lucide-react';
-import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
 interface Supplier {
@@ -185,16 +185,6 @@ export default function InventoryPage() {
   const [editingType, setEditingType] = useState<MaterialType | null>(null);
   const [editingTypeName, setEditingTypeName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [supplierDialogOpen, setSupplierDialogOpen] = useState(false);
-  const [newSupplierName, setNewSupplierName] = useState('');
-  const [newSupplierDesc, setNewSupplierDesc] = useState('');
-  const [newSupplierDeliveryType, setNewSupplierDeliveryType] = useState('');
-  const [newSupplierPhone, setNewSupplierPhone] = useState('');
-  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
-  const [editingSupplierName, setEditingSupplierName] = useState('');
-  const [editingSupplierDesc, setEditingSupplierDesc] = useState('');
-  const [editingSupplierDeliveryType, setEditingSupplierDeliveryType] = useState('');
-  const [editingSupplierPhone, setEditingSupplierPhone] = useState('');
   const [columnMenuOpen, setColumnMenuOpen] = useState(false);
   const columnMenuRef = useRef<HTMLDivElement>(null);
   const [form, setForm] = useState({
@@ -335,55 +325,6 @@ export default function InventoryPage() {
     },
   });
 
-  // Supplier CRUD mutations
-  const createSupplierMutation = useMutation({
-    mutationFn: (data: { name: string; description?: string; deliveryType?: string; phone?: string }) => api.post('/suppliers', data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
-      setNewSupplierName('');
-      setNewSupplierDesc('');
-      setNewSupplierDeliveryType('');
-      setNewSupplierPhone('');
-      toast.success('Tedarikci eklendi');
-    },
-    onError: (error: unknown) => {
-      const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err?.response?.data?.message || 'Hata olustu');
-    },
-  });
-
-  const updateSupplierMutation = useMutation({
-    mutationFn: ({ id, name, description, deliveryType, phone }: { id: string; name: string; description?: string; deliveryType?: string; phone?: string }) =>
-      api.patch(`/suppliers/${id}`, { name, description, deliveryType, phone }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
-      queryClient.invalidateQueries({ queryKey: ['raw-materials'] });
-      setEditingSupplier(null);
-      setEditingSupplierName('');
-      setEditingSupplierDesc('');
-      setEditingSupplierDeliveryType('');
-      setEditingSupplierPhone('');
-      toast.success('Tedarikci guncellendi');
-    },
-    onError: (error: unknown) => {
-      const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err?.response?.data?.message || 'Hata olustu');
-    },
-  });
-
-  const deleteSupplierMutation = useMutation({
-    mutationFn: (id: string) => api.delete(`/suppliers/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
-      queryClient.invalidateQueries({ queryKey: ['raw-materials'] });
-      toast.success('Tedarikci silindi');
-    },
-    onError: (error: unknown) => {
-      const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err?.response?.data?.message || 'Hata olustu');
-    },
-  });
-
   function resetForm() {
     setForm({ name: '', type: materialTypes.length > 0 ? materialTypes[0].name : '', unit: 'KG', currentStock: '', lastPurchasePrice: '', minStockLevel: '', supplierId: '' });
     setEditingMaterial(null);
@@ -439,10 +380,12 @@ export default function InventoryPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setSupplierDialogOpen(true)}>
-            <Truck className="mr-2 h-4 w-4" />
-            Tedarikciler
-          </Button>
+          <Link href="/dashboard/inventory/suppliers">
+            <Button variant="outline">
+              <Truck className="mr-2 h-4 w-4" />
+              Tedarikciler
+            </Button>
+          </Link>
           <Button variant="outline" onClick={() => setTypeDialogOpen(true)}>
             <Settings2 className="mr-2 h-4 w-4" />
             Stok Tipleri
@@ -756,172 +699,6 @@ export default function InventoryPage() {
           </Table>
         </CardContent>
       </Card>
-
-      {/* Tedarikci Yonetim Dialogu */}
-      <Dialog open={supplierDialogOpen} onOpenChange={setSupplierDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Tedarikcileri Yonet</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {/* Yeni tedarikci ekleme */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (newSupplierName.trim()) {
-                  createSupplierMutation.mutate({
-                    name: newSupplierName.trim(),
-                    description: newSupplierDesc.trim() || undefined,
-                    deliveryType: newSupplierDeliveryType || undefined,
-                    phone: stripPhone(newSupplierPhone) || undefined,
-                  });
-                }
-              }}
-              className="space-y-2"
-            >
-              <Input
-                placeholder="Tedarikci adi..."
-                value={newSupplierName}
-                onChange={(e) => setNewSupplierName(e.target.value)}
-              />
-              <Textarea
-                placeholder="Aciklama (istege bagli)..."
-                value={newSupplierDesc}
-                onChange={(e) => setNewSupplierDesc(e.target.value)}
-                rows={2}
-              />
-              <select
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                value={newSupplierDeliveryType}
-                onChange={(e) => setNewSupplierDeliveryType(e.target.value)}
-              >
-                <option value="">Tedarik tipi secin...</option>
-                {DELIVERY_TYPES.map((dt) => (
-                  <option key={dt} value={dt}>{dt}</option>
-                ))}
-              </select>
-              <Input
-                placeholder="0 (5xx) xxx xx xx"
-                value={formatPhone(newSupplierPhone)}
-                onChange={(e) => setNewSupplierPhone(stripPhone(e.target.value))}
-                type="tel"
-              />
-              <Button type="submit" size="sm" className="w-full" disabled={createSupplierMutation.isPending || !newSupplierName.trim()}>
-                <Plus className="mr-2 h-4 w-4" />
-                Ekle
-              </Button>
-            </form>
-
-            {/* Mevcut tedarikciler listesi */}
-            <div className="space-y-2">
-              {suppliers.map((s) => (
-                <div key={s.id} className="flex items-start gap-2 p-2 border rounded-md">
-                  {editingSupplier?.id === s.id ? (
-                    <div className="flex-1 space-y-2">
-                      <Input
-                        value={editingSupplierName}
-                        onChange={(e) => setEditingSupplierName(e.target.value)}
-                        className="h-8"
-                        autoFocus
-                      />
-                      <Textarea
-                        value={editingSupplierDesc}
-                        onChange={(e) => setEditingSupplierDesc(e.target.value)}
-                        rows={2}
-                        placeholder="Aciklama..."
-                      />
-                      <select
-                        className="flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        value={editingSupplierDeliveryType}
-                        onChange={(e) => setEditingSupplierDeliveryType(e.target.value)}
-                      >
-                        <option value="">Tedarik tipi secin...</option>
-                        {DELIVERY_TYPES.map((dt) => (
-                          <option key={dt} value={dt}>{dt}</option>
-                        ))}
-                      </select>
-                      <Input
-                        placeholder="0 (5xx) xxx xx xx"
-                        value={formatPhone(editingSupplierPhone)}
-                        onChange={(e) => setEditingSupplierPhone(stripPhone(e.target.value))}
-                        type="tel"
-                        className="h-8"
-                      />
-                      <div className="flex gap-1 justify-end">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => {
-                            if (editingSupplierName.trim()) {
-                              updateSupplierMutation.mutate({
-                                id: s.id,
-                                name: editingSupplierName.trim(),
-                                description: editingSupplierDesc.trim() || undefined,
-                                deliveryType: editingSupplierDeliveryType || undefined,
-                                phone: stripPhone(editingSupplierPhone) || undefined,
-                              });
-                            }
-                          }}
-                          disabled={updateSupplierMutation.isPending}
-                        >
-                          <Check className="h-4 w-4 text-green-600" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => { setEditingSupplier(null); setEditingSupplierName(''); setEditingSupplierDesc(''); setEditingSupplierDeliveryType(''); setEditingSupplierPhone(''); }}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex-1 min-w-0">
-                        <span className="text-sm font-medium">{s.name}</span>
-                        {s.description && (
-                          <p className="text-xs text-muted-foreground mt-0.5 truncate">{s.description}</p>
-                        )}
-                      </div>
-                      <span className="text-xs text-muted-foreground shrink-0">
-                        ({materials.filter((m) => m.supplierId === s.id).length} kalem)
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 shrink-0"
-                        onClick={() => { setEditingSupplier(s); setEditingSupplierName(s.name); setEditingSupplierDesc(s.description || ''); setEditingSupplierDeliveryType(s.deliveryType || ''); setEditingSupplierPhone(s.phone || ''); }}
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 shrink-0"
-                        onClick={() => {
-                          if (confirm(`"${s.name}" tedarikcisini silmek istediginize emin misiniz?`)) {
-                            deleteSupplierMutation.mutate(s.id);
-                          }
-                        }}
-                        disabled={deleteSupplierMutation.isPending}
-                      >
-                        <Trash2 className="h-3 w-3 text-red-500" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-              ))}
-              {suppliers.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Henuz tedarikci tanimlanmamis
-                </p>
-              )}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Stok Tipleri Yonetim Dialogu */}
       <Dialog open={typeDialogOpen} onOpenChange={setTypeDialogOpen}>
