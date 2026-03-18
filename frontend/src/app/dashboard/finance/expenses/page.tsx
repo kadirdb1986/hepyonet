@@ -185,10 +185,6 @@ export default function ExpensesPage() {
       paymentDate: form.paymentDate,
     };
     if (form.periodType === 'DIFFERENT_MONTH') payload.effectiveMonth = form.effectiveMonth;
-    else if (form.periodType === 'MULTI_MONTH') {
-      payload.effectiveMonth = form.effectiveMonth;
-      payload.effectiveEndMonth = form.effectiveEndMonth;
-    }
     createMutation.mutate(payload);
   };
 
@@ -386,36 +382,12 @@ export default function ExpensesPage() {
               <select className={selectClass} value={form.periodType} onChange={(e) => setForm({ ...form, periodType: e.target.value as PeriodType })}>
                 <option value="SAME_MONTH">Ayni Ay (odeme tarihi)</option>
                 <option value="DIFFERENT_MONTH">Farkli Ay</option>
-                <option value="MULTI_MONTH">Birden Fazla Ay</option>
               </select>
             </div>
             {form.periodType === 'DIFFERENT_MONTH' && (
               <div className="space-y-2">
                 <Label>Hangi Ay?</Label>
                 <Input type="month" value={form.effectiveMonth} onChange={(e) => setForm({ ...form, effectiveMonth: e.target.value })} required />
-              </div>
-            )}
-            {form.periodType === 'MULTI_MONTH' && (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>Baslangic Ayi</Label>
-                  <Input type="month" value={form.effectiveMonth} onChange={(e) => setForm({ ...form, effectiveMonth: e.target.value })} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Bitis Ayi</Label>
-                  <Input type="month" value={form.effectiveEndMonth} onChange={(e) => setForm({ ...form, effectiveEndMonth: e.target.value })} required />
-                </div>
-                {form.amount && form.effectiveMonth && form.effectiveEndMonth && form.effectiveEndMonth >= form.effectiveMonth && (
-                  <div className="col-span-2 p-2 bg-blue-50 rounded text-sm text-blue-700">
-                    {(() => {
-                      const [sy, sm] = form.effectiveMonth.split('-').map(Number);
-                      const [ey, em] = form.effectiveEndMonth.split('-').map(Number);
-                      const count = (ey - sy) * 12 + (em - sm) + 1;
-                      const perMonth = parseFloat(form.amount) / count;
-                      return `${count} aya esit dagitim: ${perMonth.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL/ay`;
-                    })()}
-                  </div>
-                )}
               </div>
             )}
             <div className="flex gap-2 justify-end">
@@ -529,21 +501,9 @@ export default function ExpensesPage() {
                       </td>
                       <td className="py-2 px-3">{formatDate(expense.paymentDate)}</td>
                       <td className="py-2 px-3 text-center">
-                        {expense.effectiveMonth && !expense.effectiveEndMonth ? (
+                        {expense.effectiveMonth ? (
                           <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
                             {formatMonth(expense.effectiveMonth)}
-                          </Badge>
-                        ) : expense.effectiveMonth && expense.effectiveEndMonth ? (
-                          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-                            {formatMonth(expense.effectiveMonth)} - {formatMonth(expense.effectiveEndMonth)}
-                          </Badge>
-                        ) : expense.isDistributed ? (
-                          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                            {expense.distributionType === 'EQUAL'
-                              ? `Esit (${expense.distributionMonths} ay)`
-                              : expense.distributionType === 'REVENUE_BASED'
-                              ? `Ciro Bazli (${expense.distributionMonths} ay)`
-                              : 'Dagitildi'}
                           </Badge>
                         ) : (
                           <Badge variant="secondary">{formatMonth(expense.paymentDate.substring(0, 7))}</Badge>
@@ -555,8 +515,6 @@ export default function ExpensesPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleEdit(expense)}
-                            disabled={expense.isDistributed}
-                            title={expense.isDistributed ? 'Dagitimi iptal etmeden duzenlenemez' : 'Duzenle'}
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>

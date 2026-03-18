@@ -124,13 +124,6 @@ export default function FinanceOverviewPage() {
             <ArrowRight className="h-4 w-4" />
           </Button>
         </Link>
-        <Link href="/dashboard/finance/distribute">
-          <Button variant="outline" className="gap-2">
-            <PieChart className="h-4 w-4" />
-            Gider Dagitimi
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </Link>
       </div>
 
       {isLoading ? (
@@ -276,44 +269,6 @@ export default function FinanceOverviewPage() {
             </Card>
           </div>
 
-          {summary.distributedExpenses.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">
-                  Bu Aya Dagitilan Giderler
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-3 font-medium">Gider</th>
-                        <th className="text-left py-2 px-3 font-medium">Kategori</th>
-                        <th className="text-right py-2 px-3 font-medium">Orijinal Tutar</th>
-                        <th className="text-right py-2 px-3 font-medium">Bu Aya Dusen</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {summary.distributedExpenses.map((d: any) => (
-                        <tr key={d.id} className="border-b last:border-0">
-                          <td className="py-2 px-3">{d.title}</td>
-                          <td className="py-2 px-3">
-                            {CATEGORY_LABELS[d.category] || d.category}
-                          </td>
-                          <td className="py-2 px-3 text-right">
-                            {formatCurrency(d.originalAmount)}
-                          </td>
-                          <td className="py-2 px-3 text-right font-medium">
-                            {formatCurrency(d.distributedAmount)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
           )}
           {/* Gunluk Gelir/Gider Tablosu */}
           {summary.dailyBreakdown && summary.dailyBreakdown.length > 0 && (
