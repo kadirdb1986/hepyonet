@@ -113,9 +113,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar mobileOpen={mobileMenuOpen} onMobileClose={() => setMobileMenuOpen(false)} />
+      <Sidebar open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0">
-        <Header onMenuToggle={() => setMobileMenuOpen(true)} />
+        <Header onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)} />
         <main className="flex-1 p-3 md:p-6">
           <NextIntlClientProvider locale="tr" messages={messages}>
             {children}
