@@ -198,6 +198,35 @@ export class RevenueService {
         month: d.month,
       })),
       categoryBreakdown,
+      dailyBreakdown: this.buildDailyBreakdown(year, m, revenues, directExpenses),
     };
+  }
+
+  private buildDailyBreakdown(
+    year: number,
+    month: number,
+    revenues: any[],
+    expenses: any[],
+  ) {
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const days: { day: number; date: string; revenue: number; expense: number; net: number }[] = [];
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dayRevenues = revenues.filter((r) => new Date(r.date).getDate() === day);
+      const dayExpenses = expenses.filter((e) => new Date(e.paymentDate).getDate() === day);
+
+      const revenue = dayRevenues.reduce((sum: number, r: any) => sum + Number(r.amount), 0);
+      const expense = dayExpenses.reduce((sum: number, e: any) => sum + Number(e.amount), 0);
+
+      days.push({
+        day,
+        date: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+        revenue: Math.round(revenue),
+        expense: Math.round(expense),
+        net: Math.round(revenue - expense),
+      });
+    }
+
+    return days;
   }
 }

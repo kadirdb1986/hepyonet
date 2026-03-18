@@ -315,6 +315,56 @@ export default function FinanceOverviewPage() {
               </CardContent>
             </Card>
           )}
+          {/* Gunluk Gelir/Gider Tablosu */}
+          {summary.dailyBreakdown && summary.dailyBreakdown.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Gun Gun Gelir / Gider</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2 px-3 font-medium">Gun</th>
+                        <th className="text-right py-2 px-3 font-medium">Gelir</th>
+                        <th className="text-right py-2 px-3 font-medium">Gider</th>
+                        <th className="text-right py-2 px-3 font-medium">Net</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {summary.dailyBreakdown
+                        .filter((d: any) => d.revenue > 0 || d.expense > 0)
+                        .map((d: any) => (
+                          <tr key={d.day} className="border-b last:border-0 hover:bg-gray-50">
+                            <td className="py-2 px-3">{d.day} {formatMonth(selectedMonth)}</td>
+                            <td className="py-2 px-3 text-right text-green-600">
+                              {d.revenue > 0 ? formatCurrency(d.revenue) : '—'}
+                            </td>
+                            <td className="py-2 px-3 text-right text-red-600">
+                              {d.expense > 0 ? formatCurrency(d.expense) : '—'}
+                            </td>
+                            <td className={`py-2 px-3 text-right font-medium ${d.net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {formatCurrency(d.net)}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t-2 font-bold">
+                        <td className="py-2 px-3">Toplam</td>
+                        <td className="py-2 px-3 text-right text-green-600">{formatCurrency(summary.totalRevenue)}</td>
+                        <td className="py-2 px-3 text-right text-red-600">{formatCurrency(summary.totalExpenses)}</td>
+                        <td className={`py-2 px-3 text-right ${summary.netIncome >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {formatCurrency(summary.netIncome)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
     </div>
