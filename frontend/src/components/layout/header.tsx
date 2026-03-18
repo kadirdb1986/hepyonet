@@ -61,7 +61,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={logout} className="text-red-600">
             <LogOut className="h-4 w-4 mr-2" />
-            Cikis Yap
+            Çıkış Yap
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

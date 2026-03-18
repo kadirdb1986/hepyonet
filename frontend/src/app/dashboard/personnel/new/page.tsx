@@ -65,7 +65,7 @@ export default function NewPersonnelPage() {
       router.push('/dashboard/personnel');
     },
     onError: (err: any) => {
-      setError(err.response?.data?.message || 'Personel eklenirken bir hata olustu');
+      setError(err.response?.data?.message || 'Personel eklenirken bir hata oluştu');
     },
   });
 
@@ -83,7 +83,7 @@ export default function NewPersonnelPage() {
     }
 
     if (!form.salary || Number(form.salary) < 0) {
-      setError('Gecerli bir maas giriniz');
+      setError('Geçerli bir maaş giriniz');
       return;
     }
 
@@ -170,7 +170,7 @@ export default function NewPersonnelPage() {
                 }
                 className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
               >
-                <option value="">Pozisyon Secin</option>
+                <option value="">Pozisyon Seçin</option>
                 {positions.map((pos) => (
                   <option key={pos.id} value={pos.id}>
                     {pos.name}
@@ -181,7 +181,7 @@ export default function NewPersonnelPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="startDate">Baslangic Tarihi *</Label>
+                <Label htmlFor="startDate">Başlangıç Tarihi *</Label>
                 <Input
                   id="startDate"
                   name="startDate"
@@ -192,7 +192,7 @@ export default function NewPersonnelPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="salary">Maas (TL) *</Label>
+                <Label htmlFor="salary">Maaş (TL) *</Label>
                 <Input
                   id="salary"
                   name="salary"
@@ -209,7 +209,7 @@ export default function NewPersonnelPage() {
             <div className="flex justify-end gap-3 pt-4">
               <Link href="/dashboard/personnel">
                 <Button type="button" variant="outline">
-                  Iptal
+                  İptal
                 </Button>
               </Link>
               <Button type="submit" disabled={createMutation.isPending}>

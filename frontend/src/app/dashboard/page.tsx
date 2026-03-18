@@ -45,8 +45,8 @@ export default function DashboardPage() {
   }, []);
 
   const cards = [
-    { title: 'Aylik Ciro', value: data ? formatCurrency(data.monthlyRevenue) : '—', icon: Wallet, color: 'text-green-600' },
-    { title: 'Aylik Gider', value: data ? formatCurrency(data.monthlyExpense) : '—', icon: TrendingDown, color: 'text-red-600' },
+    { title: 'Aylık Ciro', value: data ? formatCurrency(data.monthlyRevenue) : '—', icon: Wallet, color: 'text-green-600' },
+    { title: 'Aylık Gider', value: data ? formatCurrency(data.monthlyExpense) : '—', icon: TrendingDown, color: 'text-red-600' },
     { title: 'Net Kar', value: data ? formatCurrency(data.netProfit) : '—', icon: TrendingUp, color: data && data.netProfit >= 0 ? 'text-blue-600' : 'text-red-600' },
     { title: 'Personel', value: data ? String(data.personnelCount) : '—', icon: Users, color: 'text-purple-600' },
   ];

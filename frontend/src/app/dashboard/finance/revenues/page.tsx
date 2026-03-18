@@ -145,7 +145,7 @@ export default function RevenuesPage() {
       return;
     }
 
-    if (!confirm(`${day.day} ${formatMonth(selectedMonth)} icin ciroyu ${formatCurrency(amount)} olarak kaydetmek istediginize emin misiniz?`)) {
+    if (!confirm(`${day.day} ${formatMonth(selectedMonth)} için ciroyu ${formatCurrency(amount)} olarak kaydetmek istediğinize emin misiniz?`)) {
       return;
     }
 
@@ -160,7 +160,7 @@ export default function RevenuesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Gunluk Ciro Girisi</h1>
+        <h1 className="text-2xl font-bold">Günlük Ciro Girişi</h1>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" onClick={prevMonth}>
             <ChevronLeft className="h-4 w-4" />
@@ -175,17 +175,17 @@ export default function RevenuesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">Aylik Toplam Ciro</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">Aylık Toplam Ciro</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{formatCurrency(totalRevenue)}</div>
-            <p className="text-xs text-gray-500 mt-1">{daysWithRevenue} gun ciro girisi</p>
+            <p className="text-xs text-gray-500 mt-1">{daysWithRevenue} gün ciro girişi</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">Gunluk Ortalama</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">Günlük Ortalama</CardTitle>
             <TrendingUp className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
@@ -199,7 +199,7 @@ export default function RevenuesPage() {
       {chartData.some((d) => d.amount > 0) && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Gunluk Ciro Grafigi</CardTitle>
+            <CardTitle className="text-base">Günlük Ciro Grafiği</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
@@ -217,17 +217,17 @@ export default function RevenuesPage() {
 
       <Card className="lg:w-1/2">
         <CardHeader>
-          <CardTitle className="text-base">Ciro Kayitlari</CardTitle>
+          <CardTitle className="text-base">Ciro Kayıtları</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-gray-500 text-center py-8">Yukleniyor...</p>
+            <p className="text-gray-500 text-center py-8">Yükleniyor...</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-2 px-3 font-medium w-[50px]">Gun</th>
+                    <th className="text-left py-2 px-3 font-medium w-[50px]">Gün</th>
                     <th className="text-left py-2 px-3 font-medium">Tarih</th>
                     <th className="text-right py-2 px-3 font-medium">Tutar</th>
                   </tr>

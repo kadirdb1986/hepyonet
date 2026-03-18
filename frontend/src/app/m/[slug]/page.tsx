@@ -53,11 +53,11 @@ export async function generateMetadata({
     return { title: 'Menu Bulunamadi' };
   }
   return {
-    title: `${data.restaurant.name} - Menu`,
-    description: `${data.restaurant.name} restoran menusu. Lezzetli yemeklerimizi inceleyin.`,
+    title: `${data.restaurant.name} - Menü`,
+    description: `${data.restaurant.name} restoran menüsü. Lezzetli yemeklerimizi inceleyin.`,
     openGraph: {
-      title: `${data.restaurant.name} - Menu`,
-      description: `${data.restaurant.name} restoran menusu`,
+      title: `${data.restaurant.name} - Menü`,
+      description: `${data.restaurant.name} restoran menüsü`,
       ...(data.restaurant.logo ? { images: [data.restaurant.logo] } : {}),
     },
   };
@@ -206,7 +206,7 @@ export default async function PublicMenuPage({
           <p className="text-sm text-gray-400">
             {restaurant.name} &copy; {new Date().getFullYear()}
           </p>
-          <p className="text-xs text-gray-300 mt-1">HepYonet ile olusturuldu</p>
+          <p className="text-xs text-gray-300 mt-1">HepYonet ile oluşturuldu</p>
         </div>
       </footer>
     </div>

@@ -81,7 +81,7 @@ export default function PersonnelListPage() {
   });
 
   const handleDelete = (id: string, name: string) => {
-    if (confirm(`${name} adli personeli kalici olarak silmek istediginize emin misiniz? Bu islem geri alinamaz.`)) {
+    if (confirm(`${name} adli personeli kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) {
       deleteMutation.mutate(id);
     }
   };
@@ -121,7 +121,7 @@ export default function PersonnelListPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Yukleniyor...</p>
+        <p className="text-gray-500">Yükleniyor...</p>
       </div>
     );
   }
@@ -129,7 +129,7 @@ export default function PersonnelListPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Personel Yonetimi</h1>
+        <h1 className="text-2xl font-bold">Personel Yönetimi</h1>
         <div className="flex items-center gap-2">
           <Link href="/dashboard/personnel/positions">
             <Button variant="outline">
@@ -161,7 +161,7 @@ export default function PersonnelListPage() {
         <CardContent>
           {filtered.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
-              {search ? 'Aramanizla eslesen personel bulunamadi.' : 'Henuz personel kaydi yok.'}
+              {search ? 'Aramanızla eşleşen personel bulunamadı.' : 'Henüz personel kaydı yok.'}
             </div>
           ) : (
             <div className="rounded-md border">
@@ -171,10 +171,10 @@ export default function PersonnelListPage() {
                     <TableHead>Ad Soyad</TableHead>
                     <TableHead>Pozisyon</TableHead>
                     <TableHead>Telefon</TableHead>
-                    <TableHead>Baslangic Tarihi</TableHead>
-                    <TableHead>Maas</TableHead>
+                    <TableHead>Başlangıç Tarihi</TableHead>
+                    <TableHead>Maaş</TableHead>
                     <TableHead>Durum</TableHead>
-                    <TableHead>Islemler</TableHead>
+                    <TableHead>İşlemler</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -241,19 +241,19 @@ export default function PersonnelListPage() {
           <DialogHeader>
             <DialogTitle>Personeli Pasife Al</DialogTitle>
             <DialogDescription>
-              Bu personeli pasife almak istediginizden emin misiniz? Bu islem geri alinabilir.
+              Bu personeli pasife almak istediğinizden emin misiniz? Bu işlem geri alınabilir.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeactivateId(null)}>
-              Iptal
+              İptal
             </Button>
             <Button
               variant="destructive"
               disabled={deactivateMutation.isPending}
               onClick={() => deactivateId && deactivateMutation.mutate(deactivateId)}
             >
-              {deactivateMutation.isPending ? 'Islem yapiliyor...' : 'Pasife Al'}
+              {deactivateMutation.isPending ? 'İşlem yapılıyor...' : 'Pasife Al'}
             </Button>
           </DialogFooter>
         </DialogContent>

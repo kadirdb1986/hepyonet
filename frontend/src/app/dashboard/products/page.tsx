@@ -72,7 +72,7 @@ function getProductType(product: Product): { label: string; variant: 'default' |
   const ingredients = product.ingredients || [];
 
   if (ingredients.length === 0) {
-    return { label: 'Direkt Satis', variant: 'outline' };
+    return { label: 'Direkt Satış', variant: 'outline' };
   }
 
   const hasSubProduct = ingredients.some((i) => i.subProductId != null);
@@ -83,14 +83,14 @@ function getProductType(product: Product): { label: string; variant: 'default' |
   }
 
   if (hasRawMaterial && ingredients.length === 1 && ingredients[0].unit === 'ADET' && Number(ingredients[0].quantity) === 1) {
-    return { label: 'Direkt Satis', variant: 'outline' };
+    return { label: 'Direkt Satış', variant: 'outline' };
   }
 
   if (hasRawMaterial) {
-    return { label: 'Receteli', variant: 'default' };
+    return { label: 'Reçeteli', variant: 'default' };
   }
 
-  return { label: 'Direkt Satis', variant: 'outline' };
+  return { label: 'Direkt Satış', variant: 'outline' };
 }
 
 export default function ProductsPage() {
@@ -115,10 +115,10 @@ export default function ProductsPage() {
     mutationFn: (id: string) => api.delete(`/products/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast.success('Urun basariyla silindi');
+      toast.success('Ürün başarıyla silindi');
     },
     onError: () => {
-      toast.error('Urun silinirken hata olustu');
+      toast.error('Ürün silinirken hata oluştu');
     },
   });
 
@@ -147,11 +147,11 @@ export default function ProductsPage() {
       setDirectSaleDialogOpen(false);
       setSelectedRawMaterialId('');
       setDirectSalePrice('');
-      toast.success('Direkt satis urunu olusturuldu');
+      toast.success('Direkt satış ürünü oluşturuldu');
       router.push(`/dashboard/products/${data.id}`);
     },
     onError: () => {
-      toast.error('Urun olusturulurken hata olustu');
+      toast.error('Ürün oluşturulurken hata oluştu');
     },
   });
 
@@ -168,24 +168,24 @@ export default function ProductsPage() {
   function handleDirectSaleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!selectedRawMaterialId) {
-      toast.error('Lutfen bir stok kalemi secin');
+      toast.error('Lütfen bir stok kalemi seçin');
       return;
     }
     if (parseNumericValue(directSalePrice) <= 0) {
-      toast.error('Lutfen gecerli bir satis fiyati girin');
+      toast.error('Lütfen geçerli bir satış fiyatı girin');
       return;
     }
     createDirectSaleMutation.mutate();
   }
 
   if (isLoading) {
-    return <div className="p-6 text-muted-foreground">Yukleniyor...</div>;
+    return <div className="p-6 text-muted-foreground">Yükleniyor...</div>;
   }
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Urunler</h1>
+        <h1 className="text-2xl font-bold">Ürünler</h1>
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -203,11 +203,11 @@ export default function ProductsPage() {
             }}
           >
             <Package className="mr-2 h-4 w-4" />
-            Stok Kaleminden Urun Olustur
+            Stok Kaleminden Ürün Oluştur
           </Button>
           <Button onClick={() => router.push('/dashboard/products/new')}>
             <Plus className="mr-2 h-4 w-4" />
-            Yeni Urun
+            Yeni Ürün
           </Button>
         </div>
       </div>
@@ -222,23 +222,23 @@ export default function ProductsPage() {
         />
       </div>
 
-      {/* Menu Urunleri */}
+      {/* Menü Ürünleri */}
       <Card>
         <CardHeader>
-          <CardTitle>Menu Urunleri ({menuProducts.length})</CardTitle>
+          <CardTitle>Menü Ürünleri ({menuProducts.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Urun Adi</TableHead>
+                <TableHead>Ürün Adı</TableHead>
                 <TableHead>Kod</TableHead>
                 <TableHead>Kategori</TableHead>
-                <TableHead className="text-right">Satis Fiyati</TableHead>
+                <TableHead className="text-right">Satış Fiyatı</TableHead>
                 <TableHead className="text-right">Maliyet</TableHead>
-                <TableHead className="text-right">Kar Marji</TableHead>
+                <TableHead className="text-right">Kar Marjı</TableHead>
                 <TableHead className="text-center">Tip</TableHead>
-                <TableHead className="text-right">Islemler</TableHead>
+                <TableHead className="text-right">İşlemler</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -284,7 +284,7 @@ export default function ProductsPage() {
                         <Button variant="ghost" size="icon" onClick={() => router.push(`/dashboard/products/${product.id}`)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => { if (confirm('Bu urunu silmek istediginize emin misiniz?')) deleteMutation.mutate(product.id); }}>
+                        <Button variant="ghost" size="icon" onClick={() => { if (confirm('Bu ürünü silmek istediğinize emin misiniz?')) deleteMutation.mutate(product.id); }}>
                           <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
                       </div>
@@ -295,7 +295,7 @@ export default function ProductsPage() {
               {menuProducts.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                    Henuz menu urunu bulunamadi
+                    Henüz menü ürünü bulunamadı
                   </TableCell>
                 </TableRow>
               )}
@@ -304,21 +304,21 @@ export default function ProductsPage() {
         </CardContent>
       </Card>
 
-      {/* Ara Urunler */}
+      {/* Ara Ürünler */}
       <Card>
         <CardHeader>
-          <CardTitle>Ara Urunler ({intermediateProducts.length})</CardTitle>
+          <CardTitle>Ara Ürünler ({intermediateProducts.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Urun Adi</TableHead>
+                <TableHead>Ürün Adı</TableHead>
                 <TableHead>Kod</TableHead>
                 <TableHead>Kategori</TableHead>
                 <TableHead className="text-right">Maliyet</TableHead>
                 <TableHead className="text-center">Tip</TableHead>
-                <TableHead className="text-right">Islemler</TableHead>
+                <TableHead className="text-right">İşlemler</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -343,7 +343,7 @@ export default function ProductsPage() {
                         <Button variant="ghost" size="icon" onClick={() => router.push(`/dashboard/products/${product.id}`)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => { if (confirm('Bu urunu silmek istediginize emin misiniz?')) deleteMutation.mutate(product.id); }}>
+                        <Button variant="ghost" size="icon" onClick={() => { if (confirm('Bu ürünü silmek istediğinize emin misiniz?')) deleteMutation.mutate(product.id); }}>
                           <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
                       </div>
@@ -354,7 +354,7 @@ export default function ProductsPage() {
               {intermediateProducts.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                    Henuz ara urun bulunamadi
+                    Henüz ara ürün bulunamadı
                   </TableCell>
                 </TableRow>
               )}
@@ -363,14 +363,14 @@ export default function ProductsPage() {
         </CardContent>
       </Card>
 
-      {/* Stok Kaleminden Direkt Satis Urunu Olusturma Dialogu */}
+      {/* Stok Kaleminden Direkt Satış Ürünü Oluşturma Dialogu */}
       <Dialog open={directSaleDialogOpen} onOpenChange={setDirectSaleDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Stok Kaleminden Urun Olustur</DialogTitle>
+            <DialogTitle>Stok Kaleminden Ürün Oluştur</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Sectiginiz stok kalemi, 1 ADET olarak urunun icerigi haline gelir. Ornegin &quot;Sise Kola&quot; stok kalemini secip satis fiyati belirleyebilirsiniz.
+            Seçtiğiniz stok kalemi, 1 ADET olarak ürünün içeriği haline gelir. Örneğin &quot;Şişe Kola&quot; stok kalemini seçip satış fiyatı belirleyebilirsiniz.
           </p>
           <form onSubmit={handleDirectSaleSubmit} className="space-y-4">
             <div>
@@ -381,7 +381,7 @@ export default function ProductsPage() {
                 onChange={(e) => setSelectedRawMaterialId(e.target.value)}
                 required
               >
-                <option value="">Stok kalemi secin...</option>
+                <option value="">Stok kalemi seçin...</option>
                 {rawMaterials.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.name} ({m.unit}) - {formatCurrency(Number(m.lastPurchasePrice))} TL
@@ -390,22 +390,22 @@ export default function ProductsPage() {
               </select>
             </div>
             <div>
-              <Label>Satis Fiyati (TL)</Label>
+              <Label>Satış Fiyatı (TL)</Label>
               <Input
                 type="text"
                 inputMode="decimal"
                 value={displayNumericValue(directSalePrice)}
                 onChange={(e) => setDirectSalePrice(handleNumericInput(e.target.value))}
-                placeholder="Ornek: 25,00"
+                placeholder="Örnek: 25,00"
                 required
               />
             </div>
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setDirectSaleDialogOpen(false)}>
-                Iptal
+                İptal
               </Button>
               <Button type="submit" disabled={createDirectSaleMutation.isPending}>
-                {createDirectSaleMutation.isPending ? 'Olusturuluyor...' : 'Olustur'}
+                {createDirectSaleMutation.isPending ? 'Oluşturuluyor...' : 'Oluştur'}
               </Button>
             </div>
           </form>

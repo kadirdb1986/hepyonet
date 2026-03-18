@@ -92,7 +92,7 @@ export default function StockMovementsPage() {
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      const message = err?.response?.data?.message || 'Hata olustu';
+      const message = err?.response?.data?.message || 'Hata oluştu';
       toast.error(message);
     },
   });
@@ -274,7 +274,7 @@ export default function StockMovementsPage() {
               {movements.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                    Henuz stok hareketi bulunmuyor
+                    Henüz stok hareketi bulunmuyor
                   </TableCell>
                 </TableRow>
               )}

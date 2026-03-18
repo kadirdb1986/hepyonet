@@ -60,7 +60,7 @@ export default function AdminRestaurantsPage() {
             onClick={() => setFilter(s)}
             className={filter !== s ? 'border-gray-600 text-gray-300' : ''}
           >
-            {s === '' ? 'Tumu' : statusMap[s as keyof typeof statusMap].label}
+            {s === '' ? 'Tümü' : statusMap[s as keyof typeof statusMap].label}
           </Button>
         ))}
       </div>
@@ -69,10 +69,10 @@ export default function AdminRestaurantsPage() {
           <TableHeader>
             <TableRow className="border-gray-700">
               <TableHead className="text-gray-400">Restoran</TableHead>
-              <TableHead className="text-gray-400">Yonetici</TableHead>
+              <TableHead className="text-gray-400">Yönetici</TableHead>
               <TableHead className="text-gray-400">Durum</TableHead>
-              <TableHead className="text-gray-400">Kayit Tarihi</TableHead>
-              <TableHead className="text-gray-400">Islemler</TableHead>
+              <TableHead className="text-gray-400">Kayıt Tarihi</TableHead>
+              <TableHead className="text-gray-400">İşlemler</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

@@ -47,9 +47,9 @@ export default function SettingsPage() {
     try {
       const { data } = await api.patch('/restaurants/current', { name, logo: logo || undefined, address: address || undefined, phone: phone || undefined });
       setRestaurant(data);
-      toast.success('Restoran bilgileri guncellendi.');
+      toast.success('Restoran bilgileri güncellendi.');
     } catch {
-      toast.error('Bilgiler guncellenirken hata olustu.');
+      toast.error('Bilgiler güncellenirken hata oluştu.');
     } finally {
       setSaving(false);
     }
@@ -113,7 +113,7 @@ export default function SettingsPage() {
           </div>
           {user && (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Yonetici:</span>
+              <span className="text-sm text-muted-foreground">Yönetici:</span>
               <span className="text-sm">{user.name} ({user.email})</span>
             </div>
           )}

@@ -54,7 +54,7 @@ export function EditableCell({ value, originalValue, onChange, className, format
     <button type="button" onClick={() => setIsEditing(true)}
       className={cn('flex items-center gap-1 text-right cursor-pointer hover:bg-muted/50 px-2 py-1 rounded transition-colors',
         isEdited && 'text-orange-600 font-medium', className)}
-      title={isEdited ? `Orijinal: ${format(originalValue)}` : 'Duzenlemek icin tiklayin'}>
+      title={isEdited ? `Orijinal: ${format(originalValue)}` : 'Düzenlemek için tıklayın'}>
       <span>{format(value)}</span>
       {isEdited && <Pencil className="h-3 w-3 text-orange-500 flex-shrink-0" />}
     </button>

@@ -24,7 +24,7 @@ export default function AdminLoginPage() {
       await login(email, password);
       router.push('/admin');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Giris basarisiz');
+      setError(err.response?.data?.message || 'Giriş başarısız');
     } finally {
       setLoading(false);
     }
@@ -46,11 +46,11 @@ export default function AdminLoginPage() {
               <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Sifre</Label>
+              <Label htmlFor="password">Şifre</Label>
               <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Giris yapiliyor...' : 'Giris Yap'}
+              {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
             </Button>
           </form>
         </CardContent>

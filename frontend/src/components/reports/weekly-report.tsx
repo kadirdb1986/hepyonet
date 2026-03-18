@@ -79,7 +79,7 @@ export function WeeklyReport() {
         <Button onClick={handleFetchReport}>Raporu Getir</Button>
       </div>
       {isLoading && (<div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /><span className="ml-2 text-muted-foreground">Rapor yukleniyor...</span></div>)}
-      {error && (<div className="bg-destructive/10 text-destructive p-4 rounded-lg">Rapor yuklenirken hata olustu.</div>)}
+      {error && (<div className="bg-destructive/10 text-destructive p-4 rounded-lg">Rapor yuklenirken hata oluştu.</div>)}
       {report && computedValues && (
         <>
           <ReportTable revenues={report.revenues} revenueEdits={revenueEdits} onRevenueEdit={handleRevenueEdit}

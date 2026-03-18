@@ -39,11 +39,11 @@ export default function PositionsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['position-configs'] });
       setName('');
-      toast.success('Pozisyon olusturuldu');
+      toast.success('Pozisyon oluşturuldu');
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err?.response?.data?.message || 'Pozisyon olusturulurken hata olustu');
+      toast.error(err?.response?.data?.message || 'Pozisyon oluşturulurken hata oluştu');
     },
   });
 
@@ -70,7 +70,7 @@ export default function PositionsPage() {
   };
 
   if (isLoading) {
-    return <div className="p-6 text-muted-foreground">Yukleniyor...</div>;
+    return <div className="p-6 text-muted-foreground">Yükleniyor...</div>;
   }
 
   return (
@@ -79,7 +79,7 @@ export default function PositionsPage() {
         <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard/personnel')}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-2xl font-bold">Pozisyon Yonetimi</h1>
+        <h1 className="text-2xl font-bold">Pozisyon Yönetimi</h1>
       </div>
 
       <Card className="max-w-2xl">
@@ -101,7 +101,7 @@ export default function PositionsPage() {
 
           {positions.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              Henuz pozisyon eklenmemis
+              Henüz pozisyon eklenmemiş
             </div>
           ) : (
             <div className="rounded-md border">
@@ -109,7 +109,7 @@ export default function PositionsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Pozisyon Adi</TableHead>
-                    <TableHead className="text-right w-[80px]">Islemler</TableHead>
+                    <TableHead className="text-right w-[80px]">İşlemler</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -121,7 +121,7 @@ export default function PositionsPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => {
-                            if (confirm(`"${pos.name}" pozisyonunu silmek istediginize emin misiniz?`)) {
+                            if (confirm(`"${pos.name}" pozisyonunu silmek istediğinize emin misiniz?`)) {
                               deleteMutation.mutate(pos.id);
                             }
                           }}

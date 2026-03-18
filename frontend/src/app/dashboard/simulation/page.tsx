@@ -108,11 +108,11 @@ export default function SimulationPage() {
       queryClient.invalidateQueries({ queryKey: ['simulations'] });
       setIsCreateOpen(false);
       setNewName('');
-      toast.success('Simulasyon olusturuldu');
+      toast.success('Simülasyon oluşturuldu');
       router.push(`/dashboard/simulation/${res.data.id}`);
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Simulasyon olusturulurken hata olustu');
+      toast.error(error?.response?.data?.message || 'Simülasyon oluşturulurken hata oluştu');
     },
   });
 
@@ -120,10 +120,10 @@ export default function SimulationPage() {
     mutationFn: (id: string) => api.delete(`/simulations/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['simulations'] });
-      toast.success('Simulasyon silindi');
+      toast.success('Simülasyon silindi');
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Simulasyon silinirken hata olustu');
+      toast.error(error?.response?.data?.message || 'Simülasyon silinirken hata oluştu');
     },
   });
 
@@ -144,7 +144,7 @@ export default function SimulationPage() {
       toast.success('Sabit gider eklendi');
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Sabit gider eklenirken hata olustu');
+      toast.error(error?.response?.data?.message || 'Sabit gider eklenirken hata oluştu');
     },
   });
 
@@ -155,10 +155,10 @@ export default function SimulationPage() {
       queryClient.invalidateQueries({ queryKey: ['sim-fixed-expenses'] });
       setEditingExpenseId(null);
       setEditingExpenseAmount('');
-      toast.success('Sabit gider guncellendi');
+      toast.success('Sabit gider güncellendi');
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Sabit gider guncellenirken hata olustu');
+      toast.error(error?.response?.data?.message || 'Sabit gider güncellenirken hata oluştu');
     },
   });
 
@@ -169,7 +169,7 @@ export default function SimulationPage() {
       toast.success('Sabit gider silindi');
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Sabit gider silinirken hata olustu');
+      toast.error(error?.response?.data?.message || 'Sabit gider silinirken hata oluştu');
     },
   });
 
@@ -199,7 +199,7 @@ export default function SimulationPage() {
       toast.success('Sabit gelir eklendi');
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Sabit gelir eklenirken hata olustu');
+      toast.error(error?.response?.data?.message || 'Sabit gelir eklenirken hata oluştu');
     },
   });
 
@@ -210,7 +210,7 @@ export default function SimulationPage() {
       toast.success('Sabit gelir silindi');
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Sabit gelir silinirken hata olustu');
+      toast.error(error?.response?.data?.message || 'Sabit gelir silinirken hata oluştu');
     },
   });
 
@@ -220,11 +220,11 @@ export default function SimulationPage() {
     e.preventDefault();
     const trimmed = newName.trim();
     if (!trimmed) {
-      toast.error('Simulasyon adi bos olamaz');
+      toast.error('Simülasyon adı boş olamaz');
       return;
     }
     if (!newMonth) {
-      toast.error('Ay secmelisiniz');
+      toast.error('Ay seçmelisiniz');
       return;
     }
     createSimMutation.mutate({ name: trimmed, month: newMonth });
@@ -235,11 +235,11 @@ export default function SimulationPage() {
     const trimmed = expenseName.trim();
     const amount = parseFloat(expenseAmount);
     if (!trimmed) {
-      toast.error('Gider adi bos olamaz');
+      toast.error('Gider adı boş olamaz');
       return;
     }
     if (isNaN(amount) || amount <= 0) {
-      toast.error('Gecerli bir tutar giriniz');
+      toast.error('Geçerli bir tutar giriniz');
       return;
     }
     createExpMutation.mutate({ name: trimmed, amount });
@@ -248,11 +248,11 @@ export default function SimulationPage() {
   const handleSaveExpense = (id: string) => {
     const amount = parseFloat(editingExpenseAmount);
     if (isNaN(amount) || amount < 0) {
-      toast.error('Gecerli bir tutar giriniz');
+      toast.error('Geçerli bir tutar giriniz');
       return;
     }
     if (!editingExpenseName.trim()) {
-      toast.error('Ad bos birakilamaz');
+      toast.error('Ad boş bırakılamaz');
       return;
     }
     updateExpMutation.mutate({ id, name: editingExpenseName.trim(), amount });
@@ -261,12 +261,12 @@ export default function SimulationPage() {
   const handleAddRevenue = (e: React.FormEvent) => {
     e.preventDefault();
     if (!revenueProductId) {
-      toast.error('Urun secmelisiniz');
+      toast.error('Ürün seçmelisiniz');
       return;
     }
     const quantity = parseInt(revenueQuantity, 10);
     if (isNaN(quantity) || quantity <= 0) {
-      toast.error('Gecerli bir adet giriniz');
+      toast.error('Geçerli bir adet giriniz');
       return;
     }
     createRevMutation.mutate({ productId: revenueProductId, quantity });
@@ -276,10 +276,10 @@ export default function SimulationPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Simulasyon</h1>
+        <h1 className="text-2xl font-bold">Simülasyon</h1>
         <Button onClick={() => setIsCreateOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Yeni Simulasyon
+          Yeni Simülasyon
         </Button>
       </div>
 
@@ -289,7 +289,7 @@ export default function SimulationPage() {
           variant={activeTab === 'simulations' ? 'default' : 'outline'}
           onClick={() => setActiveTab('simulations')}
         >
-          Simulasyonlar
+          Simülasyonlar
         </Button>
         <Button
           variant={activeTab === 'fixedExpenses' ? 'default' : 'outline'}
@@ -309,8 +309,8 @@ export default function SimulationPage() {
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Yeni Simulasyon</DialogTitle>
-            <DialogDescription>Simulasyon adi ve ayini belirleyin</DialogDescription>
+            <DialogTitle>Yeni Simülasyon</DialogTitle>
+            <DialogDescription>Simülasyon adı ve ayını belirleyin</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCreateSim} className="space-y-4">
             <div className="space-y-2">
@@ -319,7 +319,7 @@ export default function SimulationPage() {
                 id="sim-name"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="orn: Mart Simulasyonu"
+                placeholder="örn: Mart Simülasyonu"
                 required
               />
             </div>
@@ -335,28 +335,28 @@ export default function SimulationPage() {
             </div>
             <div className="flex gap-2 justify-end">
               <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
-                Iptal
+                İptal
               </Button>
               <Button type="submit" disabled={createSimMutation.isPending}>
-                {createSimMutation.isPending ? 'Olusturuluyor...' : 'Olustur'}
+                {createSimMutation.isPending ? 'Oluşturuluyor...' : 'Oluştur'}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* ─── Simulasyonlar Tab ─── */}
+      {/* ─── Simülasyonlar Tab ─── */}
       {activeTab === 'simulations' && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Simulasyonlar</CardTitle>
+            <CardTitle className="text-base">Simülasyonlar</CardTitle>
           </CardHeader>
           <CardContent>
             {simLoading ? (
-              <p className="text-muted-foreground text-center py-8">Yukleniyor...</p>
+              <p className="text-muted-foreground text-center py-8">Yükleniyor...</p>
             ) : simulations.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
-                Henuz simulasyon olusturulmamis
+                Henüz simülasyon oluşturulmamış
               </p>
             ) : (
               <div className="rounded-md border">
@@ -366,7 +366,7 @@ export default function SimulationPage() {
                       <TableHead>Ad</TableHead>
                       <TableHead className="text-right">Ciro</TableHead>
                       <TableHead className="text-right">Net Kar</TableHead>
-                      <TableHead className="text-right w-[80px]">Islemler</TableHead>
+                      <TableHead className="text-right w-[80px]">İşlemler</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -387,7 +387,7 @@ export default function SimulationPage() {
                             size="icon"
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (confirm(`"${sim.name}" simulasyonunu silmek istediginize emin misiniz?`)) {
+                              if (confirm(`"${sim.name}" simülasyonunu silmek istediğinize emin misiniz?`)) {
                                 deleteSimMutation.mutate(sim.id);
                               }
                             }}
@@ -411,7 +411,7 @@ export default function SimulationPage() {
           <CardHeader>
             <CardTitle className="text-base">Sabit Giderler</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Yeni simulasyon olustururken otomatik eklenen gider kalemleri
+              Yeni simülasyon oluştururken otomatik eklenen gider kalemleri
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -443,10 +443,10 @@ export default function SimulationPage() {
             </form>
 
             {expLoading ? (
-              <p className="text-muted-foreground text-center py-8">Yukleniyor...</p>
+              <p className="text-muted-foreground text-center py-8">Yükleniyor...</p>
             ) : fixedExpenses.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
-                Henuz sabit gider eklenmemis
+                Henüz sabit gider eklenmemiş
               </p>
             ) : (
               <div className="rounded-md border">
@@ -455,7 +455,7 @@ export default function SimulationPage() {
                     <TableRow>
                       <TableHead>Ad</TableHead>
                       <TableHead className="text-right">Tutar</TableHead>
-                      <TableHead className="text-right w-[80px]">Islemler</TableHead>
+                      <TableHead className="text-right w-[80px]">İşlemler</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -501,7 +501,7 @@ export default function SimulationPage() {
                                   setEditingExpenseAmount('');
                                 }}
                               >
-                                Iptal
+                                İptal
                               </Button>
                             </div>
                           ) : (
@@ -521,7 +521,7 @@ export default function SimulationPage() {
                             variant="ghost"
                             size="icon"
                             onClick={() => {
-                              if (confirm(`"${exp.name}" sabit giderini silmek istediginize emin misiniz?`)) {
+                              if (confirm(`"${exp.name}" sabit giderini silmek istediğinize emin misiniz?`)) {
                                 deleteExpMutation.mutate(exp.id);
                               }
                             }}
@@ -543,22 +543,22 @@ export default function SimulationPage() {
       {activeTab === 'fixedRevenues' && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Sabit Gelirler (Urun Adetleri)</CardTitle>
+            <CardTitle className="text-base">Sabit Gelirler (Ürün Adetleri)</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Yeni simulasyon olustururken otomatik eklenen urun ve aylik satis adetleri
+              Yeni simülasyon oluştururken otomatik eklenen ürün ve aylık satış adetleri
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <form onSubmit={handleAddRevenue} className="flex items-end gap-2">
               <div className="flex-1 space-y-1">
-                <Label htmlFor="rev-product">Urun</Label>
+                <Label htmlFor="rev-product">Ürün</Label>
                 <select
                   id="rev-product"
                   className={selectClass}
                   value={revenueProductId}
                   onChange={(e) => setRevenueProductId(e.target.value)}
                 >
-                  <option value="">Urun secin...</option>
+                  <option value="">Ürün seçin...</option>
                   {menuProducts.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name}
@@ -583,19 +583,19 @@ export default function SimulationPage() {
             </form>
 
             {revLoading ? (
-              <p className="text-muted-foreground text-center py-8">Yukleniyor...</p>
+              <p className="text-muted-foreground text-center py-8">Yükleniyor...</p>
             ) : fixedRevenues.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
-                Henuz sabit gelir eklenmemis
+                Henüz sabit gelir eklenmemiş
               </p>
             ) : (
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Urun</TableHead>
+                      <TableHead>Ürün</TableHead>
                       <TableHead className="text-right">Adet</TableHead>
-                      <TableHead className="text-right w-[80px]">Islemler</TableHead>
+                      <TableHead className="text-right w-[80px]">İşlemler</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -610,7 +610,7 @@ export default function SimulationPage() {
                             variant="ghost"
                             size="icon"
                             onClick={() => {
-                              if (confirm('Bu sabit geliri silmek istediginize emin misiniz?')) {
+                              if (confirm('Bu sabit geliri silmek istediğinize emin misiniz?')) {
                                 deleteRevMutation.mutate(rev.id);
                               }
                             }}

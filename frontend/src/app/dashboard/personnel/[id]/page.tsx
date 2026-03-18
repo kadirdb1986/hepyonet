@@ -95,7 +95,7 @@ function formatPhone(raw: string): string {
 const leaveTypeMap = {
   ANNUAL: { label: 'Yillik Izin', variant: 'default' as const },
   SICK: { label: 'Hastalik Izni', variant: 'secondary' as const },
-  OTHER: { label: 'Diger', variant: 'outline' as const },
+  OTHER: { label: 'Diğer', variant: 'outline' as const },
 };
 
 const leaveStatusMap = {
@@ -170,7 +170,7 @@ export default function PersonnelDetailPage() {
       setEditError('');
     },
     onError: (err: any) => {
-      setEditError(err.response?.data?.message || 'Guncelleme sirasinda bir hata olustu');
+      setEditError(err.response?.data?.message || 'Guncelleme sirasinda bir hata oluştu');
     },
   });
 
@@ -192,7 +192,7 @@ export default function PersonnelDetailPage() {
       setLeaveError('');
     },
     onError: (err: any) => {
-      setLeaveError(err.response?.data?.message || 'Izin olusturulurken bir hata olustu');
+      setLeaveError(err.response?.data?.message || 'İzin oluşturulurken bir hata oluştu');
     },
   });
 
@@ -264,7 +264,7 @@ export default function PersonnelDetailPage() {
     setLeaveError('');
 
     if (!leaveForm.startDate || !leaveForm.endDate) {
-      setLeaveError('Baslangic ve bitis tarihleri zorunludur');
+      setLeaveError('Başlangıç ve bitiş tarihleri zorunludur');
       return;
     }
 
@@ -285,7 +285,7 @@ export default function PersonnelDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Yukleniyor...</p>
+        <p className="text-gray-500">Yükleniyor...</p>
       </div>
     );
   }
@@ -293,7 +293,7 @@ export default function PersonnelDetailPage() {
   if (!personnel) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Personel bulunamadi.</p>
+        <p className="text-gray-500">Personel bulunamadı.</p>
       </div>
     );
   }
@@ -323,7 +323,7 @@ export default function PersonnelDetailPage() {
               <CardTitle>Personel Bilgileri</CardTitle>
               {!isEditing ? (
                 <Button variant="outline" size="sm" onClick={startEditing}>
-                  Duzenle
+                  Düzenle
                 </Button>
               ) : null}
             </CardHeader>
@@ -392,7 +392,7 @@ export default function PersonnelDetailPage() {
                       }
                       className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                     >
-                      <option value="">Pozisyon Secin</option>
+                      <option value="">Pozisyon Seçin</option>
                       {positions.map((pos) => (
                         <option key={pos.id} value={pos.id}>
                           {pos.name}
@@ -402,7 +402,7 @@ export default function PersonnelDetailPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="edit-startDate">Baslangic Tarihi</Label>
+                      <Label htmlFor="edit-startDate">Başlangıç Tarihi</Label>
                       <Input
                         id="edit-startDate"
                         type="date"
@@ -414,7 +414,7 @@ export default function PersonnelDetailPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="edit-salary">Maas (TL)</Label>
+                      <Label htmlFor="edit-salary">Maaş (TL)</Label>
                       <Input
                         id="edit-salary"
                         type="number"
@@ -434,7 +434,7 @@ export default function PersonnelDetailPage() {
                       variant="outline"
                       onClick={() => setIsEditing(false)}
                     >
-                      Iptal
+                      İptal
                     </Button>
                     <Button type="submit" disabled={updateMutation.isPending}>
                       <Save className="h-4 w-4 mr-2" />
@@ -465,15 +465,15 @@ export default function PersonnelDetailPage() {
                     <p className="font-medium">{personnel.positionConfig?.name || '\u2014'}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Baslangic Tarihi</p>
+                    <p className="text-sm text-gray-500">Başlangıç Tarihi</p>
                     <p className="font-medium">{formatDate(personnel.startDate)}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Maas</p>
+                    <p className="text-sm text-gray-500">Maaş</p>
                     <p className="font-medium">{formatCurrency(personnel.salary)}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Kayit Tarihi</p>
+                    <p className="text-sm text-gray-500">Kayıt Tarihi</p>
                     <p className="font-medium">{formatDate(personnel.createdAt)}</p>
                   </div>
                 </div>
@@ -528,7 +528,7 @@ export default function PersonnelDetailPage() {
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">Yukleniyor...</p>
+                <p className="text-sm text-gray-500">Yükleniyor...</p>
               )}
             </CardContent>
           </Card>
@@ -540,7 +540,7 @@ export default function PersonnelDetailPage() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-purple-600" />
-            <CardTitle className="text-lg">Izin Kayitlari</CardTitle>
+            <CardTitle className="text-lg">İzin Kayıtları</CardTitle>
           </div>
           <Button size="sm" onClick={() => setShowLeaveDialog(true)}>
             <Plus className="h-4 w-4 mr-2" />
@@ -550,19 +550,19 @@ export default function PersonnelDetailPage() {
         <CardContent>
           {personnel.leaveRecords.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              Henuz izin kaydi yok.
+              Henüz izin kaydı yok.
             </div>
           ) : (
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Baslangic</TableHead>
+                    <TableHead>Başlangıç</TableHead>
                     <TableHead>Bitis</TableHead>
                     <TableHead>Izin Turu</TableHead>
                     <TableHead>Durum</TableHead>
                     <TableHead>Notlar</TableHead>
-                    <TableHead>Islemler</TableHead>
+                    <TableHead>İşlemler</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -638,7 +638,7 @@ export default function PersonnelDetailPage() {
             )}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="leave-startDate">Baslangic Tarihi</Label>
+                <Label htmlFor="leave-startDate">Başlangıç Tarihi</Label>
                 <Input
                   id="leave-startDate"
                   type="date"
@@ -677,7 +677,7 @@ export default function PersonnelDetailPage() {
               >
                 <option value="ANNUAL">Yillik Izin</option>
                 <option value="SICK">Hastalik Izni</option>
-                <option value="OTHER">Diger</option>
+                <option value="OTHER">Diğer</option>
               </select>
             </div>
             <div className="space-y-2">
@@ -697,10 +697,10 @@ export default function PersonnelDetailPage() {
                 variant="outline"
                 onClick={() => setShowLeaveDialog(false)}
               >
-                Iptal
+                İptal
               </Button>
               <Button type="submit" disabled={createLeaveMutation.isPending}>
-                {createLeaveMutation.isPending ? 'Olusturuluyor...' : 'Olustur'}
+                {createLeaveMutation.isPending ? 'Oluşturuluyor...' : 'Oluştur'}
               </Button>
             </DialogFooter>
           </form>

@@ -95,7 +95,7 @@ export default function ExpensesPage() {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
       setEditingCatId(null);
       setEditingCatName('');
-      toast.success('Kategori guncellendi');
+      toast.success('Kategori güncellendi');
     },
     onError: (err: any) => toast.error(err.response?.data?.message || 'Hata'),
   });
@@ -167,7 +167,7 @@ export default function ExpensesPage() {
       setForm(emptyForm);
       setError('');
     },
-    onError: (err: any) => setError(err.response?.data?.message || 'Gider guncellenemedi'),
+    onError: (err: any) => setError(err.response?.data?.message || 'Gider güncellenemedi'),
   });
 
   const deleteMutation = useMutation({
@@ -177,7 +177,7 @@ export default function ExpensesPage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.category) { setError('Kategori secmelisiniz'); return; }
+    if (!form.category) { setError('Kategori seçmelisiniz'); return; }
     const payload: any = {
       title: form.title,
       amount: parseFloat(form.amount),
@@ -218,7 +218,7 @@ export default function ExpensesPage() {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Bu gideri silmek istediginize emin misiniz?'))
+    if (window.confirm('Bu gideri silmek istediğinize emin misiniz?'))
       deleteMutation.mutate(id);
   };
 
@@ -236,7 +236,7 @@ export default function ExpensesPage() {
       onChange={(e) => setForm({ ...form, category: e.target.value })}
       required
     >
-      <option value="">Kategori secin...</option>
+      <option value="">Kategori seçin...</option>
       {categories.map((cat) => (
         <option key={cat.id} value={cat.name}>{cat.name}</option>
       ))}
@@ -275,7 +275,7 @@ export default function ExpensesPage() {
               className="flex gap-2"
             >
               <Input
-                placeholder="Yeni kategori adi"
+                placeholder="Yeni kategori adı"
                 value={catName}
                 onChange={(e) => setCatName(e.target.value)}
               />
@@ -286,7 +286,7 @@ export default function ExpensesPage() {
             <div className="space-y-1 max-h-64 overflow-y-auto">
               {categories.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  Henuz kategori eklenmemis
+                  Henüz kategori eklenmemiş
                 </p>
               )}
               {categories.map((cat) => (
@@ -319,7 +319,7 @@ export default function ExpensesPage() {
                         className="h-8"
                         onClick={() => { setEditingCatId(null); setEditingCatName(''); }}
                       >
-                        Iptal
+                        İptal
                       </Button>
                     </>
                   ) : (
@@ -338,7 +338,7 @@ export default function ExpensesPage() {
                         size="icon"
                         className="h-7 w-7"
                         onClick={() => {
-                          if (confirm(`"${cat.name}" kategorisini silmek istediginize emin misiniz?`))
+                          if (confirm(`"${cat.name}" kategorisini silmek istediğinize emin misiniz?`))
                             deleteCatMutation.mutate(cat.id);
                         }}
                       >
@@ -362,7 +362,7 @@ export default function ExpensesPage() {
           <form onSubmit={handleCreate} className="space-y-4">
             {error && <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">{error}</div>}
             <div className="space-y-2">
-              <Label htmlFor="title">Baslik</Label>
+              <Label htmlFor="title">Başlık</Label>
               <Input id="title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
             </div>
             <div className="space-y-2">
@@ -374,14 +374,14 @@ export default function ExpensesPage() {
               {categorySelect('category')}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="paymentDate">Odeme Tarihi</Label>
+              <Label htmlFor="paymentDate">Ödeme Tarihi</Label>
               <Input id="paymentDate" type="date" value={form.paymentDate} onChange={(e) => setForm({ ...form, paymentDate: e.target.value })} required />
             </div>
             <div className="space-y-2">
-              <Label>Ait Oldugu Donem</Label>
+              <Label>Ait Olduğu Dönem</Label>
               <select className={selectClass} value={form.periodType} onChange={(e) => setForm({ ...form, periodType: e.target.value as PeriodType })}>
-                <option value="SAME_MONTH">Ayni Ay (odeme tarihi)</option>
-                <option value="DIFFERENT_MONTH">Farkli Ay</option>
+                <option value="SAME_MONTH">Aynı Ay (ödeme tarihi)</option>
+                <option value="DIFFERENT_MONTH">Farklı Ay</option>
               </select>
             </div>
             {form.periodType === 'DIFFERENT_MONTH' && (
@@ -391,7 +391,7 @@ export default function ExpensesPage() {
               </div>
             )}
             <div className="flex gap-2 justify-end">
-              <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Iptal</Button>
+              <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>İptal</Button>
               <Button type="submit" disabled={createMutation.isPending}>{createMutation.isPending ? 'Ekleniyor...' : 'Ekle'}</Button>
             </div>
           </form>
@@ -402,12 +402,12 @@ export default function ExpensesPage() {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Gider Duzenle</DialogTitle>
+            <DialogTitle>Gider Düzenle</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleUpdate} className="space-y-4">
             {error && <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">{error}</div>}
             <div className="space-y-2">
-              <Label htmlFor="edit-title">Baslik</Label>
+              <Label htmlFor="edit-title">Başlık</Label>
               <Input id="edit-title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
             </div>
             <div className="space-y-2">
@@ -419,11 +419,11 @@ export default function ExpensesPage() {
               {categorySelect('edit-category')}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-paymentDate">Odeme Tarihi</Label>
+              <Label htmlFor="edit-paymentDate">Ödeme Tarihi</Label>
               <Input id="edit-paymentDate" type="date" value={form.paymentDate} onChange={(e) => setForm({ ...form, paymentDate: e.target.value })} required />
             </div>
             <div className="flex gap-2 justify-end">
-              <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Iptal</Button>
+              <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>İptal</Button>
               <Button type="submit" disabled={updateMutation.isPending}>{updateMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}</Button>
             </div>
           </form>
@@ -451,7 +451,7 @@ export default function ExpensesPage() {
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
           >
-            <option value="ALL">Tumu</option>
+            <option value="ALL">Tümü</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.name}>{cat.name}</option>
             ))}
@@ -473,20 +473,20 @@ export default function ExpensesPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-gray-500 text-center py-8">Yukleniyor...</p>
+            <p className="text-gray-500 text-center py-8">Yükleniyor...</p>
           ) : expenses.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">Henuz gider kaydi yok</p>
+            <p className="text-gray-500 text-center py-8">Henüz gider kaydı yok</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-2 px-3 font-medium">Baslik</th>
+                    <th className="text-left py-2 px-3 font-medium">Başlık</th>
                     <th className="text-left py-2 px-3 font-medium">Kategori</th>
                     <th className="text-right py-2 px-3 font-medium">Tutar</th>
-                    <th className="text-left py-2 px-3 font-medium">Odeme Tarihi</th>
-                    <th className="text-center py-2 px-3 font-medium">Donem</th>
-                    <th className="text-right py-2 px-3 font-medium">Islemler</th>
+                    <th className="text-left py-2 px-3 font-medium">Ödeme Tarihi</th>
+                    <th className="text-center py-2 px-3 font-medium">Dönem</th>
+                    <th className="text-right py-2 px-3 font-medium">İşlemler</th>
                   </tr>
                 </thead>
                 <tbody>

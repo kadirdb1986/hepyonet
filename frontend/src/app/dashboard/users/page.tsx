@@ -27,11 +27,11 @@ import { useAuth } from '@/hooks/use-auth';
 const ROLES = ['ADMIN', 'ACCOUNTANT', 'HR', 'STOCK_MANAGER', 'MENU_MANAGER', 'WAITER'] as const;
 const ROLE_LABELS: Record<string, string> = {
   OWNER: 'Sahip',
-  ADMIN: 'Yonetici',
+  ADMIN: 'Yönetici',
   ACCOUNTANT: 'Muhasebe',
-  HR: 'Insan Kaynaklari',
+  HR: 'İnsan Kaynakları',
   STOCK_MANAGER: 'Depocu',
-  MENU_MANAGER: 'Menu Yoneticisi',
+  MENU_MANAGER: 'Menü Yöneticisi',
   WAITER: 'Garson',
 };
 
@@ -73,13 +73,13 @@ export default function UsersPage() {
     setCreating(true);
     try {
       await api.post('/restaurants/current/members', { email: newEmail, role: newRole });
-      toast.success('Kullanici eklendi.');
+      toast.success('Kullanıcı eklendi.');
       setDialogOpen(false);
       setNewEmail('');
       setNewRole('ACCOUNTANT');
       loadMembers();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Kullanici eklenirken hata olustu.');
+      toast.error(err.response?.data?.message || 'Kullanıcı eklenirken hata oluştu.');
     } finally {
       setCreating(false);
     }
@@ -88,54 +88,54 @@ export default function UsersPage() {
   const handleRoleChange = async (userId: string, role: string) => {
     try {
       await api.patch(`/restaurants/current/members/${userId}/role`, { role });
-      toast.success('Rol guncellendi.');
+      toast.success('Rol güncellendi.');
       loadMembers();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Rol guncellenirken hata olustu.');
+      toast.error(err.response?.data?.message || 'Rol güncellenirken hata oluştu.');
     }
   };
 
   const handleDeactivate = async (userId: string, userName: string) => {
-    if (!confirm(`${userName} adli kullaniciyi cikarmak istediginize emin misiniz?`)) return;
+    if (!confirm(`${userName} adlı kullanıcıyı çıkarmak istediğinize emin misiniz?`)) return;
     try {
       await api.delete(`/restaurants/current/members/${userId}`);
-      toast.success('Kullanici cikarildi.');
+      toast.success('Kullanıcı çıkarıldı.');
       loadMembers();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Kullanici cikarilirken hata olustu.');
+      toast.error(err.response?.data?.message || 'Kullanıcı çıkarılırken hata oluştu.');
     }
   };
 
   const handleReactivate = async (userId: string) => {
     try {
       await api.post('/restaurants/current/members', { email: members.find(m => m.userId === userId)?.email, role: 'ADMIN' });
-      toast.success('Kullanici tekrar aktif edildi.');
+      toast.success('Kullanıcı tekrar aktif edildi.');
       loadMembers();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Kullanici aktif edilirken hata olustu.');
+      toast.error(err.response?.data?.message || 'Kullanıcı aktif edilirken hata oluştu.');
     }
   };
 
   const handleRemove = async (userId: string, userName: string) => {
-    if (!confirm(`${userName} adli kullaniciyi kalici olarak silmek istediginize emin misiniz? Bu islem geri alinamaz.`)) return;
+    if (!confirm(`${userName} adlı kullanıcıyı kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) return;
     try {
       await api.delete(`/restaurants/current/members/${userId}/permanent`);
-      toast.success('Kullanici kalici olarak silindi.');
+      toast.success('Kullanıcı kalıcı olarak silindi.');
       loadMembers();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Kullanici silinirken hata olustu.');
+      toast.error(err.response?.data?.message || 'Kullanıcı silinirken hata oluştu.');
     }
   };
 
   const handleTransferOwnership = async (userId: string, userName: string) => {
-    if (!confirm(`Sahipligi ${userName} adli kullaniciya devretmek istediginize emin misiniz? Bu islem geri alinamaz.`)) return;
+    if (!confirm(`Sahipliği ${userName} adlı kullanıcıya devretmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) return;
     try {
       await api.post('/restaurants/current/transfer-ownership', { targetUserId: userId });
       toast.success('Sahiplik devredildi.');
       // Refresh auth to get updated membership
       window.location.reload();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Sahiplik devredilirken hata olustu.');
+      toast.error(err.response?.data?.message || 'Sahiplik devredilirken hata oluştu.');
     }
   };
 
@@ -150,9 +150,9 @@ export default function UsersPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Kullanicilar</h1>
+        <h1 className="text-2xl font-bold">Kullanıcılar</h1>
         <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" /> Kullanici Ekle
+          <Plus className="h-4 w-4 mr-2" /> Kullanıcı Ekle
         </Button>
       </div>
 
@@ -164,14 +164,14 @@ export default function UsersPage() {
               <TableHead>E-posta</TableHead>
               <TableHead>Rol</TableHead>
               <TableHead>Durum</TableHead>
-              <TableHead>Islemler</TableHead>
+              <TableHead>İşlemler</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {members.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                  Henuz kullanici yok.
+                  Henüz kullanıcı yok.
                 </TableCell>
               </TableRow>
             ) : (
@@ -213,7 +213,7 @@ export default function UsersPage() {
                           <Button variant="ghost" size="icon" onClick={() => handleReactivate(m.userId)} title="Aktif et">
                             <UserCheck className="h-4 w-4 text-green-500" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleRemove(m.userId, m.name)} title="Kalici sil">
+                          <Button variant="ghost" size="icon" onClick={() => handleRemove(m.userId, m.name)} title="Kalıcı sil">
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </>
@@ -240,15 +240,16 @@ export default function UsersPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Kullanici Ekle</DialogTitle>
+            <DialogTitle>Kullanıcı Ekle</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Eklemek istediginiz kisinin sistemde kayitli e-posta adresini girin.
+            Eklemek istediğiniz kişinin sistemde kayıtlı e-posta adresini girin.
           </p>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>E-posta</Label>
               <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="kullanici@ornek.com" />
+
             </div>
             <div className="space-y-2">
               <Label>Rol</Label>
@@ -263,7 +264,7 @@ export default function UsersPage() {
               </select>
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>Iptal</Button>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>İptal</Button>
               <Button onClick={handleAdd} disabled={creating}>
                 {creating && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 Ekle

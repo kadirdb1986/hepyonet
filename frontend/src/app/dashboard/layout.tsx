@@ -28,10 +28,10 @@ function CreateRestaurantScreen() {
     setCreating(true);
     try {
       await api.post('/restaurants', { name: name.trim() });
-      toast.success('Restoran olusturuldu! Onay bekleniyor.');
+      toast.success('Restoran oluşturuldu! Onay bekleniyor.');
       await checkAuth();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Restoran olusturulurken hata olustu.');
+      toast.error(err.response?.data?.message || 'Restoran oluşturulurken hata oluştu.');
     } finally {
       setCreating(false);
     }
@@ -41,35 +41,35 @@ function CreateRestaurantScreen() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Hosgeldiniz!</CardTitle>
+          <CardTitle className="text-2xl font-bold">Hoşgeldiniz!</CardTitle>
           <CardDescription>
             {hasPending
-              ? 'Restoraniniz onay bekliyor. Onaylandiktan sonra erisim saglayabilirsiniz.'
-              : 'Yeni bir restoran olusturun veya bir restoran yoneticisinden davet bekleyin.'}
+              ? 'Restoranınız onay bekliyor. Onaylandıktan sonra erişim sağlayabilirsiniz.'
+              : 'Yeni bir restoran oluşturun veya bir restoran yöneticisinden davet bekleyin.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {!hasPending && (
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="restaurantName">Restoran Adi</Label>
+                <Label htmlFor="restaurantName">Restoran Adı</Label>
                 <Input
                   id="restaurantName"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Ornegin: Cafe Istanbul"
+                  placeholder="Örneğin: Cafe Istanbul"
                   required
                 />
               </div>
               <Button type="submit" className="w-full" disabled={creating}>
                 {creating && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                Restoran Olustur
+                Restoran Oluştur
               </Button>
             </form>
           )}
           <Button variant="outline" className="w-full" onClick={logout}>
             <LogOut className="h-4 w-4 mr-2" />
-            Cikis Yap
+            Çıkış Yap
           </Button>
         </CardContent>
       </Card>
@@ -92,7 +92,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Yukleniyor...</p>
+        <p className="text-gray-500">Yükleniyor...</p>
       </div>
     );
   }

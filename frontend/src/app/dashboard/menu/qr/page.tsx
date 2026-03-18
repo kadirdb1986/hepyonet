@@ -83,7 +83,7 @@ export default function QRMenuPage() {
   if (!slug) {
     return (
       <div className="p-6 flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Restoran bilgisi bulunamadi.</p>
+        <p className="text-muted-foreground">Restoran bilgisi bulunamadı.</p>
       </div>
     );
   }
@@ -118,7 +118,7 @@ export default function QRMenuPage() {
               </div>
             ) : (
               <div className="w-64 h-64 bg-gray-100 rounded-xl flex items-center justify-center">
-                <p className="text-muted-foreground">Olusturuluyor...</p>
+                <p className="text-muted-foreground">Oluşturuluyor...</p>
               </div>
             )}
             <div className="flex gap-3">

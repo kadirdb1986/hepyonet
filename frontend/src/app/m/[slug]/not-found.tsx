@@ -17,10 +17,10 @@ export default function MenuNotFound() {
             />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Menu Bulunamadi</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Menü Bulunamadı</h1>
         <p className="text-gray-500 max-w-sm">
-          Aradiginiz restoran menusu bulunamadi. Lutfen QR kodu tekrar tarayin
-          veya restoran ile iletisime gecin.
+          Aradığınız restoran menüsü bulunamadı. Lütfen QR kodu tekrar tarayın
+          veya restoran ile iletişime geçin.
         </p>
       </div>
     </div>

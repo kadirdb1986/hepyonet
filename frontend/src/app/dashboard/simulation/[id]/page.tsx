@@ -224,10 +224,10 @@ export default function SimulationDetailPage() {
     }) => api.patch(`/simulations/${id}`, data),
     onSuccess: async () => {
       await reloadSimulation();
-      toast.success('Simulasyon kaydedildi');
+      toast.success('Simülasyon kaydedildi');
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Simulasyon kaydedilirken hata olustu');
+      toast.error(error?.response?.data?.message || 'Simülasyon kaydedilirken hata oluştu');
     },
   });
 
@@ -289,14 +289,14 @@ export default function SimulationDetailPage() {
   const duplicateMutation = useMutation({
     mutationFn: (name: string) => api.post(`/simulations/${id}/duplicate`, { name }),
     onSuccess: (res) => {
-      toast.success('Simulasyon kopyalandi');
+      toast.success('Simülasyon kopyalandı');
       router.push(`/dashboard/simulation/${res.data.id}`);
     },
-    onError: () => toast.error('Kopyalama basarisiz'),
+    onError: () => toast.error('Kopyalama başarısız'),
   });
 
   const handleDuplicate = () => {
-    const name = prompt('Yeni simulasyon adi:', `${simName} (Kopya)`);
+    const name = prompt('Yeni simülasyon adı:', `${simName} (Kopya)`);
     if (name?.trim()) {
       duplicateMutation.mutate(name.trim());
     }
@@ -324,7 +324,7 @@ export default function SimulationDetailPage() {
   };
 
   if (isLoading || !simulation) {
-    return <div className="p-6 text-muted-foreground">Yukleniyor...</div>;
+    return <div className="p-6 text-muted-foreground">Yükleniyor...</div>;
   }
 
   return (
@@ -372,7 +372,7 @@ export default function SimulationDetailPage() {
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleDuplicate} disabled={duplicateMutation.isPending}>
             <Copy className="mr-2 h-4 w-4" />
-            Cogalt
+            Çoğalt
           </Button>
           <Button onClick={handleSave} disabled={saveMutation.isPending}>
             <Save className="mr-2 h-4 w-4" />
@@ -390,16 +390,16 @@ export default function SimulationDetailPage() {
           </CardHeader>
           <CardContent>
             <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
-              Urun Gelirleri
+              Ürün Gelirleri
             </h3>
             {products.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">Urun bulunmuyor</p>
+              <p className="text-muted-foreground text-center py-8">Ürün bulunmuyor</p>
             ) : (
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Urun</TableHead>
+                      <TableHead>Ürün</TableHead>
                       <TableHead className="text-right w-[80px]">Adet</TableHead>
                       <TableHead className="text-right w-[100px]">Birim Fiyat</TableHead>
                       <TableHead className="text-right">Toplam</TableHead>
@@ -431,7 +431,7 @@ export default function SimulationDetailPage() {
               </div>
             )}
             <div className="mt-3 flex items-center gap-2">
-              <Input placeholder="Gelir adi" value={newRevenueName} onChange={(e) => setNewRevenueName(e.target.value)} className="h-8 flex-1" />
+              <Input placeholder="Gelir adı" value={newRevenueName} onChange={(e) => setNewRevenueName(e.target.value)} className="h-8 flex-1" />
               <MoneyInput value={Number(newRevenueAmount) || 0} onChange={(v) => setNewRevenueAmount(String(v))} className="w-28" />
               <Button size="sm" className="h-8" disabled={!newRevenueName.trim() || addRevenueMutation.isPending}
                 onClick={() => addRevenueMutation.mutate({ name: newRevenueName.trim(), amount: Number(newRevenueAmount) || 0 })}>
@@ -459,7 +459,7 @@ export default function SimulationDetailPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Urun</TableHead>
+                        <TableHead>Ürün</TableHead>
                         <TableHead className="text-right w-[100px]">Birim Maliyet</TableHead>
                         <TableHead className="text-right w-[60px]">Adet</TableHead>
                         <TableHead className="text-right">Toplam</TableHead>
@@ -492,10 +492,10 @@ export default function SimulationDetailPage() {
               </div>
             </div>
 
-            {/* Sabit Giderler ve Diger Giderler */}
+            {/* Sabit Giderler ve Diğer Giderler */}
             <div>
               <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
-                Sabit Giderler ve Diger Giderler
+                Sabit Giderler ve Diğer Giderler
               </h3>
               {fixedAndOtherExpenses.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-2">Sabit gider bulunmuyor</p>
@@ -532,7 +532,7 @@ export default function SimulationDetailPage() {
                 <span className="font-medium">{formatCurrency(fixedAndOtherTotal)}</span>
               </div>
               <div className="mt-2 flex items-center gap-2">
-                <Input placeholder="Gider adi" value={newExpenseName} onChange={(e) => setNewExpenseName(e.target.value)} className="h-8 flex-1" />
+                <Input placeholder="Gider adı" value={newExpenseName} onChange={(e) => setNewExpenseName(e.target.value)} className="h-8 flex-1" />
                 <MoneyInput value={Number(newExpenseAmount) || 0} onChange={(v) => setNewExpenseAmount(String(v))} className="w-28" />
                 <Button size="sm" className="h-8" disabled={!newExpenseName.trim() || addExpenseMutation.isPending}
                   onClick={() => addExpenseMutation.mutate({ name: newExpenseName.trim(), amount: Number(newExpenseAmount) || 0 })}>
@@ -615,10 +615,10 @@ export default function SimulationDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Sag: Haftalik Ciro Dagilimi */}
+        {/* Sağ: Haftalık Ciro Dağılımı */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Haftalik Tahmini Ciro Dagilimi</CardTitle>
+            <CardTitle className="text-base">Haftalık Tahmini Ciro Dağılımı</CardTitle>
           </CardHeader>
           <CardContent>
             {(() => {
@@ -630,14 +630,14 @@ export default function SimulationDetailPage() {
               return (
                 <div className="space-y-3">
                   <div className="text-sm text-muted-foreground mb-2">
-                    Haftalik Ciro: <span className="font-medium text-foreground">{formatCurrency(weeklyCiro)}</span>
+                    Haftalık Ciro: <span className="font-medium text-foreground">{formatCurrency(weeklyCiro)}</span>
                   </div>
                   <div className="rounded-md border">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-[70px]">Agirlik %</TableHead>
-                          <TableHead>Gun</TableHead>
+                          <TableHead className="w-[70px]">Ağırlık %</TableHead>
+                          <TableHead>Gün</TableHead>
                           <TableHead className="text-right">Tahmini Ciro</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -661,7 +661,7 @@ export default function SimulationDetailPage() {
                     </Table>
                   </div>
                   <div className="flex items-center px-2 py-1.5 text-sm">
-                    <span className="text-muted-foreground">Toplam Agirlik: %{totalWeight}</span>
+                    <span className="text-muted-foreground">Toplam Ağırlık: %{totalWeight}</span>
                   </div>
                 </div>
               );

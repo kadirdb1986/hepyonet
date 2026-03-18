@@ -210,11 +210,11 @@ export default function ProductDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       setEditing(false);
-      toast.success('Urun basariyla guncellendi');
+      toast.success('Ürün başarıyla güncellendi');
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err?.response?.data?.message || 'Guncelleme sirasinda hata olustu');
+      toast.error(err?.response?.data?.message || 'Güncelleme sırasında hata oluştu');
     },
   });
 
@@ -225,11 +225,11 @@ export default function ProductDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       setIngredientDialogOpen(false);
       resetIngredientForm();
-      toast.success('Icerik basariyla eklendi');
+      toast.success('İçerik başarıyla eklendi');
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err?.response?.data?.message || 'Icerik eklenirken hata olustu');
+      toast.error(err?.response?.data?.message || 'İçerik eklenirken hata oluştu');
     },
   });
 
@@ -238,10 +238,10 @@ export default function ProductDetailPage() {
       api.delete(`/products/${productId}/ingredients/${ingredientId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast.success('Icerik basariyla silindi');
+      toast.success('İçerik başarıyla silindi');
     },
     onError: () => {
-      toast.error('Icerik silinirken hata olustu');
+      toast.error('İçerik silinirken hata oluştu');
     },
   });
 
@@ -284,7 +284,7 @@ export default function ProductDetailPage() {
   }
 
   if (isLoading || !product) {
-    return <div className="p-6 text-muted-foreground">Yukleniyor...</div>;
+    return <div className="p-6 text-muted-foreground">Yükleniyor...</div>;
   }
 
   const otherProducts = allProducts.filter((p) => p.id !== productId);
@@ -297,7 +297,7 @@ export default function ProductDetailPage() {
         <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard/products')}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-2xl font-bold">Urun Detayi</h1>
+        <h1 className="text-2xl font-bold">Ürün Detayı</h1>
       </div>
 
       {/* Product Info Card */}
@@ -307,7 +307,7 @@ export default function ProductDetailPage() {
           {!editing && (
             <Button variant="outline" size="sm" onClick={startEdit}>
               <Pencil className="mr-2 h-4 w-4" />
-              Duzenle
+              Düzenle
             </Button>
           )}
         </CardHeader>
@@ -315,7 +315,7 @@ export default function ProductDetailPage() {
           {editing ? (
             <form onSubmit={handleUpdate} className="space-y-4 max-w-lg">
               <div>
-                <Label>Urun Adi <span className="text-red-500">*</span></Label>
+                <Label>Ürün Adı <span className="text-red-500">*</span></Label>
                 <Input
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -345,14 +345,14 @@ export default function ProductDetailPage() {
                 </div>
               </div>
               <div>
-                <Label>Aciklama</Label>
+                <Label>Açıklama</Label>
                 <Textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                 />
               </div>
               <div>
-                <Label>Gorsel URL</Label>
+                <Label>Görsel URL</Label>
                 <Input
                   value={form.image}
                   onChange={(e) => setForm({ ...form, image: e.target.value })}
@@ -366,12 +366,12 @@ export default function ProductDetailPage() {
                     onChange={(e) => setForm({ ...form, isMenuItem: e.target.checked })}
                     className="rounded border-gray-300"
                   />
-                  <span className="text-sm">Menude Goster</span>
+                  <span className="text-sm">Menüde Göster</span>
                 </label>
               </div>
               {form.isMenuItem && (
                 <div>
-                  <Label>Satis Fiyati (TL) <span className="text-red-500">*</span></Label>
+                  <Label>Satış Fiyatı (TL) <span className="text-red-500">*</span></Label>
                   <Input
                     type="text"
                     inputMode="decimal"
@@ -383,20 +383,20 @@ export default function ProductDetailPage() {
               )}
               {!form.isMenuItem && (
                 <div>
-                  <Label>Satis Fiyati (TL)</Label>
+                  <Label>Satış Fiyatı (TL)</Label>
                   <Input
                     type="text"
                     inputMode="decimal"
                     value={displayNumericValue(form.price)}
                     onChange={(e) => setForm({ ...form, price: handleNumericInput(e.target.value) })}
-                    placeholder="Opsiyonel - ara urun ise bos birakilabilir"
+                    placeholder="Opsiyonel - ara ürün ise boş bırakılabilir"
                   />
                 </div>
               )}
               <div className="flex gap-2 pt-2">
                 <Button type="button" variant="outline" onClick={() => setEditing(false)}>
                   <X className="mr-2 h-4 w-4" />
-                  Iptal
+                  İptal
                 </Button>
                 <Button type="submit" disabled={updateMutation.isPending}>
                   <Save className="mr-2 h-4 w-4" />
@@ -415,7 +415,7 @@ export default function ProductDetailPage() {
                 <p className="font-medium">{product.category?.name || '-'}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Satis Fiyati</p>
+                <p className="text-sm text-muted-foreground">Satış Fiyatı</p>
                 <p className="font-medium">
                   {Number(product.price) > 0
                     ? `${formatCurrency(Number(product.price))} TL`
@@ -432,7 +432,7 @@ export default function ProductDetailPage() {
               </div>
               {Number(product.price) > 0 && (
                 <div>
-                  <p className="text-sm text-muted-foreground">Kar Marji</p>
+                  <p className="text-sm text-muted-foreground">Kar Marjı</p>
                   <p className="font-medium">
                     {product.profitMargin != null ? (
                       <span
@@ -453,13 +453,13 @@ export default function ProductDetailPage() {
                 </div>
               )}
               <div>
-                <p className="text-sm text-muted-foreground">Aciklama</p>
+                <p className="text-sm text-muted-foreground">Açıklama</p>
                 <p className="font-medium">{product.description || '-'}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Durum</p>
                 <div className="flex gap-2 mt-1">
-                  {product.isMenuItem && <Badge variant="secondary">Menu</Badge>}
+                  {product.isMenuItem && <Badge variant="secondary">Menü</Badge>}
                   {product.isComposite && <Badge variant="outline">Kompozit</Badge>}
                   {!product.isMenuItem && !product.isComposite && (
                     <span className="text-sm text-muted-foreground">-</span>
@@ -471,13 +471,13 @@ export default function ProductDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Recete / Icerikler */}
+      {/* Reçete / İçerikler */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Recete / Icerikler</CardTitle>
+          <CardTitle>Reçete / İçerikler</CardTitle>
           <Button onClick={() => { resetIngredientForm(); setIngredientDialogOpen(true); }}>
             <Plus className="mr-2 h-4 w-4" />
-            Icerik Ekle
+            İçerik Ekle
           </Button>
         </CardHeader>
         <CardContent>
@@ -513,7 +513,7 @@ export default function ProductDetailPage() {
                     <TableCell className="font-medium">{name}</TableCell>
                     <TableCell className="text-center">
                       <Badge variant={isRaw ? 'secondary' : 'outline'}>
-                        {isRaw ? 'Stok Kalemi' : 'Alt Urun'}
+                        {isRaw ? 'Stok Kalemi' : 'Alt Ürün'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -531,7 +531,7 @@ export default function ProductDetailPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => {
-                          if (confirm('Bu icerigi silmek istediginize emin misiniz?')) {
+                          if (confirm('Bu içeriği silmek istediğinize emin misiniz?')) {
                             deleteIngredientMutation.mutate(ing.id);
                           }
                         }}
@@ -545,13 +545,13 @@ export default function ProductDetailPage() {
               {product.ingredients.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                    Henuz icerik eklenmemis. &quot;Icerik Ekle&quot; butonunu kullanarak stok kalemi veya alt urun ekleyebilirsiniz.
+                    Henüz içerik eklenmemiş. &quot;İçerik Ekle&quot; butonunu kullanarak stok kalemi veya alt ürün ekleyebilirsiniz.
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
-          {/* Ozet */}
+          {/* Özet */}
           {costBreakdown && costBreakdown.ingredients.length > 0 && (
             <div className="mt-6 border-t pt-4 space-y-3 max-w-sm ml-auto">
               <div className="flex justify-between text-sm">
@@ -561,11 +561,11 @@ export default function ProductDetailPage() {
               {Number(costBreakdown.price) > 0 && (
                 <>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Satis Fiyati</span>
+                    <span className="text-muted-foreground">Satış Fiyatı</span>
                     <span className="font-semibold">{formatCurrency(Number(costBreakdown.price))} TL</span>
                   </div>
                   <div className="flex justify-between text-sm border-t pt-2">
-                    <span className="text-muted-foreground">Kar Marji</span>
+                    <span className="text-muted-foreground">Kar Marjı</span>
                     <span
                       className={`font-bold text-base ${
                         margin != null && margin >= 50
@@ -585,28 +585,28 @@ export default function ProductDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Icerik Ekleme Dialogu */}
+      {/* İçerik Ekleme Dialogu */}
       <Dialog open={ingredientDialogOpen} onOpenChange={setIngredientDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Icerik Ekle</DialogTitle>
+            <DialogTitle>İçerik Ekle</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAddIngredient} className="space-y-4">
             <div>
-              <Label>Icerik Tipi</Label>
+              <Label>İçerik Tipi</Label>
               <select
                 className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 value={ingredientType}
                 onChange={(e) => setIngredientType(e.target.value as 'raw' | 'sub')}
               >
                 <option value="raw">Stok Kalemi</option>
-                <option value="sub">Alt Urun</option>
+                <option value="sub">Alt Ürün</option>
               </select>
             </div>
 
             {ingredientType === 'raw' ? (
               <div>
-                <Label>Stok Kalemi Sec</Label>
+                <Label>Stok Kalemi Seç</Label>
                 <select
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   value={ingredientForm.rawMaterialId}
@@ -619,7 +619,7 @@ export default function ProductDetailPage() {
                   }}
                   required
                 >
-                  <option value="">Stok kalemi secin...</option>
+                  <option value="">Stok kalemi seçin...</option>
                   {rawMaterials.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name} ({UNIT_LABELS[m.unit] || m.unit}) - {formatCurrency(Number(m.lastPurchasePrice))} TL/{m.unit}
@@ -629,14 +629,14 @@ export default function ProductDetailPage() {
               </div>
             ) : (
               <div>
-                <Label>Alt Urun Sec</Label>
+                <Label>Alt Ürün Seç</Label>
                 <select
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   value={ingredientForm.subProductId}
                   onChange={(e) => setIngredientForm({ ...ingredientForm, subProductId: e.target.value })}
                   required
                 >
-                  <option value="">Urun secin...</option>
+                  <option value="">Ürün seçin...</option>
                   {otherProducts.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name} {p.calculatedCost != null ? `- ${formatCurrency(Number(p.calculatedCost))} TL` : ''}
@@ -654,7 +654,7 @@ export default function ProductDetailPage() {
                   inputMode="decimal"
                   value={displayNumericValue(ingredientForm.quantity)}
                   onChange={(e) => setIngredientForm({ ...ingredientForm, quantity: handleNumericInput(e.target.value) })}
-                  placeholder="Ornek: 200"
+                  placeholder="Örnek: 200"
                   required
                 />
               </div>
@@ -683,7 +683,7 @@ export default function ProductDetailPage() {
 
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setIngredientDialogOpen(false)}>
-                Iptal
+                İptal
               </Button>
               <Button type="submit" disabled={addIngredientMutation.isPending}>
                 {addIngredientMutation.isPending ? 'Ekleniyor...' : 'Ekle'}

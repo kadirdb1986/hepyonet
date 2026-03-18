@@ -35,12 +35,12 @@ import {
 const COLORS = ['#2563eb', '#dc2626', '#16a34a', '#ca8a04', '#9333ea', '#0891b2'];
 
 const CATEGORY_LABELS: Record<string, string> = {
-  SALARY: 'Maas',
+  SALARY: 'Maaş',
   BILL: 'Fatura',
   TAX: 'Vergi',
   RENT: 'Kira',
-  SUPPLIER: 'Tedarikci',
-  OTHER: 'Diger',
+  SUPPLIER: 'Tedarikçi',
+  OTHER: 'Diğer',
 };
 
 function getCurrentMonth(): string {
@@ -99,7 +99,7 @@ export default function FinanceOverviewPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Finans Ozeti</h1>
+        <h1 className="text-2xl font-bold">Finans Özeti</h1>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" onClick={prevMonth}>
             <ChevronLeft className="h-4 w-4" />
@@ -130,11 +130,11 @@ export default function FinanceOverviewPage() {
 
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <p className="text-gray-500">Yukleniyor...</p>
+          <p className="text-gray-500">Yükleniyor...</p>
         </div>
       ) : !summary ? (
         <div className="flex items-center justify-center h-64">
-          <p className="text-gray-500">Bu ay icin veri bulunamadi</p>
+          <p className="text-gray-500">Bu ay için veri bulunamadı</p>
         </div>
       ) : (
         <>
@@ -151,7 +151,7 @@ export default function FinanceOverviewPage() {
                   {formatCurrency(summary.totalRevenue)}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {summary.revenueCount} gun ciro girisi
+                  {summary.revenueCount} gün ciro girişi
                 </p>
               </CardContent>
             </Card>
@@ -168,7 +168,7 @@ export default function FinanceOverviewPage() {
                   {formatCurrency(summary.totalExpenses)}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {summary.directExpenses?.length || 0} gider kaydi
+                  {summary.directExpenses?.length || 0} gider kaydı
                 </p>
               </CardContent>
             </Card>
@@ -198,12 +198,12 @@ export default function FinanceOverviewPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Gunluk Ciro</CardTitle>
+                <CardTitle className="text-base">Günlük Ciro</CardTitle>
               </CardHeader>
               <CardContent>
                 {summary.dailyRevenues.length === 0 ? (
                   <p className="text-gray-500 text-sm text-center py-8">
-                    Bu ay icin ciro verisi yok
+                    Bu ay için ciro verisi yok
                   </p>
                 ) : (
                   <ResponsiveContainer width="100%" height={300}>
@@ -236,7 +236,7 @@ export default function FinanceOverviewPage() {
               <CardContent>
                 {categoryData.length === 0 ? (
                   <p className="text-gray-500 text-sm text-center py-8">
-                    Bu ay icin gider verisi yok
+                    Bu ay için gider verisi yok
                   </p>
                 ) : (
                   <ResponsiveContainer width="100%" height={300}>
@@ -271,18 +271,18 @@ export default function FinanceOverviewPage() {
             </Card>
           </div>
 
-          {/* Gunluk Gelir/Gider Tablosu */}
+          {/* Günlük Gelir/Gider Tablosu */}
           {summary.dailyBreakdown && summary.dailyBreakdown.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Gun Gun Gelir / Gider</CardTitle>
+                <CardTitle className="text-base">Gün Gün Gelir / Gider</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-2 px-3 font-medium">Gun</th>
+                        <th className="text-left py-2 px-3 font-medium">Gün</th>
                         <th className="text-right py-2 px-3 font-medium">Gelir</th>
                         <th className="text-right py-2 px-3 font-medium">Gider</th>
                         <th className="text-right py-2 px-3 font-medium">Net</th>

@@ -33,9 +33,9 @@ import { Split, Undo2, Info, AlertTriangle } from 'lucide-react';
 const CATEGORY_LABELS: Record<string, string> = {};
 
 const DISTRIBUTION_TYPE_LABELS: Record<string, string> = {
-  NONE: 'Dagitim Yok (Tek Aya Yaz)',
-  EQUAL: 'Esit Dagitim',
-  REVENUE_BASED: 'Ciro Bazli Dagitim',
+  NONE: 'Dağıtım Yok (Tek Aya Yaz)',
+  EQUAL: 'Eşit Dağıtım',
+  REVENUE_BASED: 'Ciro Bazlı Dağıtım',
 };
 
 export default function DistributePage() {
@@ -74,7 +74,7 @@ export default function DistributePage() {
       setError('');
     },
     onError: (err: any) => {
-      setError(err.response?.data?.message || 'Dagitim yapilamadi');
+      setError(err.response?.data?.message || 'Dağıtım yapılamadı');
     },
   });
 
@@ -89,7 +89,7 @@ export default function DistributePage() {
       queryClient.invalidateQueries({ queryKey: ['finance-summary'] });
     },
     onError: (err: any) => {
-      setError(err.response?.data?.message || 'Dagitim iptal edilemedi');
+      setError(err.response?.data?.message || 'Dağıtım iptal edilemedi');
     },
   });
 
@@ -118,7 +118,7 @@ export default function DistributePage() {
   const handleUndistribute = (id: string) => {
     if (
       window.confirm(
-        'Bu giderin dagitimini iptal etmek istediginize emin misiniz? Tum dagitim kayitlari silinecektir.',
+        'Bu giderin dağıtımını iptal etmek istediğinize emin misiniz? Tüm dağıtım kayıtları silinecektir.',
       )
     ) {
       undistributeMutation.mutate(id);
@@ -143,9 +143,9 @@ export default function DistributePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Gider Dagitimi</h1>
+          <h1 className="text-2xl font-bold">Gider Dağıtımı</h1>
           <p className="text-gray-500 text-sm mt-1">
-            Giderleri aylara dagitarak daha dogru finansal raporlama yapin
+            Giderleri aylara dağıtarak daha doğru finansal raporlama yapın
           </p>
         </div>
       </div>
@@ -156,19 +156,19 @@ export default function DistributePage() {
             <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
             <div className="text-sm text-blue-800 space-y-2">
               <p>
-                <strong>Dagitim Yok (NONE):</strong> Gider, odeme tarihindeki aya
-                yazilir. Tek seferlik giderler icin uygundur.
+                <strong>Dağıtım Yok (NONE):</strong> Gider, ödeme tarihindeki aya
+                yazılır. Tek seferlik giderler için uygundur.
               </p>
               <p>
-                <strong>Esit Dagitim (EQUAL):</strong> Gider belirtilen ay sayisina
-                esit bolunur. Ornegin 9.000 TL / 3 ay = her aya 3.000 TL.
+                <strong>Eşit Dağıtım (EQUAL):</strong> Gider belirtilen ay sayısına
+                eşit bölünür. Örneğin 9.000 TL / 3 ay = her aya 3.000 TL.
               </p>
               <p>
-                <strong>Ciro Bazli Dagitim (REVENUE_BASED):</strong> Gider
-                belirtilen aylara ciro oraninda dagitilir. Ornegin Ocak=100k,
-                Subat=120k, Mart=180k ise dagitim %25 / %30 / %45 oraninda
-                yapilir. Dagitim yapilabilmesi icin ilgili aylarda ciro verisi
-                girilmis olmalidir.
+                <strong>Ciro Bazlı Dağıtım (REVENUE_BASED):</strong> Gider
+                belirtilen aylara ciro oranında dağıtılır. Örneğin Ocak=100k,
+                Şubat=120k, Mart=180k ise dağıtım %25 / %30 / %45 oranında
+                yapılır. Dağıtım yapılabilmesi için ilgili aylarda ciro verisi
+                girilmiş olmalıdır.
               </p>
             </div>
           </div>
@@ -178,7 +178,7 @@ export default function DistributePage() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Gider Dagitimi</DialogTitle>
+            <DialogTitle>Gider Dağıtımı</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             {error && (
@@ -209,7 +209,7 @@ export default function DistributePage() {
             )}
 
             <div className="space-y-2">
-              <Label>Dagitim Tipi</Label>
+              <Label>Dağıtım Tipi</Label>
               <Select
                 value={distributionType}
                 onValueChange={(value) => value && setDistributionType(value)}
@@ -219,11 +219,11 @@ export default function DistributePage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="NONE">
-                    Dagitim Yok (Tek Aya Yaz)
+                    Dağıtım Yok (Tek Aya Yaz)
                   </SelectItem>
-                  <SelectItem value="EQUAL">Esit Dagitim</SelectItem>
+                  <SelectItem value="EQUAL">Eşit Dağıtım</SelectItem>
                   <SelectItem value="REVENUE_BASED">
-                    Ciro Bazli Dagitim
+                    Ciro Bazlı Dağıtım
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -231,7 +231,7 @@ export default function DistributePage() {
 
             {distributionType !== 'NONE' && (
               <div className="space-y-2">
-                <Label>Dagitim Ay Sayisi</Label>
+                <Label>Dağıtım Ay Sayısı</Label>
                 <Input
                   type="number"
                   min="2"
@@ -240,7 +240,7 @@ export default function DistributePage() {
                   onChange={(e) => setDistributionMonths(e.target.value)}
                 />
                 <p className="text-xs text-gray-500">
-                  Odeme tarihinden itibaren kac aya dagitilacagini belirtin (2-24
+                  Ödeme tarihinden itibaren kaç aya dağıtılacağını belirtin (2-24
                   ay)
                 </p>
               </div>
@@ -249,7 +249,7 @@ export default function DistributePage() {
             {distributionType === 'EQUAL' && selectedExpenseId && (
               <div className="p-3 bg-green-50 rounded-md text-sm text-green-800">
                 <p>
-                  Her aya dusecek tutar:{' '}
+                  Her aya düşecek tutar:{' '}
                   <strong>
                     {formatCurrency(
                       Number(
@@ -266,8 +266,8 @@ export default function DistributePage() {
               <div className="p-3 bg-amber-50 rounded-md text-sm text-amber-800 flex items-start gap-2">
                 <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 <p>
-                  Ciro bazli dagitim icin ilgili aylarda ciro verisi girilmis
-                  olmalidir. Ciro verisi olmayan aylar icin dagitim yapilamaz.
+                  Ciro bazlı dağıtım için ilgili aylarda ciro verisi girilmiş
+                  olmalıdır. Ciro verisi olmayan aylar için dağıtım yapılamaz.
                 </p>
               </div>
             )}
@@ -277,13 +277,13 @@ export default function DistributePage() {
                 variant="outline"
                 onClick={() => setIsDialogOpen(false)}
               >
-                Iptal
+                İptal
               </Button>
               <Button
                 onClick={handleDistribute}
                 disabled={distributeMutation.isPending}
               >
-                {distributeMutation.isPending ? 'Dagitiliyor...' : 'Dagit'}
+                {distributeMutation.isPending ? 'Dağıtılıyor...' : 'Dağıt'}
               </Button>
             </div>
           </div>
@@ -292,23 +292,23 @@ export default function DistributePage() {
 
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <p className="text-gray-500">Yukleniyor...</p>
+          <p className="text-gray-500">Yükleniyor...</p>
         </div>
       ) : (
         <>
           <Card>
             <CardHeader>
               <CardTitle className="text-base">
-                Dagitilmamis Giderler ({undistributedExpenses.length})
+                Dağıtılmamış Giderler ({undistributedExpenses.length})
               </CardTitle>
               <CardDescription>
-                Asagidaki giderler henuz aylara dagitilmamistir
+                Aşağıdaki giderler henüz aylara dağıtılmamıştır
               </CardDescription>
             </CardHeader>
             <CardContent>
               {undistributedExpenses.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">
-                  Dagitilacak gider yok
+                  Dağıtılacak gider yok
                 </p>
               ) : (
                 <div className="overflow-x-auto">
@@ -316,7 +316,7 @@ export default function DistributePage() {
                     <thead>
                       <tr className="border-b">
                         <th className="text-left py-2 px-3 font-medium">
-                          Baslik
+                          Başlık
                         </th>
                         <th className="text-left py-2 px-3 font-medium">
                           Kategori
@@ -325,10 +325,10 @@ export default function DistributePage() {
                           Tutar
                         </th>
                         <th className="text-left py-2 px-3 font-medium">
-                          Odeme Tarihi
+                          Ödeme Tarihi
                         </th>
                         <th className="text-right py-2 px-3 font-medium">
-                          Islem
+                          İşlem
                         </th>
                       </tr>
                     </thead>
@@ -360,7 +360,7 @@ export default function DistributePage() {
                               }
                             >
                               <Split className="h-3 w-3" />
-                              Dagit
+                              Dağıt
                             </Button>
                           </td>
                         </tr>
@@ -375,16 +375,16 @@ export default function DistributePage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base">
-                Dagitilmis Giderler ({distributedExpenses.length})
+                Dağıtılmış Giderler ({distributedExpenses.length})
               </CardTitle>
               <CardDescription>
-                Aylara dagitilmis giderler ve dagitim detaylari
+                Aylara dağıtılmış giderler ve dağıtım detayları
               </CardDescription>
             </CardHeader>
             <CardContent>
               {distributedExpenses.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">
-                  Dagitilmis gider yok
+                  Dağıtılmış gider yok
                 </p>
               ) : (
                 <Accordion className="w-full">
@@ -421,7 +421,7 @@ export default function DistributePage() {
                                     Ay
                                   </th>
                                   <th className="text-right py-2 px-3 font-medium">
-                                    Dagitilan Tutar
+                                    Dağıtılan Tutar
                                   </th>
                                   <th className="text-right py-2 px-3 font-medium">
                                     Oran
@@ -472,7 +472,7 @@ export default function DistributePage() {
                               disabled={undistributeMutation.isPending}
                             >
                               <Undo2 className="h-3 w-3" />
-                              Dagitimi Iptal Et
+                              Dağıtımı İptal Et
                             </Button>
                           </div>
                         </div>

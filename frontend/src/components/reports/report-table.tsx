@@ -4,7 +4,7 @@ import { EditableCell } from './editable-cell';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const CATEGORY_LABELS: Record<string, string> = {
-  SALARY: 'Maas', BILL: 'Fatura', TAX: 'Vergi', RENT: 'Kira', SUPPLIER: 'Tedarikci', OTHER: 'Diger',
+  SALARY: 'Maaş', BILL: 'Fatura', TAX: 'Vergi', RENT: 'Kira', SUPPLIER: 'Tedarikçi', OTHER: 'Diğer',
 };
 
 interface ReportTableProps {
@@ -48,7 +48,7 @@ export function ReportTable({
                   </TableRow>
                 );
               })}
-              {revenues.length === 0 && (<TableRow><TableCell colSpan={3} className="text-center text-muted-foreground">Bu donem icin gelir kaydi bulunamadi</TableCell></TableRow>)}
+              {revenues.length === 0 && (<TableRow><TableCell colSpan={3} className="text-center text-muted-foreground">Bu dönem için gelir kaydı bulunamadı</TableCell></TableRow>)}
               <TableRow className="bg-green-50 font-bold"><TableCell>Toplam Gelir</TableCell><TableCell className="text-right text-green-700">{formatCurrency(totalRevenue)}</TableCell><TableCell /></TableRow>
             </TableBody>
           </Table>

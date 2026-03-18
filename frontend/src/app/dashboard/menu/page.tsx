@@ -68,7 +68,7 @@ export default function MenuManagementPage() {
       toast.success(t('orderSaved'));
     },
     onError: () => {
-      toast.error('Hata olustu');
+      toast.error('Hata oluştu');
     },
   });
 
@@ -80,7 +80,7 @@ export default function MenuManagementPage() {
       toast.success(t('availabilityUpdated'));
     },
     onError: () => {
-      toast.error('Hata olustu');
+      toast.error('Hata oluştu');
     },
   });
 
@@ -145,7 +145,7 @@ export default function MenuManagementPage() {
             <p className="text-muted-foreground text-center">{t('emptyState')}</p>
             <Link href="/dashboard/products">
               <Button variant="outline" className="mt-4">
-                Urunlere Git
+                Ürünlere Git
               </Button>
             </Link>
           </CardContent>

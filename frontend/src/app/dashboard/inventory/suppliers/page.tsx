@@ -89,11 +89,11 @@ export default function SuppliersPage() {
       setNewDesc('');
       setNewDeliveryType('');
       setNewPhone('');
-      toast.success('Tedarikci eklendi');
+      toast.success('Tedarikçi eklendi');
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err?.response?.data?.message || 'Hata olustu');
+      toast.error(err?.response?.data?.message || 'Hata oluştu');
     },
   });
 
@@ -108,11 +108,11 @@ export default function SuppliersPage() {
       setEditingDesc('');
       setEditingDeliveryType('');
       setEditingPhone('');
-      toast.success('Tedarikci guncellendi');
+      toast.success('Tedarikçi güncellendi');
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err?.response?.data?.message || 'Hata olustu');
+      toast.error(err?.response?.data?.message || 'Hata oluştu');
     },
   });
 
@@ -121,11 +121,11 @@ export default function SuppliersPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       queryClient.invalidateQueries({ queryKey: ['raw-materials'] });
-      toast.success('Tedarikci silindi');
+      toast.success('Tedarikçi silindi');
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err?.response?.data?.message || 'Hata olustu');
+      toast.error(err?.response?.data?.message || 'Hata oluştu');
     },
   });
 
@@ -150,7 +150,7 @@ export default function SuppliersPage() {
   }
 
   if (isLoading) {
-    return <div className="p-6 text-muted-foreground">Yukleniyor...</div>;
+    return <div className="p-6 text-muted-foreground">Yükleniyor...</div>;
   }
 
   return (
@@ -160,13 +160,13 @@ export default function SuppliersPage() {
         <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard/inventory')}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-2xl font-bold">Tedarikci Yonetimi</h1>
+        <h1 className="text-2xl font-bold">Tedarikçi Yönetimi</h1>
       </div>
 
       {/* Add supplier form */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Yeni Tedarikci Ekle</CardTitle>
+          <CardTitle className="text-lg">Yeni Tedarikçi Ekle</CardTitle>
         </CardHeader>
         <CardContent>
           <form
@@ -184,9 +184,9 @@ export default function SuppliersPage() {
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             <div>
-              <Label>Tedarikci Adi</Label>
+              <Label>Tedarikçi Adı</Label>
               <Input
-                placeholder="Tedarikci adi..."
+                placeholder="Tedarikçi adı..."
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 required
@@ -202,9 +202,9 @@ export default function SuppliersPage() {
               />
             </div>
             <div>
-              <Label>Aciklama</Label>
+              <Label>Açıklama</Label>
               <Textarea
-                placeholder="Aciklama (istege bagli)..."
+                placeholder="Açıklama (isteğe bağlı)..."
                 value={newDesc}
                 onChange={(e) => setNewDesc(e.target.value)}
                 rows={2}
@@ -217,7 +217,7 @@ export default function SuppliersPage() {
                 value={newDeliveryType}
                 onChange={(e) => setNewDeliveryType(e.target.value)}
               >
-                <option value="">Tedarik tipi secin...</option>
+                <option value="">Tedarik tipi seçin...</option>
                 {DELIVERY_TYPES.map((dt) => (
                   <option key={dt} value={dt}>{dt}</option>
                 ))}
@@ -236,18 +236,18 @@ export default function SuppliersPage() {
       {/* Suppliers list */}
       <Card>
         <CardHeader>
-          <CardTitle>Tedarikciler ({suppliers.length})</CardTitle>
+          <CardTitle>Tedarikçiler ({suppliers.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Tedarikci Adi</TableHead>
-                <TableHead>Aciklama</TableHead>
+                <TableHead>Tedarikçi Adı</TableHead>
+                <TableHead>Açıklama</TableHead>
                 <TableHead className="text-center">Tedarik Tipi</TableHead>
                 <TableHead className="text-center">Telefon</TableHead>
                 <TableHead className="text-center">Kalem</TableHead>
-                <TableHead className="text-right">Islemler</TableHead>
+                <TableHead className="text-right">İşlemler</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -268,7 +268,7 @@ export default function SuppliersPage() {
                           value={editingDesc}
                           onChange={(e) => setEditingDesc(e.target.value)}
                           rows={2}
-                          placeholder="Aciklama..."
+                          placeholder="Açıklama..."
                           className="min-h-[2rem]"
                         />
                       </TableCell>
@@ -278,7 +278,7 @@ export default function SuppliersPage() {
                           value={editingDeliveryType}
                           onChange={(e) => setEditingDeliveryType(e.target.value)}
                         >
-                          <option value="">Tedarik tipi secin...</option>
+                          <option value="">Tedarik tipi seçin...</option>
                           {DELIVERY_TYPES.map((dt) => (
                             <option key={dt} value={dt}>{dt}</option>
                           ))}
@@ -354,7 +354,7 @@ export default function SuppliersPage() {
                             variant="ghost"
                             size="icon"
                             onClick={() => {
-                              if (confirm(`"${s.name}" tedarikcisini silmek istediginize emin misiniz?`)) {
+                              if (confirm(`"${s.name}" tedarikçisini silmek istediğinize emin misiniz?`)) {
                                 deleteSupplierMutation.mutate(s.id);
                               }
                             }}
@@ -371,7 +371,7 @@ export default function SuppliersPage() {
               {suppliers.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                    Henuz tedarikci tanimlanmamis
+                    Henüz tedarikçi tanımlanmamış
                   </TableCell>
                 </TableRow>
               )}

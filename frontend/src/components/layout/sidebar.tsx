@@ -22,12 +22,12 @@ const menuItems = [
   { href: '/dashboard/personnel', label: 'Personel', icon: Users },
   { href: '/dashboard/finance', label: 'Finans', icon: Wallet },
   { href: '/dashboard/inventory', label: 'Stok', icon: Package },
-  { href: '/dashboard/products', label: 'Urunler', icon: ChefHat },
-  { href: '/dashboard/menu', label: 'Menu', icon: UtensilsCrossed },
-  { href: '/dashboard/simulation', label: 'Simulasyon', icon: Calculator },
+  { href: '/dashboard/products', label: 'Ürünler', icon: ChefHat },
+  { href: '/dashboard/menu', label: 'Menü', icon: UtensilsCrossed },
+  { href: '/dashboard/simulation', label: 'Simülasyon', icon: Calculator },
   { href: '/dashboard/reports', label: 'Raporlar', icon: BarChart3 },
   { href: '/dashboard/settings', label: 'Ayarlar', icon: Settings },
-  { href: '/dashboard/users', label: 'Kullanicilar', icon: UserCog },
+  { href: '/dashboard/users', label: 'Kullanıcılar', icon: UserCog },
 ];
 
 interface SidebarProps {

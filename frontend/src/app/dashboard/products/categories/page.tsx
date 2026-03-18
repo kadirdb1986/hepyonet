@@ -49,11 +49,11 @@ export default function CategoriesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       closeDialog();
-      toast.success('Kategori olusturuldu');
+      toast.success('Kategori oluşturuldu');
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err?.response?.data?.message || 'Kategori olusturulurken hata olustu');
+      toast.error(err?.response?.data?.message || 'Kategori oluşturulurken hata oluştu');
     },
   });
 
@@ -64,11 +64,11 @@ export default function CategoriesPage() {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
       closeDialog();
-      toast.success('Kategori guncellendi');
+      toast.success('Kategori güncellendi');
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err?.response?.data?.message || 'Kategori guncellenirken hata olustu');
+      toast.error(err?.response?.data?.message || 'Kategori güncellenirken hata oluştu');
     },
   });
 
@@ -80,7 +80,7 @@ export default function CategoriesPage() {
       toast.success('Kategori silindi');
     },
     onError: () => {
-      toast.error('Kategori silinirken hata olustu');
+      toast.error('Kategori silinirken hata oluştu');
     },
   });
 
@@ -89,10 +89,10 @@ export default function CategoriesPage() {
       api.patch('/categories/order', { items }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
-      toast.success('Siralama kaydedildi');
+      toast.success('Sıralama kaydedildi');
     },
     onError: () => {
-      toast.error('Siralama kaydedilirken hata olustu');
+      toast.error('Sıralama kaydedilirken hata oluştu');
     },
   });
 
@@ -127,7 +127,7 @@ export default function CategoriesPage() {
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) {
-      toast.error('Kategori adi bos olamaz');
+      toast.error('Kategori adı boş olamaz');
       return;
     }
     if (editingCategory) {
@@ -138,7 +138,7 @@ export default function CategoriesPage() {
   }
 
   if (isLoading) {
-    return <div className="p-6 text-muted-foreground">Yukleniyor...</div>;
+    return <div className="p-6 text-muted-foreground">Yükleniyor...</div>;
   }
 
   return (
@@ -163,11 +163,11 @@ export default function CategoriesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[80px]">Sira</TableHead>
-                <TableHead>Kategori Adi</TableHead>
-                <TableHead className="text-center">Urun Sayisi</TableHead>
-                <TableHead className="text-center w-[100px]">Sirala</TableHead>
-                <TableHead className="text-right">Islemler</TableHead>
+                <TableHead className="w-[80px]">Sıra</TableHead>
+                <TableHead>Kategori Adı</TableHead>
+                <TableHead className="text-center">Ürün Sayısı</TableHead>
+                <TableHead className="text-center w-[100px]">Sırala</TableHead>
+                <TableHead className="text-right">İşlemler</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -207,7 +207,7 @@ export default function CategoriesPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => {
-                          if (confirm(`"${cat.name}" kategorisini silmek istediginize emin misiniz? Urunlerin kategorisi bos kalacaktir.`)) {
+                          if (confirm(`"${cat.name}" kategorisini silmek istediğinize emin misiniz? Ürünlerin kategorisi boş kalacaktır.`)) {
                             deleteMutation.mutate(cat.id);
                           }
                         }}
@@ -221,7 +221,7 @@ export default function CategoriesPage() {
               {categories.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                    Henuz kategori eklenmemis
+                    Henüz kategori eklenmemiş
                   </TableCell>
                 </TableRow>
               )}
@@ -233,22 +233,22 @@ export default function CategoriesPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>{editingCategory ? 'Kategori Duzenle' : 'Yeni Kategori'}</DialogTitle>
+            <DialogTitle>{editingCategory ? 'Kategori Düzenle' : 'Yeni Kategori'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label>Kategori Adi</Label>
+              <Label>Kategori Adı</Label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ornek: Ana Yemek, Icecek, Tatli"
+                placeholder="Örnek: Ana Yemek, İçecek, Tatlı"
                 required
                 autoFocus
               />
             </div>
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={closeDialog}>
-                Iptal
+                İptal
               </Button>
               <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
                 {createMutation.isPending || updateMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}

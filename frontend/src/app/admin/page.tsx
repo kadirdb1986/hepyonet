@@ -19,13 +19,13 @@ export default function AdminDashboardPage() {
     api.get('/admin/stats').then(({ data }) => setStats(data)).catch(console.error);
   }, []);
 
-  if (!stats) return <p>Yukleniyor...</p>;
+  if (!stats) return <p>Yükleniyor...</p>;
 
   const cards = [
     { title: 'Toplam Restoran', value: stats.totalRestaurants, icon: Store },
     { title: 'Onay Bekleyen', value: stats.pendingRestaurants, icon: Clock },
     { title: 'Onaylanan', value: stats.approvedRestaurants, icon: Store },
-    { title: 'Toplam Kullanici', value: stats.totalUsers, icon: Users },
+    { title: 'Toplam Kullanıcı', value: stats.totalUsers, icon: Users },
   ];
 
   return (

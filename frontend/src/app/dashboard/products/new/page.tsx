@@ -44,23 +44,23 @@ export default function NewProductPage() {
         isComposite: false,
       }),
     onSuccess: (res) => {
-      toast.success('Urun basariyla olusturuldu');
+      toast.success('Ürün başarıyla oluşturuldu');
       router.push(`/dashboard/products/${res.data.id}`);
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err?.response?.data?.message || 'Urun olusturulurken hata olustu');
+      toast.error(err?.response?.data?.message || 'Ürün oluşturulurken hata oluştu');
     },
   });
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.name.trim()) {
-      toast.error('Urun adi zorunludur');
+      toast.error('Ürün adı zorunludur');
       return;
     }
     if (form.isMenuItem && parseNumericValue(form.price) <= 0) {
-      toast.error('Menude gosterilen urunler icin satis fiyati zorunludur');
+      toast.error('Menüde gösterilen ürünler için satış fiyatı zorunludur');
       return;
     }
     createMutation.mutate(form);
@@ -72,23 +72,23 @@ export default function NewProductPage() {
         <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard/products')}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-2xl font-bold">Yeni Urun Olustur</h1>
+        <h1 className="text-2xl font-bold">Yeni Ürün Oluştur</h1>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Urun Bilgileri</CardTitle>
+          <CardTitle>Ürün Bilgileri</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
             <div>
               <Label>
-                Urun Adi <span className="text-red-500">*</span>
+                Ürün Adı <span className="text-red-500">*</span>
               </Label>
               <Input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Ornek: Kofte, Lahmacun, vb."
+                placeholder="Örnek: Köfte, Lahmacun, vb."
                 required
               />
             </div>
@@ -99,7 +99,7 @@ export default function NewProductPage() {
                 <Input
                   value={form.code}
                   onChange={(e) => setForm({ ...form, code: e.target.value })}
-                  placeholder="Ornek: URN-001"
+                  placeholder="Örnek: URN-001"
                 />
               </div>
               <div>
@@ -118,16 +118,16 @@ export default function NewProductPage() {
             </div>
 
             <div>
-              <Label>Aciklama</Label>
+              <Label>Açıklama</Label>
               <Textarea
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="Urun hakkinda kisa bir aciklama..."
+                placeholder="Ürün hakkında kısa bir açıklama..."
               />
             </div>
 
             <div>
-              <Label>Gorsel URL</Label>
+              <Label>Görsel URL</Label>
               <Input
                 value={form.image}
                 onChange={(e) => setForm({ ...form, image: e.target.value })}
@@ -143,45 +143,46 @@ export default function NewProductPage() {
                   onChange={(e) => setForm({ ...form, isMenuItem: e.target.checked })}
                   className="rounded border-gray-300"
                 />
-                <span className="text-sm font-medium">Menude Goster</span>
+                <span className="text-sm font-medium">Menüde Göster</span>
               </label>
               <p className="text-xs text-muted-foreground mt-1">
                 {form.isMenuItem
-                  ? 'Bu urun menude gorunecek ve satis fiyati zorunludur.'
-                  : 'Bu urun bir ara urun olarak kullanilabilir (ornegin kofte, sos gibi).'}
+                  ? 'Bu ürün menüde görünecek ve satış fiyatı zorunludur.'
+                  : 'Bu ürün bir ara ürün olarak kullanılabilir (örneğin köfte, sos gibi).'}
+
               </p>
             </div>
 
             {form.isMenuItem ? (
               <div>
                 <Label>
-                  Satis Fiyati (TL) <span className="text-red-500">*</span>
+                  Satış Fiyatı (TL) <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   type="text"
                   inputMode="decimal"
                   value={displayNumericValue(form.price)}
                   onChange={(e) => setForm({ ...form, price: handleNumericInput(e.target.value) })}
-                  placeholder="Ornek: 150,00"
+                  placeholder="Örnek: 150,00"
                   required
                 />
               </div>
             ) : (
               <div>
-                <Label>Satis Fiyati (TL)</Label>
+                <Label>Satış Fiyatı (TL)</Label>
                 <Input
                   type="text"
                   inputMode="decimal"
                   value={displayNumericValue(form.price)}
                   onChange={(e) => setForm({ ...form, price: handleNumericInput(e.target.value) })}
-                  placeholder="Opsiyonel - ara urun ise bos birakilabilir"
+                  placeholder="Opsiyonel - ara ürün ise boş bırakılabilir"
                 />
               </div>
             )}
 
             <div className="flex gap-2 pt-4 border-t">
               <Button type="button" variant="outline" onClick={() => router.push('/dashboard/products')}>
-                Iptal
+                İptal
               </Button>
               <Button type="submit" disabled={createMutation.isPending}>
                 {createMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}

@@ -28,11 +28,11 @@ const statusMap = {
 
 const roleLabels: Record<string, string> = {
   OWNER: 'Sahip',
-  ADMIN: 'Yonetici',
+  ADMIN: 'Yönetici',
   ACCOUNTANT: 'Muhasebe',
-  HR: 'Insan Kaynaklari',
+  HR: 'İnsan Kaynakları',
   STOCK_MANAGER: 'Depocu',
-  MENU_MANAGER: 'Menu Yoneticisi',
+  MENU_MANAGER: 'Menü Yöneticisi',
   WAITER: 'Garson',
 };
 
@@ -67,9 +67,9 @@ export default function AdminRestaurantDetailPage() {
   if (!restaurant) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-400 text-lg">Restoran bulunamadi.</p>
+        <p className="text-gray-400 text-lg">Restoran bulunamadı.</p>
         <Button variant="outline" onClick={() => router.push('/admin/restaurants')} className="mt-4 border-gray-600 text-gray-300">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Geri Don
+          <ArrowLeft className="h-4 w-4 mr-2" /> Geri Dön
         </Button>
       </div>
     );
@@ -103,7 +103,7 @@ export default function AdminRestaurantDetailPage() {
               <p className="text-white">{restaurant.phone || '-'}</p>
             </div>
             <div>
-              <span className="text-sm text-gray-400">Kayit Tarihi</span>
+              <span className="text-sm text-gray-400">Kayıt Tarihi</span>
               <p className="text-white">{new Date(restaurant.createdAt).toLocaleDateString('tr-TR')}</p>
             </div>
             <div>
@@ -126,7 +126,7 @@ export default function AdminRestaurantDetailPage() {
         </div>
 
         <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">Kullanicilar ({restaurant.members.length})</h2>
+          <h2 className="text-lg font-semibold text-white mb-4">Kullanıcılar ({restaurant.members.length})</h2>
           <div className="space-y-3">
             {restaurant.members.map((m) => (
               <div key={m.user.id} className="flex items-center justify-between py-2 border-b border-gray-700 last:border-0">

@@ -92,10 +92,10 @@ const UNIT_SHORT: Record<string, string> = {
 
 const TOGGLEABLE_COLUMNS = [
   { key: 'type', label: 'Tip' },
-  { key: 'supplier', label: 'Tedarikci' },
+  { key: 'supplier', label: 'Tedarikçi' },
   { key: 'currentStock', label: 'Mevcut Stok' },
   { key: 'minStockLevel', label: 'Minimum Stok' },
-  { key: 'lastPurchasePrice', label: 'Son Alis Fiyati' },
+  { key: 'lastPurchasePrice', label: 'Son Alış Fiyatı' },
   { key: 'stockStatus', label: 'Stok Durumu' },
 ] as const;
 
@@ -165,7 +165,7 @@ function SupplierPopover({ supplier }: { supplier: Supplier }) {
           {supplier.description ? (
             <p className="text-xs text-muted-foreground mt-1.5 whitespace-pre-wrap">{supplier.description}</p>
           ) : (
-            <p className="text-xs text-muted-foreground mt-1.5 italic">Aciklama eklenmemis</p>
+            <p className="text-xs text-muted-foreground mt-1.5 italic">Açıklama eklenmemiş</p>
           )}
         </div>
       )}
@@ -293,7 +293,7 @@ export default function InventoryPage() {
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err?.response?.data?.message || 'Hata olustu');
+      toast.error(err?.response?.data?.message || 'Hata oluştu');
     },
   });
 
@@ -305,11 +305,11 @@ export default function InventoryPage() {
       queryClient.invalidateQueries({ queryKey: ['raw-materials'] });
       setEditingType(null);
       setEditingTypeName('');
-      toast.success('Stok tipi guncellendi');
+      toast.success('Stok tipi güncellendi');
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err?.response?.data?.message || 'Hata olustu');
+      toast.error(err?.response?.data?.message || 'Hata oluştu');
     },
   });
 
@@ -321,7 +321,7 @@ export default function InventoryPage() {
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err?.response?.data?.message || 'Hata olustu');
+      toast.error(err?.response?.data?.message || 'Hata oluştu');
     },
   });
 
@@ -383,7 +383,7 @@ export default function InventoryPage() {
           <Link href="/dashboard/inventory/suppliers">
             <Button variant="outline">
               <Truck className="mr-2 h-4 w-4" />
-              Tedarikciler
+              Tedarikçiler
             </Button>
           </Link>
           <Button variant="outline" onClick={() => setTypeDialogOpen(true)}>
@@ -417,7 +417,7 @@ export default function InventoryPage() {
                     value={form.type}
                     onChange={(e) => setForm({ ...form, type: e.target.value })}
                   >
-                    {materialTypes.length === 0 && <option value="">Tip tanimlanmamis</option>}
+                    {materialTypes.length === 0 && <option value="">Tip tanımlanmamış</option>}
                     {materialTypes.map((mt) => (
                       <option key={mt.id} value={mt.name}>{mt.name}</option>
                     ))}
@@ -438,13 +438,13 @@ export default function InventoryPage() {
                   </select>
                 </div>
                 <div>
-                  <Label>Tedarikci</Label>
+                  <Label>Tedarikçi</Label>
                   <select
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     value={form.supplierId}
                     onChange={(e) => setForm({ ...form, supplierId: e.target.value })}
                   >
-                    <option value="">Tedarikci secilmedi</option>
+                    <option value="">Tedarikçi seçilmedi</option>
                     {suppliers.map((s) => (
                       <option key={s.id} value={s.id}>{s.name}</option>
                     ))}
@@ -535,7 +535,7 @@ export default function InventoryPage() {
       {/* Filter tabs and search */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex gap-2 flex-wrap">
-          {[{ key: 'ALL', label: 'Tumu' }, ...materialTypes.map((mt) => ({ key: mt.name, label: mt.name }))].map((tab) => (
+          {[{ key: 'ALL', label: 'Tümü' }, ...materialTypes.map((mt) => ({ key: mt.name, label: mt.name }))].map((tab) => (
             <Button
               key={tab.key}
               variant={activeTab === tab.key ? 'default' : 'outline'}
@@ -582,11 +582,11 @@ export default function InventoryPage() {
               onClick={() => setColumnMenuOpen((v) => !v)}
             >
               <SlidersHorizontal className="mr-2 h-4 w-4" />
-              Sutunlar
+              Sütunlar
             </Button>
             {columnMenuOpen && (
               <div className="absolute right-0 top-full mt-1 z-50 w-52 rounded-md border bg-popover p-1 shadow-md">
-                <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Gorunur Sutunlar</p>
+                <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Gorunur Sütunlar</p>
                 <div className="h-px bg-border my-1" />
                 {TOGGLEABLE_COLUMNS.map((col) => (
                   <label
@@ -612,7 +612,7 @@ export default function InventoryPage() {
               <TableRow>
                 <TableHead>{t('name')}</TableHead>
                 {isColumnVisible('type') && <TableHead className="text-center">Tip</TableHead>}
-                {isColumnVisible('supplier') && <TableHead className="text-center">Tedarikci</TableHead>}
+                {isColumnVisible('supplier') && <TableHead className="text-center">Tedarikçi</TableHead>}
                 {isColumnVisible('currentStock') && <TableHead className="text-center">{t('currentStock')}</TableHead>}
                 {isColumnVisible('minStockLevel') && <TableHead className="text-center">{t('minStockLevel')}</TableHead>}
                 {isColumnVisible('lastPurchasePrice') && <TableHead className="text-center">{t('lastPurchasePrice')}</TableHead>}
@@ -691,7 +691,7 @@ export default function InventoryPage() {
               {materials.filter((m) => (activeTab === 'ALL' || m.type === activeTab) && (!searchQuery || m.name.toLocaleLowerCase('tr-TR').includes(searchQuery.toLocaleLowerCase('tr-TR')))).length === 0 && (
                 <TableRow>
                   <TableCell colSpan={2 + visibleColumns.length} className="text-center text-muted-foreground py-8">
-                    {searchQuery ? `"${searchQuery}" ile eslesen stok kalemi bulunamadi` : t('materialNotFound')}
+                    {searchQuery ? `"${searchQuery}" ile eşleşen stok kalemi bulunamadı` : t('materialNotFound')}
                   </TableCell>
                 </TableRow>
               )}
@@ -780,7 +780,7 @@ export default function InventoryPage() {
                         size="icon"
                         className="h-8 w-8 shrink-0"
                         onClick={() => {
-                          if (confirm(`"${mt.name}" tipini silmek istediginize emin misiniz?`)) {
+                          if (confirm(`"${mt.name}" tipini silmek istediğinize emin misiniz?`)) {
                             deleteTypeMutation.mutate(mt.id);
                           }
                         }}
@@ -794,7 +794,7 @@ export default function InventoryPage() {
               ))}
               {materialTypes.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  Henuz stok tipi tanimlanmamis
+                  Henüz stok tipi tanımlanmamış
                 </p>
               )}
             </div>

@@ -10,7 +10,7 @@ import { Loader2, Plus, X } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 const CATEGORY_LABELS: Record<string, string> = {
-  SALARY: 'Maas', BILL: 'Fatura', TAX: 'Vergi', RENT: 'Kira', SUPPLIER: 'Tedarikci', OTHER: 'Diger',
+  SALARY: 'Maaş', BILL: 'Fatura', TAX: 'Vergi', RENT: 'Kira', SUPPLIER: 'Tedarikçi', OTHER: 'Diğer',
 };
 
 export function ComparisonReport() {
@@ -38,7 +38,7 @@ export function ComparisonReport() {
   };
 
   const overviewChartData = reports?.map((r) => ({ period: r.period, Gelir: r.totalRevenue, Gider: r.totalExpense, Vergi: r.taxAmount, 'Net Kar': r.netProfit }));
-  const marginChartData = reports?.map((r) => ({ period: r.period, 'Kar Marji (%)': r.totalRevenue > 0 ? parseFloat((((r.totalRevenue - r.totalExpense - r.taxAmount) / r.totalRevenue) * 100).toFixed(1)) : 0 }));
+  const marginChartData = reports?.map((r) => ({ period: r.period, 'Kar Marjı (%)': r.totalRevenue > 0 ? parseFloat((((r.totalRevenue - r.totalExpense - r.taxAmount) / r.totalRevenue) * 100).toFixed(1)) : 0 }));
 
   return (
     <div className="space-y-6">
@@ -47,12 +47,12 @@ export function ComparisonReport() {
           <div className="space-y-2">
             <Label>Karsilastirma Turu</Label>
             <select className="flex h-9 w-40 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={type} onChange={(e) => setType(e.target.value as 'monthly' | 'weekly')}>
-              <option value="monthly">Aylik</option><option value="weekly">Haftalik</option>
+              <option value="monthly">Aylık</option><option value="weekly">Haftalık</option>
             </select>
           </div>
         </div>
         <div className="space-y-2">
-          <Label>Donemler (en az 2)</Label>
+          <Label>Dönemler (en az 2)</Label>
           <div className="flex flex-wrap gap-2 items-center">
             {periods.map((period, index) => (
               <div key={index} className="flex items-center gap-1">
@@ -66,7 +66,7 @@ export function ComparisonReport() {
         <Button onClick={handleCompare}>Karsilastir</Button>
       </div>
       {isLoading && (<div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /><span className="ml-2 text-muted-foreground">Karsilastirma yukleniyor...</span></div>)}
-      {error && (<div className="bg-destructive/10 text-destructive p-4 rounded-lg">Karsilastirma yuklenirken hata olustu.</div>)}
+      {error && (<div className="bg-destructive/10 text-destructive p-4 rounded-lg">Karsilastirma yuklenirken hata oluştu.</div>)}
       {reports && reports.length >= 2 && (
         <div className="space-y-8">
           <div className="bg-card border rounded-lg p-6">
@@ -76,9 +76,9 @@ export function ComparisonReport() {
             </ResponsiveContainer>
           </div>
           <div className="bg-card border rounded-lg p-6">
-            <h3 className="text-lg font-semibold mb-4">Kar Marji Trendi</h3>
+            <h3 className="text-lg font-semibold mb-4">Kar Marjı Trendi</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={marginChartData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="period" /><YAxis unit="%" /><Tooltip formatter={(value) => `${value}%`} /><Legend /><Line type="monotone" dataKey="Kar Marji (%)" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 5 }} /></LineChart>
+              <LineChart data={marginChartData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="period" /><YAxis unit="%" /><Tooltip formatter={(value) => `${value}%`} /><Legend /><Line type="monotone" dataKey="Kar Marjı (%)" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 5 }} /></LineChart>
             </ResponsiveContainer>
           </div>
           <div className="bg-card border rounded-lg p-6">
@@ -94,7 +94,7 @@ export function ComparisonReport() {
                   <TableRow className="bg-red-50"><TableCell className="sticky left-0 bg-red-50 font-medium">Toplam Gider</TableCell>{reports.map((r) => (<TableCell key={r.period} className="text-right text-red-700 font-medium">{formatCurrency(r.totalExpense)}</TableCell>))}</TableRow>
                   <TableRow><TableCell className="sticky left-0 bg-background font-medium">Vergi</TableCell>{reports.map((r) => (<TableCell key={r.period} className="text-right">{formatCurrency(r.taxAmount)}</TableCell>))}</TableRow>
                   <TableRow className="border-t-2 font-bold"><TableCell className="sticky left-0 bg-background font-bold text-lg">Net Kar/Zarar</TableCell>{reports.map((r) => (<TableCell key={r.period} className={`text-right text-lg font-bold ${r.netProfit >= 0 ? 'text-green-700' : 'text-red-700'}`}>{formatCurrency(r.netProfit)}</TableCell>))}</TableRow>
-                  <TableRow><TableCell className="sticky left-0 bg-background font-medium">Kar Marji</TableCell>{reports.map((r) => (<TableCell key={r.period} className="text-right font-medium">{formatMargin(r.totalRevenue, r.totalExpense, r.taxAmount)}</TableCell>))}</TableRow>
+                  <TableRow><TableCell className="sticky left-0 bg-background font-medium">Kar Marjı</TableCell>{reports.map((r) => (<TableCell key={r.period} className="text-right font-medium">{formatMargin(r.totalRevenue, r.totalExpense, r.taxAmount)}</TableCell>))}</TableRow>
                 </TableBody>
               </Table>
             </div>

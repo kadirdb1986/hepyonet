@@ -35,7 +35,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (isLoading || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        <p>Yukleniyor...</p>
+        <p>Yükleniyor...</p>
       </div>
     );
   }
@@ -73,7 +73,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             onClick={logout}
           >
             <LogOut className="h-4 w-4" />
-            Cikis Yap
+            Çıkış Yap
           </Button>
         </div>
       </aside>
