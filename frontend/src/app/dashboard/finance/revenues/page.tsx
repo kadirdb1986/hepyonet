@@ -70,10 +70,12 @@ export default function RevenuesPage() {
   // Build full month days with revenue data
   const monthDays = useMemo(() => {
     const [y, m] = selectedMonth.split('-').map(Number);
-    const daysInMonth = new Date(y, m, 0).getDate();
+    const now = new Date();
+    const isCurrentMonth = now.getFullYear() === y && now.getMonth() + 1 === m;
+    const maxDay = isCurrentMonth ? now.getDate() : new Date(y, m, 0).getDate();
     const days = [];
 
-    for (let day = 1; day <= daysInMonth; day++) {
+    for (let day = 1; day <= maxDay; day++) {
       const dateStr = `${selectedMonth}-${String(day).padStart(2, '0')}`;
       const dateObj = new Date(y, m - 1, day);
       const dayName = dayNames[dateObj.getDay()];
@@ -95,7 +97,7 @@ export default function RevenuesPage() {
       });
     }
 
-    return days;
+    return days.reverse();
   }, [selectedMonth, revenues]);
 
   const totalRevenue = monthDays.reduce((sum, d) => sum + d.amount, 0);
