@@ -223,7 +223,7 @@ export default function ExpensesPage() {
   };
 
   const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount);
+    new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(amount));
 
   const formatDate = (date: string) => new Date(date).toLocaleDateString('tr-TR');
 

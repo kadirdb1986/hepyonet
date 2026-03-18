@@ -91,7 +91,9 @@ export default function FinanceOverviewPage() {
     return new Intl.NumberFormat('tr-TR', {
       style: 'currency',
       currency: 'TRY',
-    }).format(amount);
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(Math.round(amount));
   };
 
   return (
