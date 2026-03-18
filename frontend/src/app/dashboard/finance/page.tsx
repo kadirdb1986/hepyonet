@@ -269,7 +269,6 @@ export default function FinanceOverviewPage() {
             </Card>
           </div>
 
-          )}
           {/* Gunluk Gelir/Gider Tablosu */}
           {summary.dailyBreakdown && summary.dailyBreakdown.length > 0 && (
             <Card>
