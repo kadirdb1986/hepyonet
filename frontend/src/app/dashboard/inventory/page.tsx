@@ -115,29 +115,46 @@ function formatCurrency(val: number): string {
 
 function SupplierPopover({ supplier }: { supplier: Supplier }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
     if (!open) return;
     function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (
+        popRef.current && !popRef.current.contains(e.target as Node) &&
+        btnRef.current && !btnRef.current.contains(e.target as Node)
+      ) setOpen(false);
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [open]);
 
+  const handleToggle = () => {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setPos({ top: rect.bottom + 8, left: rect.left + rect.width / 2 - 128 });
+    }
+    setOpen((v) => !v);
+  };
+
   return (
-    <div className="relative inline-block" ref={ref}>
+    <>
       <button
+        ref={btnRef}
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleToggle}
         className="text-sm font-medium underline decoration-dotted underline-offset-2 cursor-pointer hover:text-primary"
       >
         {supplier.name}
       </button>
       {open && (
-        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 w-64 rounded-lg border bg-popover p-3 shadow-lg">
-          <div className="absolute left-1/2 -translate-x-1/2 -top-2 w-3 h-3 rotate-45 border-l border-t bg-popover" />
+        <div
+          ref={popRef}
+          className="fixed z-[9999] w-64 rounded-lg border bg-white p-3 shadow-lg"
+          style={{ top: pos.top, left: Math.max(8, pos.left) }}
+        >
           <p className="font-semibold text-sm">{supplier.name}</p>
           {supplier.deliveryType && (
             <p className="text-xs mt-1.5"><span className="text-muted-foreground">Tedarik Tipi:</span> {supplier.deliveryType}</p>
@@ -152,7 +169,7 @@ function SupplierPopover({ supplier }: { supplier: Supplier }) {
           )}
         </div>
       )}
-    </div>
+    </>
   );
 }
 
