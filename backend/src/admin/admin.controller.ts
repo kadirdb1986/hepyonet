@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, Query, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Delete, Param, Query, Body, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { SuperAdminGuard } from './guards/super-admin.guard';
@@ -20,6 +20,11 @@ export class AdminController {
     @Body('status') status: RestaurantStatus,
   ) {
     return this.adminService.approveRestaurant(id, status);
+  }
+
+  @Delete('restaurants/:id')
+  deleteRestaurant(@Param('id') id: string) {
+    return this.adminService.deleteRestaurant(id);
   }
 
   @Get('stats')

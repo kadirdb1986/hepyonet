@@ -56,6 +56,17 @@ export default function AdminRestaurantDetailPage() {
     setRestaurant({ ...restaurant, status });
   };
 
+  const handleDelete = async () => {
+    if (!restaurant) return;
+    if (!confirm(`"${restaurant.name}" restoranını ve tüm verilerini kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) return;
+    try {
+      await api.delete(`/admin/restaurants/${restaurant.id}`);
+      router.push('/admin/restaurants');
+    } catch {
+      alert('Restoran silinirken hata oluştu.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -119,8 +130,14 @@ export default function AdminRestaurantDetailPage() {
             </div>
           )}
           {restaurant.status === 'REJECTED' && (
-            <div className="mt-6 pt-4 border-t border-gray-700">
+            <div className="flex gap-2 mt-6 pt-4 border-t border-gray-700">
               <Button onClick={() => handleStatusChange('APPROVED')}>Yeniden Onayla</Button>
+              <Button variant="destructive" onClick={handleDelete}>Restoranı Sil</Button>
+            </div>
+          )}
+          {restaurant.status !== 'PENDING' && restaurant.status !== 'REJECTED' && (
+            <div className="mt-6 pt-4 border-t border-gray-700">
+              <Button variant="destructive" onClick={handleDelete}>Restoranı Sil</Button>
             </div>
           )}
         </div>
