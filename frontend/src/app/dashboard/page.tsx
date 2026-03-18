@@ -7,7 +7,12 @@ import { Wallet, TrendingDown, TrendingUp, Users, Loader2 } from 'lucide-react';
 import api from '@/lib/api';
 
 function formatCurrency(value: number) {
-  return value.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' });
+  return new Intl.NumberFormat('tr-TR', {
+    style: 'currency',
+    currency: 'TRY',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(Math.round(value));
 }
 
 interface DashboardData {
@@ -26,13 +31,13 @@ export default function DashboardPage() {
     const currentMonth = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
 
     Promise.all([
-      api.get(`/reports/monthly?month=${currentMonth}`).then((r) => r.data).catch(() => null),
+      api.get('/revenues/summary/monthly', { params: { month: currentMonth } }).then((r) => r.data).catch(() => null),
       api.get('/personnel').then((r) => r.data).catch(() => []),
-    ]).then(([report, personnel]) => {
+    ]).then(([summary, personnel]) => {
       setData({
-        monthlyRevenue: report?.totalRevenue ?? 0,
-        monthlyExpense: report?.totalExpense ?? 0,
-        netProfit: report?.netProfit ?? 0,
+        monthlyRevenue: summary?.totalRevenue ?? 0,
+        monthlyExpense: summary?.totalExpenses ?? 0,
+        netProfit: summary?.netIncome ?? 0,
         personnelCount: Array.isArray(personnel) ? personnel.filter((p: { isActive: boolean }) => p.isActive).length : 0,
       });
       setLoading(false);
