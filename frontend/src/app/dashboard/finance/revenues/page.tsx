@@ -103,7 +103,7 @@ export default function RevenuesPage() {
   const totalRevenue = monthDays.reduce((sum, d) => sum + d.amount, 0);
   const daysWithRevenue = monthDays.filter((d) => d.hasData).length;
 
-  const chartData = monthDays.map((d) => ({
+  const chartData = [...monthDays].reverse().map((d) => ({
     date: String(d.day),
     amount: d.amount,
   }));
