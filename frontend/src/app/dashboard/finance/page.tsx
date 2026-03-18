@@ -168,7 +168,7 @@ export default function FinanceOverviewPage() {
                   {formatCurrency(summary.totalExpenses)}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {summary.expenseCount || 0} gider kaydi
+                  {summary.directExpenses?.length || 0} gider kaydi
                 </p>
               </CardContent>
             </Card>
