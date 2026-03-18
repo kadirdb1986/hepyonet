@@ -215,7 +215,7 @@ export default function RevenuesPage() {
         </Card>
       )}
 
-      <Card>
+      <Card className="lg:w-1/2">
         <CardHeader>
           <CardTitle className="text-base">Ciro Kayitlari</CardTitle>
         </CardHeader>
