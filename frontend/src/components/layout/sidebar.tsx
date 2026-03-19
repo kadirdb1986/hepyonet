@@ -38,7 +38,7 @@ function NavItem({ item, pathname, onClick }: { item: typeof menuItems[0]; pathn
       className={cn(
         'flex items-center gap-3 px-4 py-3 rounded-md text-sm transition-all duration-150',
         isActive
-          ? 'bg-white text-teal-900 border-l-4 border-teal-900 font-bold shadow-sm rounded-l-none translate-x-1'
+          ? 'bg-white text-teal-900 border-l-4 border-teal-900 font-bold shadow-xs rounded-l-none translate-x-1'
           : 'text-slate-500 hover:text-teal-800 hover:bg-slate-200/50',
       )}
     >

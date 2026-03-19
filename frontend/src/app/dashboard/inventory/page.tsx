@@ -470,7 +470,7 @@ export default function InventoryPage() {
                 <div>
                   <Label>Stok Tipi</Label>
                   <select
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     value={form.type}
                     onChange={(e) => setForm({ ...form, type: e.target.value })}
                   >
@@ -483,7 +483,7 @@ export default function InventoryPage() {
                 <div>
                   <Label>{t('unit')}</Label>
                   <select
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     value={form.unit}
                     onChange={(e) => setForm({ ...form, unit: e.target.value })}
                   >
@@ -497,7 +497,7 @@ export default function InventoryPage() {
                 <div>
                   <Label>Tedarikçi</Label>
                   <select
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     value={form.supplierId}
                     onChange={(e) => setForm({ ...form, supplierId: e.target.value })}
                   >
@@ -608,7 +608,7 @@ export default function InventoryPage() {
 
       {/* Filters & Main Data Table Section */}
       <div className="bg-[#f2f4f5] rounded-[32px] p-2">
-        <div className="bg-white rounded-[28px] shadow-sm p-6 md:p-8">
+        <div className="bg-white rounded-[28px] shadow-xs p-6 md:p-8">
           {/* Filter Chips & Actions */}
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
             <div className="flex gap-2 flex-wrap">
@@ -618,7 +618,7 @@ export default function InventoryPage() {
                   onClick={() => setActiveTab(tab.key)}
                   className={`px-5 py-2 rounded-full text-xs font-bold transition-colors ${
                     activeTab === tab.key
-                      ? 'bg-[#004253] text-white shadow-sm'
+                      ? 'bg-[#004253] text-white shadow-xs'
                       : 'bg-[#e6e8e9] text-[#40484c] hover:bg-[#e1e3e4]'
                   }`}
                 >

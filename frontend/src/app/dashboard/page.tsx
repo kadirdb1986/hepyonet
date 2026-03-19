@@ -111,7 +111,7 @@ export default function DashboardPage() {
       {/* Bento Grid Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {/* Aylık Ciro */}
-        <div className="bg-white p-6 rounded-xl shadow-sm ring-1 ring-[#bfc8cc]/10 flex flex-col justify-between group hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 rounded-xl shadow-xs ring-1 ring-[#bfc8cc]/10 flex flex-col justify-between group hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start mb-4">
             <div className="w-12 h-12 bg-[#005b71]/10 rounded-xl flex items-center justify-center text-[#004253]">
               <span className="material-symbols-outlined text-2xl">trending_up</span>
@@ -129,7 +129,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Aylık Giderler */}
-        <div className="bg-white p-6 rounded-xl shadow-sm ring-1 ring-[#bfc8cc]/10 flex flex-col justify-between group hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 rounded-xl shadow-xs ring-1 ring-[#bfc8cc]/10 flex flex-col justify-between group hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start mb-4">
             <div className="w-12 h-12 bg-[#ffdad6]/20 rounded-xl flex items-center justify-center text-[#ba1a1a]">
               <span className="material-symbols-outlined text-2xl">payments</span>
@@ -167,7 +167,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Personel Sayısı */}
-        <div className="bg-white p-6 rounded-xl shadow-sm ring-1 ring-[#bfc8cc]/10 flex flex-col justify-between group hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 rounded-xl shadow-xs ring-1 ring-[#bfc8cc]/10 flex flex-col justify-between group hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start mb-4">
             <div className="w-12 h-12 bg-[#d4e6e9] rounded-xl flex items-center justify-center text-[#516164]">
               <span className="material-symbols-outlined text-2xl">group</span>
@@ -231,7 +231,7 @@ export default function DashboardPage() {
         {/* Sidebar Insights (Right 1/3) */}
         <div className="space-y-8">
           {/* En Çok Satanlar */}
-          <div className="bg-white rounded-2xl p-6 ring-1 ring-[#bfc8cc]/10 shadow-sm">
+          <div className="bg-white rounded-2xl p-6 ring-1 ring-[#bfc8cc]/10 shadow-xs">
             <h3 className="font-headline text-lg font-bold text-[#191c1d] mb-6">En Çok Satanlar</h3>
             <div className="space-y-6">
               {placeholderTopSelling.map((item) => (

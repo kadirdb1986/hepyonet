@@ -18,7 +18,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
   const memberships = user?.memberships.filter((m) => m.restaurantStatus === 'APPROVED') || [];
 
   return (
-    <header className="h-16 flex justify-between items-center px-6 sticky top-0 z-10 bg-slate-50/80 backdrop-blur-md shadow-sm font-headline">
+    <header className="h-16 flex justify-between items-center px-6 sticky top-0 z-10 bg-slate-50/80 backdrop-blur-md shadow-xs font-headline">
       <div className="flex items-center gap-4">
         {/* Mobile hamburger */}
         {onMenuToggle && (

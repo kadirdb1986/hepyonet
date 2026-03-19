@@ -233,7 +233,7 @@ export default function ProductsPage() {
 
       {/* Bento Summary Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm flex items-center gap-4">
+        <div className="bg-white p-6 rounded-xl shadow-xs flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-[#004253]/5 flex items-center justify-center text-[#004253]">
             <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>restaurant</span>
           </div>
@@ -242,7 +242,7 @@ export default function ProductsPage() {
             <p className="text-2xl font-extrabold text-[#004253] font-headline">{allMenuProducts.length}</p>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm flex items-center gap-4">
+        <div className="bg-white p-6 rounded-xl shadow-xs flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-[#7df4ff]/20 flex items-center justify-center text-[#004448]">
             <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>inventory</span>
           </div>
@@ -251,7 +251,7 @@ export default function ProductsPage() {
             <p className="text-2xl font-extrabold text-[#191c1d] font-headline">{allIntermediateProducts.length}</p>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm flex items-center gap-4">
+        <div className="bg-white p-6 rounded-xl shadow-xs flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-[#ffdad6]/40 flex items-center justify-center text-[#ba1a1a]">
             <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>trending_down</span>
           </div>
@@ -260,7 +260,7 @@ export default function ProductsPage() {
             <p className="text-2xl font-extrabold text-[#191c1d] font-headline">{lowMarginCount}</p>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm flex items-center gap-4">
+        <div className="bg-white p-6 rounded-xl shadow-xs flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-[#d4e6e9] flex items-center justify-center text-[#516164]">
             <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>sell</span>
           </div>
@@ -398,7 +398,7 @@ export default function ProductsPage() {
               return (
                 <div
                   key={product.id}
-                  className="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center justify-between group border-l-4 border-transparent hover:border-[#004253] cursor-pointer"
+                  className="bg-white p-5 rounded-xl shadow-xs hover:shadow-md transition-shadow flex items-center justify-between group border-l-4 border-transparent hover:border-[#004253] cursor-pointer"
                   onClick={() => router.push(`/dashboard/products/${product.id}`)}
                 >
                   <div className="flex items-center gap-4">
@@ -473,7 +473,7 @@ export default function ProductsPage() {
             <div>
               <Label>Stok Kalemi</Label>
               <select
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 value={selectedRawMaterialId}
                 onChange={(e) => setSelectedRawMaterialId(e.target.value)}
                 required

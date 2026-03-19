@@ -181,7 +181,7 @@ export default function FinanceOverviewPage() {
           </div>
 
           {/* Dışa Aktar button */}
-          <button className="flex items-center gap-2 bg-white text-[#004253] px-5 py-2.5 rounded-xl font-bold shadow-sm hover:bg-slate-50 transition-all text-sm">
+          <button className="flex items-center gap-2 bg-white text-[#004253] px-5 py-2.5 rounded-xl font-bold shadow-xs hover:bg-slate-50 transition-all text-sm">
             <span className="material-symbols-outlined text-lg">upload</span>
             Dışa Aktar
           </button>
@@ -207,7 +207,7 @@ export default function FinanceOverviewPage() {
           {/* Summary Grid - exact Stitch layout */}
           <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             {/* Card: Toplam Ciro */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-[#bfc8cc]/5">
+            <div className="bg-white p-6 rounded-xl shadow-xs border border-[#bfc8cc]/5">
               <div className="flex justify-between items-start mb-4">
                 <div className="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center text-[#004253]">
                   <span className="material-symbols-outlined">trending_up</span>
@@ -228,7 +228,7 @@ export default function FinanceOverviewPage() {
             </div>
 
             {/* Card: Toplam Gider */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-[#bfc8cc]/5">
+            <div className="bg-white p-6 rounded-xl shadow-xs border border-[#bfc8cc]/5">
               <div className="flex justify-between items-start mb-4">
                 <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center text-[#ba1a1a]">
                   <span className="material-symbols-outlined">trending_down</span>
@@ -249,7 +249,7 @@ export default function FinanceOverviewPage() {
             </div>
 
             {/* Card: Net Gelir */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-[#bfc8cc]/5 ring-2 ring-[#004253]/5">
+            <div className="bg-white p-6 rounded-xl shadow-xs border border-[#bfc8cc]/5 ring-2 ring-[#004253]/5">
               <div className="flex justify-between items-start mb-4">
                 <div className="w-10 h-10 rounded-lg bg-[#005b71] flex items-center justify-center text-white">
                   <span className="material-symbols-outlined">account_balance_wallet</span>
@@ -270,7 +270,7 @@ export default function FinanceOverviewPage() {
           {/* Main Charts Area - Bento Layout */}
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
             {/* Left: Günlük Ciro Analizi - Custom bar chart matching Stitch */}
-            <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-sm border border-[#bfc8cc]/5">
+            <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-xs border border-[#bfc8cc]/5">
               <div className="flex items-center justify-between mb-8">
                 <div>
                   <h3 className="text-xl font-bold text-[#191c1d]">Günlük Ciro Analizi</h3>
@@ -351,7 +351,7 @@ export default function FinanceOverviewPage() {
             </div>
 
             {/* Right: Gider Kategorileri - SVG Donut matching Stitch */}
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-[#bfc8cc]/5">
+            <div className="bg-white p-8 rounded-2xl shadow-xs border border-[#bfc8cc]/5">
               <h3 className="text-xl font-bold text-[#191c1d] mb-1">Gider Kategorileri</h3>
               <p className="text-sm text-[#70787d] mb-8">Dağılım Analizi</p>
               {categoryData.length === 0 ? (
@@ -392,7 +392,7 @@ export default function FinanceOverviewPage() {
 
           {/* Data Table Section */}
           {filteredBreakdown.length > 0 && (
-            <section className="bg-white rounded-2xl shadow-sm border border-[#bfc8cc]/5 overflow-hidden">
+            <section className="bg-white rounded-2xl shadow-xs border border-[#bfc8cc]/5 overflow-hidden">
               <div className="p-8 border-b border-[#bfc8cc]/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-xl font-bold text-[#191c1d]">Gün Gün Gelir / Gider</h3>
