@@ -260,12 +260,12 @@ export default function FinanceOverviewPage() {
                       const pct = Math.max(5, (val / max) * 100);
                       const isLast = i === last7Revenue.length - 1;
                       const isSecondLast = i === last7Revenue.length - 2;
-                      const opacity = isLast ? '' : isSecondLast ? '/40' : '/20';
+                      const alpha = isLast ? 1 : isSecondLast ? 0.4 : 0.2;
                       return (
                         <div
                           key={i}
-                          className={`flex-1 bg-[#004253]${opacity} rounded-t-sm`}
-                          style={{ height: `${pct}%` }}
+                          className="flex-1 rounded-t-sm"
+                          style={{ height: `${pct}%`, backgroundColor: `rgba(0, 66, 83, ${alpha})` }}
                         />
                       );
                     });
