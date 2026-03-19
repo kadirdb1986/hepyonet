@@ -39,10 +39,15 @@ function NavItem({ item, pathname, onClick }: { item: typeof menuItems[0]; pathn
         'flex items-center gap-3 px-4 py-3 rounded-md text-sm transition-all duration-150',
         isActive
           ? 'bg-white text-teal-900 border-l-4 border-teal-900 font-bold shadow-sm rounded-l-none translate-x-1'
-          : 'text-slate-500 hover:text-teal-800',
+          : 'text-slate-500 hover:text-teal-800 hover:bg-slate-200/50',
       )}
     >
-      <span className="material-symbols-outlined text-xl">{item.icon}</span>
+      <span
+        className="material-symbols-outlined text-xl"
+        style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
+      >
+        {item.icon}
+      </span>
       {item.label}
     </Link>
   );
@@ -54,12 +59,12 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const logoArea = (
     <div className="p-6">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-teal-600 flex items-center justify-center text-white">
+        <div className="w-10 h-10 rounded-xl bg-[#004253] flex items-center justify-center text-white">
           <span className="material-symbols-outlined text-xl">restaurant</span>
         </div>
         <div>
-          <h1 className="text-lg font-bold text-teal-900 leading-tight">HepyOnet</h1>
-          <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Restaurant Executive</p>
+          <h1 className="text-2xl font-bold text-teal-900 leading-tight">HepyOnet</h1>
+          <p className="text-[10px] uppercase tracking-widest text-[#70787d] font-semibold">Restaurant Executive</p>
         </div>
       </div>
     </div>
@@ -83,7 +88,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   return (
     <>
       {/* Desktop: fixed sidebar that pushes content */}
-      <aside className="hidden md:flex w-64 bg-slate-100 h-screen sticky top-0 flex-col shrink-0 font-[family-name:var(--font-headline)] text-sm font-medium tracking-tight">
+      <aside className="hidden md:flex w-64 bg-slate-100 h-screen sticky top-0 flex-col shrink-0 font-headline text-sm font-medium tracking-tight">
         {logoArea}
         {navContent}
       </aside>
@@ -92,7 +97,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       {open && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-slate-100 flex flex-col shadow-xl animate-in slide-in-from-left duration-200 font-[family-name:var(--font-headline)] text-sm font-medium tracking-tight">
+          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-slate-100 flex flex-col shadow-xl animate-in slide-in-from-left duration-200 font-headline text-sm font-medium tracking-tight">
             <div className="flex items-center justify-between pr-2">
               {logoArea}
               <button onClick={onClose} className="p-2 rounded-md hover:bg-slate-200 text-slate-500">

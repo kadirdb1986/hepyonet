@@ -7,25 +7,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { handleNumericInput, displayNumericValue, parseNumericValue } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2, AlertTriangle, Settings2, X, Check, Search, Truck, SlidersHorizontal } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Supplier {
@@ -145,7 +135,7 @@ function SupplierPopover({ supplier }: { supplier: Supplier }) {
         ref={btnRef}
         type="button"
         onClick={handleToggle}
-        className="text-sm font-medium underline decoration-dotted underline-offset-2 cursor-pointer hover:text-primary"
+        className="text-sm font-medium underline decoration-dotted underline-offset-2 cursor-pointer hover:text-[#004253]"
       >
         {supplier.name}
       </button>
@@ -173,6 +163,16 @@ function SupplierPopover({ supplier }: { supplier: Supplier }) {
   );
 }
 
+/** Stock level progress bar percentage */
+function getStockPercent(material: RawMaterial): number {
+  const current = Number(material.currentStock);
+  const min = Number(material.minStockLevel);
+  if (min <= 0) return 100;
+  // max stock estimated as 5x min
+  const max = min * 5;
+  return Math.min(100, Math.max(5, (current / max) * 100));
+}
+
 export default function InventoryPage() {
   const t = useTranslations('inventory');
   const tc = useTranslations('common');
@@ -196,6 +196,10 @@ export default function InventoryPage() {
     minStockLevel: '' as string | number,
     supplierId: '' as string,
   });
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -371,30 +375,83 @@ export default function InventoryPage() {
     return Number(material.minStockLevel) > 0 && Number(material.currentStock) <= Number(material.minStockLevel);
   }
 
+  // Compute total stock value
+  const totalStockValue = materials.reduce((sum, m) => {
+    return sum + Number(m.currentStock) * Number(m.lastPurchasePrice);
+  }, 0);
+
+  // Filtered materials
+  const filteredMaterials = materials.filter(
+    (m) =>
+      (activeTab === 'ALL' || m.type === activeTab) &&
+      (!searchQuery || m.name.toLocaleLowerCase('tr-TR').includes(searchQuery.toLocaleLowerCase('tr-TR')))
+  );
+
+  // Pagination logic
+  const totalItems = filteredMaterials.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedMaterials = filteredMaterials.slice(
+    (safeCurrentPage - 1) * itemsPerPage,
+    safeCurrentPage * itemsPerPage
+  );
+
+  // Reset to page 1 when filter/search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, searchQuery]);
+
+  // Count visible data columns (for colspan)
+  const visibleDataColCount = (() => {
+    let count = 1; // name column always visible
+    if (isColumnVisible('type')) count++;
+    if (isColumnVisible('supplier')) count++;
+    if (isColumnVisible('currentStock')) count++;
+    if (isColumnVisible('minStockLevel')) count++;
+    if (isColumnVisible('lastPurchasePrice')) count++;
+    if (isColumnVisible('stockStatus')) count++;
+    count++; // actions column
+    return count;
+  })();
+
   if (isLoading) {
-    return <div className="p-6">{tc('loading')}</div>;
+    return <div className="p-6 text-[#70787d]">{tc('loading')}</div>;
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t('title')}</h1>
-        <div className="flex gap-2">
+    <div className="p-6 md:p-10 space-y-8 max-w-[1600px] mx-auto">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <nav className="flex gap-2 text-[10px] font-bold uppercase tracking-widest text-[#70787d] mb-2">
+            <span>HepyOnet</span>
+            <span>/</span>
+            <span className="text-[#004253]">Stok Yönetimi</span>
+          </nav>
+          <h1 className="text-4xl font-extrabold tracking-tight text-[#004253] font-headline">{t('title')}</h1>
+        </div>
+        <div className="flex flex-wrap gap-3">
           <Link href="/dashboard/inventory/suppliers">
-            <Button variant="outline">
-              <Truck className="mr-2 h-4 w-4" />
+            <button className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#d4e6e9] text-[#57676a] font-semibold text-sm hover:brightness-95 transition-all active:scale-95">
+              <span className="material-symbols-outlined text-lg">local_shipping</span>
               Tedarikçiler
-            </Button>
+            </button>
           </Link>
-          <Button variant="outline" onClick={() => setTypeDialogOpen(true)}>
-            <Settings2 className="mr-2 h-4 w-4" />
+          <button
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#d4e6e9] text-[#57676a] font-semibold text-sm hover:brightness-95 transition-all active:scale-95"
+            onClick={() => setTypeDialogOpen(true)}
+          >
+            <span className="material-symbols-outlined text-lg">category</span>
             Stok Tipleri
-          </Button>
+          </button>
           <Dialog open={dialogOpen} onOpenChange={(open) => setDialogOpen(open)}>
-            <Button onClick={openCreate}>
-              <Plus className="mr-2 h-4 w-4" />
+            <button
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br from-[#004253] to-[#005b71] text-white font-bold text-sm shadow-lg shadow-[#004253]/20 hover:shadow-xl transition-all active:scale-95"
+              onClick={openCreate}
+            >
+              <span className="material-symbols-outlined text-lg">add</span>
               {t('addMaterial')}
-            </Button>
+            </button>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
@@ -511,194 +568,335 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      {/* Low stock alert */}
-      {lowStockMaterials.length > 0 && (
-        <Card className="border-orange-300 bg-orange-50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-orange-700 flex items-center gap-2 text-lg">
-              <AlertTriangle className="h-5 w-5" />
-              {t('lowStockAlert')} ({lowStockMaterials.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {lowStockMaterials.map((m: RawMaterial) => (
-                <Badge key={m.id} variant="destructive">
-                  {m.name}: {formatQuantity(Number(m.currentStock))} {UNIT_LABELS[m.unit] || m.unit}
-                </Badge>
+      {/* Bento Grid - Stats & Alert */}
+      <div className="grid grid-cols-12 gap-6">
+        {/* Critical Alert Card */}
+        {lowStockMaterials.length > 0 && (
+          <div className={`col-span-12 ${totalStockValue > 0 ? 'lg:col-span-8' : ''} bg-[#ffdad6]/40 p-1 rounded-3xl border border-[#ba1a1a]/10 overflow-hidden`}>
+            <div className="bg-white/60 backdrop-blur-sm p-6 rounded-[22px] flex items-center justify-between h-full">
+              <div className="flex items-center gap-6">
+                <div className="w-16 h-16 bg-[#ba1a1a]/10 text-[#ba1a1a] rounded-2xl flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-[#93000a]">{t('lowStockAlert')}</h3>
+                  <p className="text-[#93000a]/70 text-sm mt-1">
+                    Şu anda <span className="font-bold">{lowStockMaterials.length} ürün</span> kritik seviyenin altında. Operasyonun aksamaması için sipariş oluşturun.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Total Stock Value Card */}
+        {totalStockValue > 0 && (
+          <div className={`col-span-12 ${lowStockMaterials.length > 0 ? 'lg:col-span-4' : 'lg:col-span-4'} bg-[#f2f4f5] p-6 rounded-3xl flex flex-col justify-between min-h-[120px]`}>
+            <div className="flex justify-between items-start">
+              <span className="p-2 bg-[#004253]/5 text-[#004253] rounded-lg">
+                <span className="material-symbols-outlined">payments</span>
+              </span>
+            </div>
+            <div>
+              <p className="text-[#70787d] text-xs font-medium uppercase tracking-tighter">Toplam Stok Değeri</p>
+              <p className="text-3xl font-headline font-extrabold text-[#004253]">
+                {totalStockValue.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace('TRY', '₺').trim()}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Filters & Main Data Table Section */}
+      <div className="bg-[#f2f4f5] rounded-[32px] p-2">
+        <div className="bg-white rounded-[28px] shadow-sm p-6 md:p-8">
+          {/* Filter Chips & Actions */}
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+            <div className="flex gap-2 flex-wrap">
+              {[{ key: 'ALL', label: 'Tümü' }, ...materialTypes.map((mt) => ({ key: mt.name, label: mt.name }))].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-5 py-2 rounded-full text-xs font-bold transition-colors ${
+                    activeTab === tab.key
+                      ? 'bg-[#004253] text-white shadow-sm'
+                      : 'bg-[#e6e8e9] text-[#40484c] hover:bg-[#e1e3e4]'
+                  }`}
+                >
+                  {tab.label}
+                  <span className="ml-1.5 opacity-70">
+                    ({tab.key === 'ALL' ? materials.length : materials.filter((m) => m.type === tab.key).length})
+                  </span>
+                </button>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+            <div className="flex items-center gap-3">
+              {/* Search */}
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#70787d] text-lg">search</span>
+                <input
+                  placeholder="Stok kalemi ara..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-9 py-2 bg-[#f2f4f5] border-none rounded-xl text-sm focus:ring-2 focus:ring-[#004253]/20 w-56 outline-none"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#70787d] hover:text-[#191c1d]"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              {/* Column toggle */}
+              <div className="relative" ref={columnMenuRef}>
+                <button
+                  onClick={() => setColumnMenuOpen((v) => !v)}
+                  className="p-2 rounded-lg text-[#70787d] hover:bg-[#f2f4f5] transition-colors"
+                  title="Sütunları Ayarla"
+                >
+                  <span className="material-symbols-outlined">tune</span>
+                </button>
+                {columnMenuOpen && (
+                  <div className="absolute right-0 top-full mt-1 z-50 w-52 rounded-xl border bg-white p-1 shadow-lg">
+                    <p className="px-3 py-2 text-xs font-bold text-[#70787d] uppercase tracking-wider">Görünür Sütunlar</p>
+                    <div className="h-px bg-[#bfc8cc]/30 my-1" />
+                    {TOGGLEABLE_COLUMNS.map((col) => (
+                      <label
+                        key={col.key}
+                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm cursor-pointer hover:bg-[#f2f4f5] transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isColumnVisible(col.key)}
+                          onChange={() => toggleColumn(col.key)}
+                          className="h-4 w-4 rounded border-gray-300 accent-[#004253]"
+                        />
+                        {col.label}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {/* Download */}
+              <button className="p-2 rounded-lg text-[#70787d] hover:bg-[#f2f4f5] transition-colors" title="Dışa Aktar">
+                <span className="material-symbols-outlined">file_download</span>
+              </button>
+            </div>
+          </div>
 
-      {/* Filter tabs and search */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex gap-2 flex-wrap">
-          {[{ key: 'ALL', label: 'Tümü' }, ...materialTypes.map((mt) => ({ key: mt.name, label: mt.name }))].map((tab) => (
-            <Button
-              key={tab.key}
-              variant={activeTab === tab.key ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setActiveTab(tab.key)}
-            >
-              {tab.label}
-              <span className="ml-1.5 text-xs opacity-70">
-                ({tab.key === 'ALL' ? materials.length : materials.filter((m) => m.type === tab.key).length})
-              </span>
-            </Button>
-          ))}
-        </div>
-        <div className="relative w-64">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Stok kalemi ara..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-9"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-            </button>
+          {/* Data Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[#e6e8e9]/50">
+                  <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#70787d] rounded-l-xl">{t('name')}</th>
+                  {isColumnVisible('type') && (
+                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#70787d]">Tip</th>
+                  )}
+                  {isColumnVisible('supplier') && (
+                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#70787d]">Tedarikçi</th>
+                  )}
+                  {isColumnVisible('currentStock') && (
+                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#70787d]">Mevcut Stok</th>
+                  )}
+                  {isColumnVisible('minStockLevel') && (
+                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#70787d]">Min. Stok</th>
+                  )}
+                  {isColumnVisible('lastPurchasePrice') && (
+                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#70787d] text-right">Son Alış Fiyatı</th>
+                  )}
+                  {isColumnVisible('stockStatus') && (
+                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#70787d] text-center">Durum</th>
+                  )}
+                  <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#70787d] rounded-r-xl text-center">İşlemler</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-transparent">
+                {paginatedMaterials.map((material) => {
+                  const unitLabel = UNIT_LABELS[material.unit] || material.unit;
+                  const unitShort = UNIT_SHORT[material.unit] || material.unit;
+                  const low = isLowStock(material);
+                  const stockPct = getStockPercent(material);
+
+                  return (
+                    <tr key={material.id} className="hover:bg-[#f2f4f5] transition-colors group">
+                      {/* Name */}
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-[#f2f4f5] flex items-center justify-center text-[#70787d] shrink-0">
+                            <span className="material-symbols-outlined text-xl">inventory_2</span>
+                          </div>
+                          <div>
+                            <p className="font-bold text-sm text-[#191c1d]">{material.name}</p>
+                            <p className="text-[10px] text-[#70787d]">{material.type || '-'} / {unitLabel}</p>
+                          </div>
+                        </div>
+                      </td>
+                      {/* Type */}
+                      {isColumnVisible('type') && (
+                        <td className="px-6 py-5">
+                          <span className="px-3 py-1 bg-[#e6e8e9] text-[#191c1d] rounded-full text-[10px] font-medium uppercase tracking-tight">
+                            {material.type || '-'}
+                          </span>
+                        </td>
+                      )}
+                      {/* Supplier */}
+                      {isColumnVisible('supplier') && (
+                        <td className="px-6 py-5">
+                          {material.supplier ? (
+                            <SupplierPopover supplier={material.supplier} />
+                          ) : (
+                            <span className="text-[#70787d] text-sm">-</span>
+                          )}
+                        </td>
+                      )}
+                      {/* Current Stock with progress bar */}
+                      {isColumnVisible('currentStock') && (
+                        <td className="px-6 py-5">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-sm font-bold ${low ? 'text-[#ba1a1a]' : 'text-[#191c1d]'}`}>
+                              {formatQuantity(Number(material.currentStock))} {unitShort}
+                            </span>
+                            <div className={`w-20 h-1.5 rounded-full overflow-hidden ${low ? 'bg-[#ffdad6]' : 'bg-[#e6e8e9]'}`}>
+                              <div
+                                className={`h-full rounded-full ${low ? 'bg-[#ba1a1a]' : 'bg-[#004253]'}`}
+                                style={{ width: `${stockPct}%` }}
+                              />
+                            </div>
+                          </div>
+                        </td>
+                      )}
+                      {/* Min Stock Level */}
+                      {isColumnVisible('minStockLevel') && (
+                        <td className="px-6 py-5 text-sm text-[#70787d]">
+                          {formatQuantity(Number(material.minStockLevel))} {unitShort}
+                        </td>
+                      )}
+                      {/* Last Purchase Price */}
+                      {isColumnVisible('lastPurchasePrice') && (
+                        <td className="px-6 py-5 text-right">
+                          <p className="text-sm font-bold text-[#191c1d]">
+                            ₺{formatCurrency(Number(material.lastPurchasePrice))}
+                          </p>
+                          <p className="text-[10px] text-[#70787d]">/{unitShort}</p>
+                        </td>
+                      )}
+                      {/* Stock Status */}
+                      {isColumnVisible('stockStatus') && (
+                        <td className="px-6 py-5 text-center">
+                          {low ? (
+                            <span className="px-3 py-1 bg-[#ffdad6] text-[#93000a] rounded-full text-[10px] font-bold uppercase">
+                              {t('critical')}
+                            </span>
+                          ) : (
+                            <span className="px-3 py-1 bg-[#d4e6e9] text-[#004253] rounded-full text-[10px] font-bold uppercase">
+                              {t('normal')}
+                            </span>
+                          )}
+                        </td>
+                      )}
+                      {/* Actions - visible on hover */}
+                      <td className="px-6 py-5">
+                        <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            className="p-2 text-[#004253] hover:bg-[#004253]/5 rounded-lg transition-colors"
+                            onClick={() => openEdit(material)}
+                          >
+                            <span className="material-symbols-outlined text-lg">edit</span>
+                          </button>
+                          <button
+                            className="p-2 text-[#ba1a1a] hover:bg-[#ba1a1a]/5 rounded-lg transition-colors"
+                            onClick={() => {
+                              if (confirm(tc('confirm') + '?')) {
+                                deleteMutation.mutate(material.id);
+                              }
+                            }}
+                          >
+                            <span className="material-symbols-outlined text-lg">delete</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {filteredMaterials.length === 0 && (
+                  <tr>
+                    <td colSpan={visibleDataColCount} className="text-center text-[#70787d] py-12">
+                      <div className="flex flex-col items-center gap-2">
+                        <span className="material-symbols-outlined text-4xl text-[#bfc8cc]">inventory_2</span>
+                        <p className="text-sm">
+                          {searchQuery ? `"${searchQuery}" ile eşleşen stok kalemi bulunamadı` : t('materialNotFound')}
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-8 pt-8 flex items-center justify-between border-t border-[#bfc8cc]/10">
+              <p className="text-xs text-[#70787d]">
+                Toplam {totalItems} stok kaleminden {(safeCurrentPage - 1) * itemsPerPage + 1}-{Math.min(safeCurrentPage * itemsPerPage, totalItems)} arası gösteriliyor
+              </p>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={safeCurrentPage <= 1}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-[#70787d] hover:bg-[#e6e8e9] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <span className="material-symbols-outlined text-lg">chevron_left</span>
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((page) => {
+                    // Show first, last, current, and neighbors
+                    if (page === 1 || page === totalPages) return true;
+                    if (Math.abs(page - safeCurrentPage) <= 1) return true;
+                    return false;
+                  })
+                  .reduce<(number | string)[]>((acc, page, idx, arr) => {
+                    if (idx > 0) {
+                      const prev = arr[idx - 1];
+                      if (typeof prev === 'number' && page - prev > 1) {
+                        acc.push('...');
+                      }
+                    }
+                    acc.push(page);
+                    return acc;
+                  }, [])
+                  .map((item, idx) =>
+                    typeof item === 'string' ? (
+                      <span key={`ellipsis-${idx}`} className="w-8 h-8 flex items-center justify-center text-xs text-[#70787d]">...</span>
+                    ) : (
+                      <button
+                        key={item}
+                        onClick={() => setCurrentPage(item)}
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition-colors ${
+                          item === safeCurrentPage
+                            ? 'bg-[#004253] text-white'
+                            : 'text-[#70787d] hover:bg-[#e6e8e9]'
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    )
+                  )}
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safeCurrentPage >= totalPages}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-[#70787d] hover:bg-[#e6e8e9] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <span className="material-symbols-outlined text-lg">chevron_right</span>
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>
-
-      {/* Materials table */}
-      <Card className="overflow-visible">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle>
-            {activeTab === 'ALL' ? t('rawMaterials') : activeTab}
-          </CardTitle>
-          <div className="relative" ref={columnMenuRef}>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setColumnMenuOpen((v) => !v)}
-            >
-              <SlidersHorizontal className="mr-2 h-4 w-4" />
-              Sütunlar
-            </Button>
-            {columnMenuOpen && (
-              <div className="absolute right-0 top-full mt-1 z-50 w-52 rounded-md border bg-popover p-1 shadow-md">
-                <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Gorunur Sütunlar</p>
-                <div className="h-px bg-border my-1" />
-                {TOGGLEABLE_COLUMNS.map((col) => (
-                  <label
-                    key={col.key}
-                    className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-accent"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isColumnVisible(col.key)}
-                      onChange={() => toggleColumn(col.key)}
-                      className="h-4 w-4 rounded border-gray-300"
-                    />
-                    {col.label}
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent className="overflow-visible">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('name')}</TableHead>
-                {isColumnVisible('type') && <TableHead className="text-center">Tip</TableHead>}
-                {isColumnVisible('supplier') && <TableHead className="text-center">Tedarikçi</TableHead>}
-                {isColumnVisible('currentStock') && <TableHead className="text-center">{t('currentStock')}</TableHead>}
-                {isColumnVisible('minStockLevel') && <TableHead className="text-center">{t('minStockLevel')}</TableHead>}
-                {isColumnVisible('lastPurchasePrice') && <TableHead className="text-center">{t('lastPurchasePrice')}</TableHead>}
-                {isColumnVisible('stockStatus') && <TableHead className="text-center">{t('stockStatus')}</TableHead>}
-                <TableHead className="text-right">{tc('actions')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {materials.filter((m) => (activeTab === 'ALL' || m.type === activeTab) && (!searchQuery || m.name.toLocaleLowerCase('tr-TR').includes(searchQuery.toLocaleLowerCase('tr-TR')))).map((material) => {
-                const unitLabel = UNIT_LABELS[material.unit] || material.unit;
-                return (
-                  <TableRow key={material.id}>
-                    <TableCell className="font-medium">{material.name}</TableCell>
-                    {isColumnVisible('type') && (
-                      <TableCell className="text-center">
-                        <Badge variant="outline">{material.type || '-'}</Badge>
-                      </TableCell>
-                    )}
-                    {isColumnVisible('supplier') && (
-                      <TableCell className="text-center">
-                        {material.supplier ? (
-                          <SupplierPopover supplier={material.supplier} />
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                    )}
-                    {isColumnVisible('currentStock') && (
-                      <TableCell className="text-center">
-                        <span className="inline-block w-16 text-right tabular-nums">{formatQuantity(Number(material.currentStock))}</span>
-                        <span className="inline-block w-20 text-left text-muted-foreground ml-1">{unitLabel}</span>
-                      </TableCell>
-                    )}
-                    {isColumnVisible('minStockLevel') && (
-                      <TableCell className="text-center">
-                        <span className="inline-block w-16 text-right tabular-nums">{formatQuantity(Number(material.minStockLevel))}</span>
-                        <span className="inline-block w-20 text-left text-muted-foreground ml-1">{unitLabel}</span>
-                      </TableCell>
-                    )}
-                    {isColumnVisible('lastPurchasePrice') && (
-                      <TableCell className="text-center">
-                        <span className="inline-block w-24 text-right tabular-nums">{formatCurrency(Number(material.lastPurchasePrice))} TL</span>
-                        <span className="inline-block w-20 text-left text-muted-foreground ml-1">/{UNIT_SHORT[material.unit] || material.unit}</span>
-                      </TableCell>
-                    )}
-                    {isColumnVisible('stockStatus') && (
-                      <TableCell className="text-center">
-                        {isLowStock(material) ? (
-                          <Badge variant="destructive">{t('critical')}</Badge>
-                        ) : (
-                          <Badge variant="secondary">{t('normal')}</Badge>
-                        )}
-                      </TableCell>
-                    )}
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(material)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            if (confirm(tc('confirm') + '?')) {
-                              deleteMutation.mutate(material.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {materials.filter((m) => (activeTab === 'ALL' || m.type === activeTab) && (!searchQuery || m.name.toLocaleLowerCase('tr-TR').includes(searchQuery.toLocaleLowerCase('tr-TR')))).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={2 + visibleColumns.length} className="text-center text-muted-foreground py-8">
-                    {searchQuery ? `"${searchQuery}" ile eşleşen stok kalemi bulunamadı` : t('materialNotFound')}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
 
       {/* Stok Tipleri Yonetim Dialogu */}
       <Dialog open={typeDialogOpen} onOpenChange={setTypeDialogOpen}>
