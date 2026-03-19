@@ -138,6 +138,12 @@ export default function FinanceOverviewPage() {
     const weeks: { label: string; amount: number }[] = [];
     const days = summary.dailyBreakdown as any[];
     // Haftaları 7'şerli grupla (1-7, 8-14, 15-21, 22-28, 29+)
+    // Seçili ay bu ay mı? Bu ay ise bugüne kadarki haftaları göster.
+    const now = new Date();
+    const [selY, selM] = selectedMonth.split('-').map(Number);
+    const isCurrentMonth = selY === now.getFullYear() && selM === now.getMonth() + 1;
+    const maxDay = isCurrentMonth ? now.getDate() : 31;
+
     const weekRanges = [
       { start: 1, end: 7, label: '1. Hafta' },
       { start: 8, end: 14, label: '2. Hafta' },
@@ -146,12 +152,12 @@ export default function FinanceOverviewPage() {
       { start: 29, end: 31, label: '5. Hafta' },
     ];
     for (const range of weekRanges) {
+      // Haftanın başlangıcı bugünden sonraysa gösterme
+      if (range.start > maxDay) break;
       const total = days
         .filter((d: any) => d.day >= range.start && d.day <= range.end)
         .reduce((sum: number, d: any) => sum + Number(d.revenue), 0);
-      if (range.start <= days.length) {
-        weeks.push({ label: range.label, amount: total });
-      }
+      weeks.push({ label: range.label, amount: total });
     }
     return weeks;
   }, [summary]);
