@@ -21,7 +21,6 @@ const DAY_NAMES = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cu
 
 const MONTH_NAMES = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 
-const ITEMS_PER_PAGE = 10;
 
 function getCurrentMonth(): string {
   const now = new Date();
@@ -81,20 +80,16 @@ function DonutChart({ data, colors, total }: { data: { name: string; value: numb
 export default function FinanceOverviewPage() {
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
   const [chartTab, setChartTab] = useState<'daily' | 'weekly'>('daily');
-  const [currentPage, setCurrentPage] = useState(1);
-
   const prevMonth = () => {
     const [y, m] = selectedMonth.split('-').map(Number);
     const d = new Date(y, m - 2, 1);
     setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
-    setCurrentPage(1);
   };
 
   const nextMonth = () => {
     const [y, m] = selectedMonth.split('-').map(Number);
     const d = new Date(y, m, 1);
     setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
-    setCurrentPage(1);
   };
 
   const { data: summary, isLoading } = useQuery({
@@ -194,15 +189,15 @@ export default function FinanceOverviewPage() {
 
   const filteredBreakdown = useMemo(() => {
     if (!summary?.dailyBreakdown) return [];
-    // Tüm günleri al, son günden ilk güne sırala
-    return [...summary.dailyBreakdown].sort((a: any, b: any) => b.day - a.day);
-  }, [summary]);
-
-  const totalPages = Math.ceil(filteredBreakdown.length / ITEMS_PER_PAGE);
-  const paginatedBreakdown = filteredBreakdown.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+    // Seçili ay bu ay ise bugüne kadar, geçmiş ay ise tümü
+    const now = new Date();
+    const [selY, selM] = selectedMonth.split('-').map(Number);
+    const isCurrentMonth = selY === now.getFullYear() && selM === now.getMonth() + 1;
+    const maxDay = isCurrentMonth ? now.getDate() : 31;
+    return [...summary.dailyBreakdown]
+      .filter((d: any) => d.day <= maxDay)
+      .sort((a: any, b: any) => b.day - a.day);
+  }, [summary, selectedMonth]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('tr-TR', {
@@ -291,12 +286,12 @@ export default function FinanceOverviewPage() {
                       const isSecondLast = i === last7Days.length - 2;
                       const alpha = isLast ? 1 : isSecondLast ? 0.4 : 0.2;
                       return (
-                        <div key={i} className="relative flex-1 group">
+                        <div key={i} className="relative flex-1 h-full flex flex-col justify-end group">
                           <div
                             className="w-full rounded-t-sm cursor-pointer transition-all group-hover:opacity-80"
                             style={{ height: `${pct}%`, backgroundColor: `rgba(0, 66, 83, ${alpha})` }}
                           />
-                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#191c1d] text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#191c1d] text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
                             {d.day} {formatMonth(selectedMonth).split(' ')[0]}: {formatCurrency(d.revenue)}
                           </div>
                         </div>
@@ -329,12 +324,12 @@ export default function FinanceOverviewPage() {
                       const intensity = Math.round(10 + (i / (last7Days.length - 1)) * 30);
                       const pct = Math.max(5, (d.expense / max) * 100);
                       return (
-                        <div key={i} className="relative flex-1 group">
+                        <div key={i} className="relative flex-1 h-full flex flex-col justify-end group">
                           <div
                             className="w-full rounded-t-sm cursor-pointer transition-all group-hover:opacity-80"
                             style={{ height: `${pct}%`, backgroundColor: `rgba(186, 26, 26, ${intensity / 100})` }}
                           />
-                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#191c1d] text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#191c1d] text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
                             {d.day} {formatMonth(selectedMonth).split(' ')[0]}: {formatCurrency(d.expense)}
                           </div>
                         </div>
@@ -550,7 +545,7 @@ export default function FinanceOverviewPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#bfc8cc]/10">
-                    {paginatedBreakdown.map((d: any) => (
+                    {filteredBreakdown.map((d: any) => (
                       <tr key={d.day} className="hover:bg-slate-50 transition-colors">
                         <td className="px-8 py-5">
                           <div className="flex flex-col">
@@ -598,41 +593,6 @@ export default function FinanceOverviewPage() {
                     </tr>
                   </tfoot>
                 </table>
-              </div>
-              {/* Pagination footer */}
-              <div className="p-6 bg-[#f2f4f5] flex items-center justify-between border-t border-[#bfc8cc]/10">
-                <span className="text-xs font-medium text-[#70787d]">
-                  Toplam {filteredBreakdown.length} kayıttan {(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, filteredBreakdown.length)} arası gösteriliyor
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="w-8 h-8 rounded bg-white flex items-center justify-center border border-[#bfc8cc]/30 text-[#70787d] hover:text-[#004253] transition-all disabled:opacity-40"
-                  >
-                    <span className="material-symbols-outlined text-sm">chevron_left</span>
-                  </button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`w-8 h-8 rounded flex items-center justify-center font-bold text-xs transition-all ${
-                        page === currentPage
-                          ? 'bg-[#004253] text-white'
-                          : 'bg-white border border-[#bfc8cc]/30 text-[#40484c] hover:text-[#004253]'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                    className="w-8 h-8 rounded bg-white flex items-center justify-center border border-[#bfc8cc]/30 text-[#70787d] hover:text-[#004253] transition-all disabled:opacity-40"
-                  >
-                    <span className="material-symbols-outlined text-sm">chevron_right</span>
-                  </button>
-                </div>
               </div>
             </section>
           )}
