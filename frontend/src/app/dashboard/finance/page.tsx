@@ -132,6 +132,38 @@ export default function FinanceOverviewPage() {
     return Math.max(...dailyRevenueData.map((d: any) => d.amount), 1);
   }, [dailyRevenueData]);
 
+  // Son 7 gün ve önceki 7 gün verileri (mini bar chart + yüzde değişim)
+  const { last7Revenue, prev7Revenue, revenuePctChange, last7Expense, prev7Expense, expensePctChange } = useMemo(() => {
+    if (!summary?.dailyBreakdown) return { last7Revenue: [] as number[], prev7Revenue: 0, revenuePctChange: 0, last7Expense: [] as number[], prev7Expense: 0, expensePctChange: 0 };
+
+    // dailyBreakdown'ı veri olan günlere filtrele ve ters çevir (en yeni başta)
+    const allDays = (summary.dailyBreakdown as any[]).filter((d: any) => d.revenue > 0 || d.expense > 0);
+    const sorted = [...allDays].sort((a: any, b: any) => b.day - a.day);
+
+    const last7 = sorted.slice(0, 7).reverse(); // son 7 gün (kronolojik sıra)
+    const prev7 = sorted.slice(7, 14);
+
+    const last7Rev = last7.map((d: any) => Number(d.revenue));
+    const last7Exp = last7.map((d: any) => Number(d.expense));
+
+    const last7RevTotal = last7Rev.reduce((s, v) => s + v, 0);
+    const prev7RevTotal = prev7.reduce((s, d: any) => s + Number(d.revenue), 0);
+    const last7ExpTotal = last7Exp.reduce((s, v) => s + v, 0);
+    const prev7ExpTotal = prev7.reduce((s, d: any) => s + Number(d.expense), 0);
+
+    const revPct = prev7RevTotal > 0 ? Math.round(((last7RevTotal - prev7RevTotal) / prev7RevTotal) * 100) : 0;
+    const expPct = prev7ExpTotal > 0 ? Math.round(((last7ExpTotal - prev7ExpTotal) / prev7ExpTotal) * 100) : 0;
+
+    return {
+      last7Revenue: last7Rev,
+      prev7Revenue: prev7RevTotal,
+      revenuePctChange: revPct,
+      last7Expense: last7Exp,
+      prev7Expense: prev7ExpTotal,
+      expensePctChange: expPct,
+    };
+  }, [summary]);
+
   const filteredBreakdown = useMemo(() => {
     if (!summary?.dailyBreakdown) return [];
     return summary.dailyBreakdown.filter((d: any) => d.revenue > 0 || d.expense > 0);
@@ -212,19 +244,34 @@ export default function FinanceOverviewPage() {
                 <div className="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center text-[#004253]">
                   <span className="material-symbols-outlined">trending_up</span>
                 </div>
-                <span className="text-xs font-bold text-[#004448] px-2 py-1 bg-[#7df4ff] rounded-full">+12%</span>
+                {revenuePctChange !== 0 && (
+                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${revenuePctChange > 0 ? 'text-[#004448] bg-[#7df4ff]' : 'text-[#93000a] bg-[#ffdad6]'}`}>
+                    {revenuePctChange > 0 ? '+' : ''}{revenuePctChange}%
+                  </span>
+                )}
               </div>
               <p className="text-[#70787d] text-sm font-medium mb-1">Toplam Ciro</p>
               <h3 className="text-3xl font-black text-[#191c1d]">{formatCurrency(summary.totalRevenue)}</h3>
-              <div className="mt-4 h-12 w-full flex items-end gap-1">
-                <div className="flex-1 bg-[#004253]/20 rounded-t-sm h-[40%]"></div>
-                <div className="flex-1 bg-[#004253]/20 rounded-t-sm h-[60%]"></div>
-                <div className="flex-1 bg-[#004253]/20 rounded-t-sm h-[45%]"></div>
-                <div className="flex-1 bg-[#004253]/20 rounded-t-sm h-[70%]"></div>
-                <div className="flex-1 bg-[#004253]/20 rounded-t-sm h-[55%]"></div>
-                <div className="flex-1 bg-[#004253]/40 rounded-t-sm h-[85%]"></div>
-                <div className="flex-1 bg-[#004253] rounded-t-sm h-[100%]"></div>
-              </div>
+              {last7Revenue.length > 0 && (
+                <div className="mt-4 h-12 w-full flex items-end gap-1">
+                  {(() => {
+                    const max = Math.max(...last7Revenue, 1);
+                    return last7Revenue.map((val, i) => {
+                      const pct = Math.max(5, (val / max) * 100);
+                      const isLast = i === last7Revenue.length - 1;
+                      const isSecondLast = i === last7Revenue.length - 2;
+                      const opacity = isLast ? '' : isSecondLast ? '/40' : '/20';
+                      return (
+                        <div
+                          key={i}
+                          className={`flex-1 bg-[#004253]${opacity} rounded-t-sm`}
+                          style={{ height: `${pct}%` }}
+                        />
+                      );
+                    });
+                  })()}
+                </div>
+              )}
             </div>
 
             {/* Card: Toplam Gider */}
@@ -233,19 +280,32 @@ export default function FinanceOverviewPage() {
                 <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center text-[#ba1a1a]">
                   <span className="material-symbols-outlined">trending_down</span>
                 </div>
-                <span className="text-xs font-bold text-[#93000a] px-2 py-1 bg-[#ffdad6] rounded-full">+4%</span>
+                {expensePctChange !== 0 && (
+                  <span className="text-xs font-bold text-[#93000a] px-2 py-1 bg-[#ffdad6] rounded-full">
+                    {expensePctChange > 0 ? '+' : ''}{expensePctChange}%
+                  </span>
+                )}
               </div>
               <p className="text-[#70787d] text-sm font-medium mb-1">Toplam Gider</p>
               <h3 className="text-3xl font-black text-[#191c1d]">{formatCurrency(summary.totalExpenses)}</h3>
-              <div className="mt-4 h-12 w-full flex items-end gap-1">
-                <div className="flex-1 bg-[#ba1a1a]/10 rounded-t-sm h-[70%]"></div>
-                <div className="flex-1 bg-[#ba1a1a]/10 rounded-t-sm h-[40%]"></div>
-                <div className="flex-1 bg-[#ba1a1a]/10 rounded-t-sm h-[50%]"></div>
-                <div className="flex-1 bg-[#ba1a1a]/10 rounded-t-sm h-[60%]"></div>
-                <div className="flex-1 bg-[#ba1a1a]/20 rounded-t-sm h-[80%]"></div>
-                <div className="flex-1 bg-[#ba1a1a]/30 rounded-t-sm h-[75%]"></div>
-                <div className="flex-1 bg-[#ba1a1a]/40 rounded-t-sm h-[65%]"></div>
-              </div>
+              {last7Expense.length > 0 && (
+                <div className="mt-4 h-12 w-full flex items-end gap-1">
+                  {(() => {
+                    const max = Math.max(...last7Expense, 1);
+                    return last7Expense.map((val, i) => {
+                      const pct = Math.max(5, (val / max) * 100);
+                      const intensity = Math.round(10 + (i / (last7Expense.length - 1)) * 30);
+                      return (
+                        <div
+                          key={i}
+                          className="flex-1 rounded-t-sm"
+                          style={{ height: `${pct}%`, backgroundColor: `rgba(186, 26, 26, ${intensity / 100})` }}
+                        />
+                      );
+                    });
+                  })()}
+                </div>
+              )}
             </div>
 
             {/* Card: Net Gelir */}
