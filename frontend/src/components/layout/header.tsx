@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut, User, Menu, ChevronDown, Building2 } from 'lucide-react';
+import { LogOut, ChevronDown } from 'lucide-react';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -18,21 +18,32 @@ export function Header({ onMenuToggle }: HeaderProps) {
   const memberships = user?.memberships.filter((m) => m.restaurantStatus === 'APPROVED') || [];
 
   return (
-    <header className="h-14 md:h-16 border-b bg-white flex items-center justify-between px-4 md:px-6 sticky top-0 z-10">
-      <div className="flex items-center gap-3">
+    <header className="h-16 flex justify-between items-center px-6 sticky top-0 z-10 bg-slate-50/80 backdrop-blur-md shadow-sm">
+      <div className="flex items-center gap-4">
+        {/* Mobile hamburger */}
         {onMenuToggle && (
           <button
             onClick={onMenuToggle}
-            className="p-2 -ml-2 rounded-md hover:bg-gray-100"
+            className="p-2 -ml-2 rounded-md hover:bg-slate-100 md:hidden"
           >
-            <Menu className="h-5 w-5" />
+            <span className="material-symbols-outlined text-slate-600">menu</span>
           </button>
         )}
 
+        {/* Search input */}
+        <div className="relative hidden md:block">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#70787d] text-xl">search</span>
+          <input
+            className="pl-10 pr-4 py-2 bg-white/40 backdrop-blur-sm border-none rounded-full w-64 focus:ring-2 focus:ring-[#004253]/20 text-sm outline-none"
+            placeholder="Ara..."
+            type="text"
+          />
+        </div>
+
+        {/* Restaurant switcher */}
         {memberships.length > 1 ? (
           <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex items-center gap-1.5 text-sm text-gray-700 hover:text-gray-900 outline-none">
-              <Building2 className="h-4 w-4" />
+            <DropdownMenuTrigger className="inline-flex items-center gap-1.5 text-sm text-[#191c1d] font-semibold hover:text-teal-900 outline-none border-b-2 border-teal-600 pb-0.5">
               <span className="truncate max-w-[200px]">{activeMembership?.restaurantName}</span>
               <ChevronDown className="h-3 w-3" />
             </DropdownMenuTrigger>
@@ -49,22 +60,39 @@ export function Header({ onMenuToggle }: HeaderProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <h2 className="text-sm text-gray-500 truncate">{activeMembership?.restaurantName}</h2>
+          <span className="text-sm text-[#191c1d] font-semibold border-b-2 border-teal-600 pb-0.5 hidden md:inline">
+            {activeMembership?.restaurantName}
+          </span>
         )}
       </div>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium h-9 px-3 md:px-4 py-2 hover:bg-accent hover:text-accent-foreground cursor-pointer outline-none">
-          <User className="h-4 w-4" />
-          <span className="hidden sm:inline">{user?.name}</span>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={logout} className="text-red-600">
-            <LogOut className="h-4 w-4 mr-2" />
-            Çıkış Yap
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="flex items-center gap-4">
+        {/* Notification bell */}
+        <button className="p-2 rounded-full hover:bg-slate-100 relative">
+          <span className="material-symbols-outlined text-[#70787d] text-xl">notifications</span>
+        </button>
+
+        {/* User profile with logout dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger className="inline-flex items-center gap-3 outline-none cursor-pointer">
+            <div className="text-right hidden sm:block">
+              <p className="text-xs font-bold text-[#191c1d]">{user?.name}</p>
+              <p className="text-[10px] text-[#70787d]">
+                {activeMembership?.role === 'OWNER' ? 'Yönetici' : activeMembership?.role}
+              </p>
+            </div>
+            <div className="w-9 h-9 rounded-full bg-[#d4e6e9] flex items-center justify-center text-[#004253] font-bold text-sm">
+              {user?.name?.charAt(0)}
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={logout} className="text-red-600">
+              <LogOut className="h-4 w-4 mr-2" />
+              Çıkış Yap
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </header>
   );
 }
