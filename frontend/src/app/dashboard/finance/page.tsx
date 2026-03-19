@@ -132,6 +132,35 @@ export default function FinanceOverviewPage() {
     return Math.max(...dailyRevenueData.map((d: any) => d.amount), 1);
   }, [dailyRevenueData]);
 
+  // Haftalık ciro verisi: ayın haftalarına göre grupla
+  const weeklyRevenueData = useMemo(() => {
+    if (!summary?.dailyBreakdown) return [];
+    const weeks: { label: string; amount: number }[] = [];
+    const days = summary.dailyBreakdown as any[];
+    // Haftaları 7'şerli grupla (1-7, 8-14, 15-21, 22-28, 29+)
+    const weekRanges = [
+      { start: 1, end: 7, label: '1. Hafta' },
+      { start: 8, end: 14, label: '2. Hafta' },
+      { start: 15, end: 21, label: '3. Hafta' },
+      { start: 22, end: 28, label: '4. Hafta' },
+      { start: 29, end: 31, label: '5. Hafta' },
+    ];
+    for (const range of weekRanges) {
+      const total = days
+        .filter((d: any) => d.day >= range.start && d.day <= range.end)
+        .reduce((sum: number, d: any) => sum + Number(d.revenue), 0);
+      if (range.start <= days.length) {
+        weeks.push({ label: range.label, amount: total });
+      }
+    }
+    return weeks;
+  }, [summary]);
+
+  const maxWeeklyRevenue = useMemo(() => {
+    if (weeklyRevenueData.length === 0) return 1;
+    return Math.max(...weeklyRevenueData.map((w) => w.amount), 1);
+  }, [weeklyRevenueData]);
+
   // Son 7 gün ve önceki 7 gün verileri (mini bar chart + yüzde değişim)
   const { last7Revenue, prev7Revenue, revenuePctChange, last7Expense, prev7Expense, expensePctChange } = useMemo(() => {
     if (!summary?.dailyBreakdown) return { last7Revenue: [] as number[], prev7Revenue: 0, revenuePctChange: 0, last7Expense: [] as number[], prev7Expense: 0, expensePctChange: 0 };
@@ -334,7 +363,7 @@ export default function FinanceOverviewPage() {
               <div className="flex items-center justify-between mb-8">
                 <div>
                   <h3 className="text-xl font-bold text-[#191c1d]">Günlük Ciro Analizi</h3>
-                  <p className="text-sm text-[#70787d]">{formatMonth(selectedMonth)} ayı günlük performans grafiği</p>
+                  <p className="text-sm text-[#70787d]">{formatMonth(selectedMonth)} ayı {chartTab === 'daily' ? 'günlük' : 'haftalık'} performans grafiği</p>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -359,54 +388,86 @@ export default function FinanceOverviewPage() {
                   </button>
                 </div>
               </div>
-              {dailyRevenueData.length === 0 ? (
-                <p className="text-[#70787d] text-sm text-center py-8">
-                  Bu ay için ciro verisi yok
-                </p>
-              ) : (
-                /* Custom thin-bar chart matching Stitch design */
-                <div className="aspect-[16/7] relative w-full flex items-end justify-between px-4 pb-8">
-                  {/* Grid Lines */}
-                  <div className="absolute inset-0 flex flex-col justify-between pointer-events-none border-b border-[#bfc8cc]/20">
-                    <div className="w-full h-px bg-[#bfc8cc]/10"></div>
-                    <div className="w-full h-px bg-[#bfc8cc]/10"></div>
-                    <div className="w-full h-px bg-[#bfc8cc]/10"></div>
-                    <div className="w-full h-px bg-[#bfc8cc]/10"></div>
-                  </div>
-                  {/* Area gradient background */}
-                  <div className="absolute bottom-10 left-0 w-full h-32 opacity-10 pointer-events-none">
-                    <div
-                      className="w-full h-full bg-gradient-to-t from-[#004253] to-transparent"
-                      style={{
-                        clipPath: `polygon(${dailyRevenueData.map((d: any, i: number) => {
-                          const x = (i / (dailyRevenueData.length - 1)) * 100;
-                          const y = 100 - (d.amount / maxRevenue) * 80;
-                          return `${x}% ${y}%`;
-                        }).join(', ')}, 100% 100%, 0% 100%)`,
-                      }}
-                    ></div>
-                  </div>
-                  {/* Interactive bar points */}
-                  {dailyRevenueData.map((d: any, i: number) => {
-                    const heightPct = Math.max(5, (d.amount / maxRevenue) * 90);
-                    const isHighest = d.amount === maxRevenue;
-                    return (
-                      <div key={d.day} className="relative group cursor-pointer h-full w-4 flex flex-col justify-end">
-                        <div
-                          className={`${isHighest ? 'w-2 bg-[#004253] shadow-md shadow-[#004253]/20' : 'w-1 bg-[#004253]/20 group-hover:bg-[#004253]'} rounded-full mx-auto transition-all`}
-                          style={{ height: `${heightPct}%` }}
-                        ></div>
-                        <span className={`absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] ${isHighest ? 'font-bold text-[#004253]' : 'text-[#70787d]'}`}>
-                          {String(d.day).padStart(2, '0')}
-                        </span>
-                        {/* Tooltip on hover */}
-                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#191c1d] text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                          {formatCurrency(d.amount)}
+              {chartTab === 'daily' ? (
+                /* Günlük: thin-bar chart */
+                dailyRevenueData.length === 0 ? (
+                  <p className="text-[#70787d] text-sm text-center py-8">Bu ay için ciro verisi yok</p>
+                ) : (
+                  <div className="aspect-[16/7] relative w-full flex items-end justify-between px-4 pb-8">
+                    {/* Grid Lines */}
+                    <div className="absolute inset-0 flex flex-col justify-between pointer-events-none border-b border-[#bfc8cc]/20">
+                      <div className="w-full h-px bg-[#bfc8cc]/10"></div>
+                      <div className="w-full h-px bg-[#bfc8cc]/10"></div>
+                      <div className="w-full h-px bg-[#bfc8cc]/10"></div>
+                      <div className="w-full h-px bg-[#bfc8cc]/10"></div>
+                    </div>
+                    {/* Area gradient background */}
+                    <div className="absolute bottom-10 left-0 w-full h-32 opacity-10 pointer-events-none">
+                      <div
+                        className="w-full h-full bg-gradient-to-t from-[#004253] to-transparent"
+                        style={{
+                          clipPath: `polygon(${dailyRevenueData.map((d: any, i: number) => {
+                            const x = (i / (dailyRevenueData.length - 1)) * 100;
+                            const y = 100 - (d.amount / maxRevenue) * 80;
+                            return `${x}% ${y}%`;
+                          }).join(', ')}, 100% 100%, 0% 100%)`,
+                        }}
+                      ></div>
+                    </div>
+                    {/* Interactive bar points */}
+                    {dailyRevenueData.map((d: any) => {
+                      const heightPct = Math.max(5, (d.amount / maxRevenue) * 90);
+                      const isHighest = d.amount === maxRevenue;
+                      return (
+                        <div key={d.day} className="relative group cursor-pointer h-full w-4 flex flex-col justify-end">
+                          <div
+                            className={`${isHighest ? 'w-2 bg-[#004253] shadow-md shadow-[#004253]/20' : 'w-1 bg-[#004253]/20 group-hover:bg-[#004253]'} rounded-full mx-auto transition-all`}
+                            style={{ height: `${heightPct}%` }}
+                          ></div>
+                          <span className={`absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] ${isHighest ? 'font-bold text-[#004253]' : 'text-[#70787d]'}`}>
+                            {String(d.day).padStart(2, '0')}
+                          </span>
+                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#191c1d] text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            {formatCurrency(d.amount)}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )
+              ) : (
+                /* Haftalık: kalın bar chart */
+                weeklyRevenueData.length === 0 ? (
+                  <p className="text-[#70787d] text-sm text-center py-8">Bu ay için ciro verisi yok</p>
+                ) : (
+                  <div className="aspect-[16/7] relative w-full flex items-end justify-around px-4 pb-8">
+                    {/* Grid Lines */}
+                    <div className="absolute inset-0 flex flex-col justify-between pointer-events-none border-b border-[#bfc8cc]/20">
+                      <div className="w-full h-px bg-[#bfc8cc]/10"></div>
+                      <div className="w-full h-px bg-[#bfc8cc]/10"></div>
+                      <div className="w-full h-px bg-[#bfc8cc]/10"></div>
+                      <div className="w-full h-px bg-[#bfc8cc]/10"></div>
+                    </div>
+                    {weeklyRevenueData.map((w, i) => {
+                      const heightPct = Math.max(5, (w.amount / maxWeeklyRevenue) * 90);
+                      const isHighest = w.amount === maxWeeklyRevenue;
+                      return (
+                        <div key={w.label} className="relative group cursor-pointer h-full flex flex-col justify-end items-center" style={{ width: `${80 / weeklyRevenueData.length}%` }}>
+                          <div
+                            className={`w-full max-w-16 rounded-t-lg mx-auto transition-all ${isHighest ? 'bg-[#004253] shadow-md shadow-[#004253]/20' : 'bg-[#004253]/20 group-hover:bg-[#004253]/40'}`}
+                            style={{ height: `${heightPct}%` }}
+                          ></div>
+                          <span className={`absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] whitespace-nowrap ${isHighest ? 'font-bold text-[#004253]' : 'text-[#70787d]'}`}>
+                            {w.label}
+                          </span>
+                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#191c1d] text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            {formatCurrency(w.amount)}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )
               )}
             </div>
 
