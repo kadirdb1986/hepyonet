@@ -168,33 +168,26 @@ export default function FinanceOverviewPage() {
   }, [weeklyRevenueData]);
 
   // Son 7 gün ve önceki 7 gün verileri (mini bar chart + yüzde değişim)
-  const { last7Revenue, prev7Revenue, revenuePctChange, last7Expense, prev7Expense, expensePctChange } = useMemo(() => {
-    if (!summary?.dailyBreakdown) return { last7Revenue: [] as number[], prev7Revenue: 0, revenuePctChange: 0, last7Expense: [] as number[], prev7Expense: 0, expensePctChange: 0 };
+  const { last7Days, revenuePctChange, expensePctChange } = useMemo(() => {
+    if (!summary?.dailyBreakdown) return { last7Days: [] as { day: number; revenue: number; expense: number }[], revenuePctChange: 0, expensePctChange: 0 };
 
-    // dailyBreakdown'ı veri olan günlere filtrele ve ters çevir (en yeni başta)
     const allDays = (summary.dailyBreakdown as any[]).filter((d: any) => d.revenue > 0 || d.expense > 0);
     const sorted = [...allDays].sort((a: any, b: any) => b.day - a.day);
 
-    const last7 = sorted.slice(0, 7).reverse(); // son 7 gün (kronolojik sıra)
+    const last7 = sorted.slice(0, 7).reverse();
     const prev7 = sorted.slice(7, 14);
 
-    const last7Rev = last7.map((d: any) => Number(d.revenue));
-    const last7Exp = last7.map((d: any) => Number(d.expense));
-
-    const last7RevTotal = last7Rev.reduce((s, v) => s + v, 0);
+    const last7RevTotal = last7.reduce((s, d: any) => s + Number(d.revenue), 0);
     const prev7RevTotal = prev7.reduce((s, d: any) => s + Number(d.revenue), 0);
-    const last7ExpTotal = last7Exp.reduce((s, v) => s + v, 0);
+    const last7ExpTotal = last7.reduce((s, d: any) => s + Number(d.expense), 0);
     const prev7ExpTotal = prev7.reduce((s, d: any) => s + Number(d.expense), 0);
 
     const revPct = prev7RevTotal > 0 ? Math.round(((last7RevTotal - prev7RevTotal) / prev7RevTotal) * 100) : 0;
     const expPct = prev7ExpTotal > 0 ? Math.round(((last7ExpTotal - prev7ExpTotal) / prev7ExpTotal) * 100) : 0;
 
     return {
-      last7Revenue: last7Rev,
-      prev7Revenue: prev7RevTotal,
+      last7Days: last7.map((d: any) => ({ day: Number(d.day), revenue: Number(d.revenue), expense: Number(d.expense) })),
       revenuePctChange: revPct,
-      last7Expense: last7Exp,
-      prev7Expense: prev7ExpTotal,
       expensePctChange: expPct,
     };
   }, [summary]);
@@ -288,21 +281,25 @@ export default function FinanceOverviewPage() {
               </div>
               <p className="text-[#70787d] text-sm font-medium mb-1">Toplam Ciro</p>
               <h3 className="text-3xl font-black text-[#191c1d]">{formatCurrency(summary.totalRevenue)}</h3>
-              {last7Revenue.length > 0 && (
+              {last7Days.length > 0 && (
                 <div className="mt-4 h-12 w-full flex items-end gap-1">
                   {(() => {
-                    const max = Math.max(...last7Revenue, 1);
-                    return last7Revenue.map((val, i) => {
-                      const pct = Math.max(5, (val / max) * 100);
-                      const isLast = i === last7Revenue.length - 1;
-                      const isSecondLast = i === last7Revenue.length - 2;
+                    const max = Math.max(...last7Days.map((d) => d.revenue), 1);
+                    return last7Days.map((d, i) => {
+                      const pct = Math.max(5, (d.revenue / max) * 100);
+                      const isLast = i === last7Days.length - 1;
+                      const isSecondLast = i === last7Days.length - 2;
                       const alpha = isLast ? 1 : isSecondLast ? 0.4 : 0.2;
                       return (
-                        <div
-                          key={i}
-                          className="flex-1 rounded-t-sm"
-                          style={{ height: `${pct}%`, backgroundColor: `rgba(0, 66, 83, ${alpha})` }}
-                        />
+                        <div key={i} className="relative flex-1 group">
+                          <div
+                            className="w-full rounded-t-sm cursor-pointer transition-all group-hover:opacity-80"
+                            style={{ height: `${pct}%`, backgroundColor: `rgba(0, 66, 83, ${alpha})` }}
+                          />
+                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#191c1d] text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+                            {d.day} {formatMonth(selectedMonth).split(' ')[0]}: {formatCurrency(d.revenue)}
+                          </div>
+                        </div>
                       );
                     });
                   })()}
@@ -324,19 +321,23 @@ export default function FinanceOverviewPage() {
               </div>
               <p className="text-[#70787d] text-sm font-medium mb-1">Toplam Gider</p>
               <h3 className="text-3xl font-black text-[#191c1d]">{formatCurrency(summary.totalExpenses)}</h3>
-              {last7Expense.length > 0 && (
+              {last7Days.length > 0 && (
                 <div className="mt-4 h-12 w-full flex items-end gap-1">
                   {(() => {
-                    const max = Math.max(...last7Expense, 1);
-                    return last7Expense.map((val, i) => {
-                      const pct = Math.max(5, (val / max) * 100);
-                      const intensity = Math.round(10 + (i / (last7Expense.length - 1)) * 30);
+                    const max = Math.max(...last7Days.map((d) => d.expense), 1);
+                    return last7Days.map((d, i) => {
+                      const intensity = Math.round(10 + (i / (last7Days.length - 1)) * 30);
+                      const pct = Math.max(5, (d.expense / max) * 100);
                       return (
-                        <div
-                          key={i}
-                          className="flex-1 rounded-t-sm"
-                          style={{ height: `${pct}%`, backgroundColor: `rgba(186, 26, 26, ${intensity / 100})` }}
-                        />
+                        <div key={i} className="relative flex-1 group">
+                          <div
+                            className="w-full rounded-t-sm cursor-pointer transition-all group-hover:opacity-80"
+                            style={{ height: `${pct}%`, backgroundColor: `rgba(186, 26, 26, ${intensity / 100})` }}
+                          />
+                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#191c1d] text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+                            {d.day} {formatMonth(selectedMonth).split(' ')[0]}: {formatCurrency(d.expense)}
+                          </div>
+                        </div>
                       );
                     });
                   })()}
