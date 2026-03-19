@@ -201,7 +201,8 @@ export default function FinanceOverviewPage() {
 
   const filteredBreakdown = useMemo(() => {
     if (!summary?.dailyBreakdown) return [];
-    return summary.dailyBreakdown.filter((d: any) => d.revenue > 0 || d.expense > 0);
+    // Tüm günleri al, son günden ilk güne sırala
+    return [...summary.dailyBreakdown].sort((a: any, b: any) => b.day - a.day);
   }, [summary]);
 
   const totalPages = Math.ceil(filteredBreakdown.length / ITEMS_PER_PAGE);
