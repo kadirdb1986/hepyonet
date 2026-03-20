@@ -82,7 +82,7 @@ export function PublicMenuClient({ data }: { data: PublicMenuData }) {
         </nav>
       </header>
 
-      <main className="pt-24 pb-32 max-w-7xl mx-auto px-4 md:px-8">
+      <main className="pt-24 pb-12 max-w-7xl mx-auto px-4 md:px-8">
         {/* Category Navigation */}
         {categories.length > 0 && (
           <div className="sticky top-[72px] z-40 -mx-4 px-4 py-4 mb-8 backdrop-blur-[12px] bg-white/85 shadow-sm overflow-x-auto"
@@ -190,32 +190,6 @@ export function PublicMenuClient({ data }: { data: PublicMenuData }) {
         </div>
       </footer>
 
-      {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 w-full h-20 flex justify-around items-center px-4 bg-white z-50 rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-        <div className="flex flex-col items-center justify-center bg-[#f2f4f5] text-[#004253] rounded-xl px-4 py-2">
-          <span
-            className="material-symbols-outlined"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            restaurant_menu
-          </span>
-          <span className="font-[Manrope,sans-serif] text-[11px] font-semibold tracking-wide uppercase mt-1">
-            Menü
-          </span>
-        </div>
-        <div className="flex flex-col items-center justify-center text-[#191c1d]/50 px-4 py-2 hover:bg-[#f2f4f5] rounded-xl transition-all">
-          <span className="material-symbols-outlined">search</span>
-          <span className="font-[Manrope,sans-serif] text-[11px] font-semibold tracking-wide uppercase mt-1">
-            Ara
-          </span>
-        </div>
-        <div className="flex flex-col items-center justify-center text-[#191c1d]/50 px-4 py-2 hover:bg-[#f2f4f5] rounded-xl transition-all">
-          <span className="material-symbols-outlined">info</span>
-          <span className="font-[Manrope,sans-serif] text-[11px] font-semibold tracking-wide uppercase mt-1">
-            İletişim
-          </span>
-        </div>
-      </nav>
     </div>
   );
 }
