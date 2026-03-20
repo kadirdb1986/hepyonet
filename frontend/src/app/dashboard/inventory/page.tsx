@@ -446,7 +446,7 @@ export default function InventoryPage() {
           </button>
           <Dialog open={dialogOpen} onOpenChange={(open) => setDialogOpen(open)}>
             <button
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br from-[#004253] to-[#005b71] text-white font-bold text-sm shadow-lg shadow-[#004253]/20 hover:shadow-xl transition-all active:scale-95"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br from-[#004253] to-[#005b71] text-white font-bold text-sm shadow-lg shadow-[#004253]/20 hover:scale-[1.02] transition-all active:scale-95"
               onClick={openCreate}
             >
               <span className="material-symbols-outlined text-lg">add</span>
