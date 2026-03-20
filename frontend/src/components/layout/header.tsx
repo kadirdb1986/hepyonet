@@ -9,6 +9,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LogOut, ChevronDown } from 'lucide-react';
 
+const ROLE_LABELS: Record<string, string> = {
+  OWNER: 'Sahip',
+  ADMIN: 'Yönetici',
+  ACCOUNTANT: 'Muhasebe',
+  HR: 'İnsan Kaynakları',
+  STOCK_MANAGER: 'Depocu',
+  MENU_MANAGER: 'Menü Yöneticisi',
+  WAITER: 'Garson',
+};
+
 interface HeaderProps {
   onMenuToggle?: () => void;
 }
@@ -84,7 +94,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
             <div className="text-right hidden sm:block">
               <p className="text-xs font-bold text-[#191c1d]">{user?.name}</p>
               <p className="text-[10px] text-[#70787d]">
-                {activeMembership?.role === 'OWNER' ? 'Yönetici' : activeMembership?.role}
+                {activeMembership?.role ? ROLE_LABELS[activeMembership.role] || activeMembership.role : ''}
               </p>
             </div>
             <div className="w-9 h-9 rounded-full bg-[#d4e6e9] flex items-center justify-center text-[#004253] font-bold text-sm">
