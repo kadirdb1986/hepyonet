@@ -155,18 +155,18 @@ export function PublicMenuClient({ data }: { data: PublicMenuData }) {
             <p className="text-[#70787d] text-lg">Menü henüz hazırlanmamış.</p>
           </div>
         ) : (
-          <div className="space-y-12">
-            {categories.map((category) => (
+          <div className="space-y-10">
+            {categories.map((category, index) => (
               <section
                 key={category.name}
                 data-category={category.name}
                 ref={(el) => { sectionRefs.current[category.name] = el; }}
                 className="scroll-mt-36"
               >
-                {/* Category Title */}
-                <h2 className="font-[Manrope,sans-serif] font-extrabold text-2xl text-[#004253] mb-6">
-                  {category.name}
-                </h2>
+                {/* Divider between categories */}
+                {index > 0 && (
+                  <div className="h-px bg-[#bfc8cc]/30 mb-10" />
+                )}
 
                 {/* Products Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
