@@ -426,13 +426,24 @@ export default function ProductsPage() {
                       <p className="text-lg font-black text-[#004253] font-headline">{ingredientCount}</p>
                     </div>
                     <button
-                      className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-slate-100 transition-colors"
+                      className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-[#004253]/10 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/dashboard/products/${product.id}`);
+                      }}
+                      title="Düzenle"
+                    >
+                      <span className="material-symbols-outlined text-lg text-[#004253]">edit</span>
+                    </button>
+                    <button
+                      className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-[#ffdad6] transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (confirm('Bu ürünü silmek istediğinize emin misiniz?')) deleteMutation.mutate(product.id);
                       }}
+                      title="Sil"
                     >
-                      <span className="material-symbols-outlined text-[#70787d]">more_vert</span>
+                      <span className="material-symbols-outlined text-lg text-[#ba1a1a]">delete</span>
                     </button>
                   </div>
                 </div>
