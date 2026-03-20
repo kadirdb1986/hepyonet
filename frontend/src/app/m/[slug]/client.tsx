@@ -119,30 +119,16 @@ export function PublicMenuClient({ data }: { data: PublicMenuData }) {
                 className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col group"
               >
                 {/* Image */}
-                <div className="relative h-64 overflow-hidden">
-                  {product.image ? (
+                {product.image && (
+                  <div className="relative h-64 overflow-hidden">
                     <img
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       src={product.image}
                       loading="lazy"
                     />
-                  ) : (
-                    <div className="w-full h-full bg-[#f2f4f5] flex items-center justify-center">
-                      <div className="flex flex-col items-center gap-2 opacity-30 group-hover:opacity-40 transition-opacity">
-                        <span
-                          className="material-symbols-outlined text-6xl"
-                          style={{ fontVariationSettings: "'wght' 200" }}
-                        >
-                          restaurant
-                        </span>
-                        <span className="font-[Manrope,sans-serif] text-xs font-bold uppercase tracking-wider">
-                          Görsel Yakında
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 {/* Content */}
                 <div className="p-6 flex flex-col flex-grow">
