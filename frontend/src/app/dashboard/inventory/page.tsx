@@ -588,22 +588,6 @@ export default function InventoryPage() {
             </div>
           </div>
         )}
-        {/* Total Stock Value Card */}
-        {totalStockValue > 0 && (
-          <div className={`col-span-12 ${lowStockMaterials.length > 0 ? 'lg:col-span-4' : 'lg:col-span-4'} bg-[#f2f4f5] p-6 rounded-3xl flex flex-col justify-between min-h-[120px]`}>
-            <div className="flex justify-between items-start">
-              <span className="p-2 bg-[#004253]/5 text-[#004253] rounded-lg">
-                <span className="material-symbols-outlined">payments</span>
-              </span>
-            </div>
-            <div>
-              <p className="text-[#70787d] text-xs font-medium uppercase tracking-tighter">Toplam Stok Değeri</p>
-              <p className="text-3xl font-headline font-extrabold text-[#004253]">
-                {totalStockValue.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace('TRY', '₺').trim()}
-              </p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Filters & Main Data Table Section */}
