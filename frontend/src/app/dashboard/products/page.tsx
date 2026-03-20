@@ -231,46 +231,6 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      {/* Bento Summary Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-[#004253]/5 flex items-center justify-center text-[#004253]">
-            <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>restaurant</span>
-          </div>
-          <div>
-            <p className="text-xs font-medium text-[#70787d] uppercase tracking-wider">Menü Ürünleri Sayısı</p>
-            <p className="text-2xl font-extrabold text-[#004253] font-headline">{allMenuProducts.length}</p>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-[#7df4ff]/20 flex items-center justify-center text-[#004448]">
-            <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>inventory</span>
-          </div>
-          <div>
-            <p className="text-xs font-medium text-[#70787d] uppercase tracking-wider">Ara Ürünler</p>
-            <p className="text-2xl font-extrabold text-[#191c1d] font-headline">{allIntermediateProducts.length}</p>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-[#ffdad6]/40 flex items-center justify-center text-[#ba1a1a]">
-            <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>trending_down</span>
-          </div>
-          <div>
-            <p className="text-xs font-medium text-[#70787d] uppercase tracking-wider">Düşük Kar Marjı</p>
-            <p className="text-2xl font-extrabold text-[#191c1d] font-headline">{lowMarginCount}</p>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-[#d4e6e9] flex items-center justify-center text-[#516164]">
-            <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>sell</span>
-          </div>
-          <div>
-            <p className="text-xs font-medium text-[#70787d] uppercase tracking-wider">Aktif Satış</p>
-            <p className="text-2xl font-extrabold text-[#191c1d] font-headline">{activeSalesCount}</p>
-          </div>
-        </div>
-      </div>
-
       {/* Search */}
       <div className="relative w-72">
         <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#70787d] text-xl">search</span>
