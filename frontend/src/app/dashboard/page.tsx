@@ -227,7 +227,6 @@ export default function DashboardPage() {
             <div className="w-12 h-12 bg-[#d4e6e9] rounded-xl flex items-center justify-center text-[#516164]">
               <span className="material-symbols-outlined text-2xl">group</span>
             </div>
-            <span className="text-xs font-bold text-[#516164] bg-[#d4e6e9]/50 px-2 py-1 rounded-full">Sabit</span>
           </div>
           <div>
             <p className="text-[#70787d] text-xs font-bold uppercase tracking-wider mb-1">Personel Sayısı</p>
