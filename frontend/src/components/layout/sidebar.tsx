@@ -5,10 +5,23 @@ import { usePathname } from 'next/navigation';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const menuItems = [
+interface MenuItem {
+  href: string;
+  label: string;
+  icon: string;
+  children?: { href: string; label: string; icon: string }[];
+}
+
+const menuItems: MenuItem[] = [
   { href: '/dashboard', label: 'Panel', icon: 'dashboard' },
   { href: '/dashboard/personnel', label: 'Personel', icon: 'group' },
-  { href: '/dashboard/finance', label: 'Finans', icon: 'payments' },
+  {
+    href: '/dashboard/finance', label: 'Finans', icon: 'payments',
+    children: [
+      { href: '/dashboard/finance/revenues', label: 'Cirolar', icon: 'trending_up' },
+      { href: '/dashboard/finance/expenses', label: 'Giderler', icon: 'trending_down' },
+    ],
+  },
   { href: '/dashboard/inventory', label: 'Stok', icon: 'inventory_2' },
   { href: '/dashboard/products', label: 'Ürünler', icon: 'fastfood' },
   { href: '/dashboard/menu', label: 'Menü', icon: 'restaurant_menu' },
@@ -28,30 +41,63 @@ interface SidebarProps {
   onDesktopClose?: () => void;
 }
 
-function NavItem({ item, pathname, onClick }: { item: typeof menuItems[0]; pathname: string; onClick?: () => void }) {
+function NavItem({ item, pathname, onClick }: { item: MenuItem; pathname: string; onClick?: () => void }) {
   const isActive =
     pathname === item.href ||
     (item.href !== '/dashboard' && pathname.startsWith(item.href));
 
+  const hasChildren = item.children && item.children.length > 0;
+  const isExpanded = hasChildren && pathname.startsWith(item.href);
+
   return (
-    <Link
-      href={item.href}
-      onClick={onClick}
-      className={cn(
-        'flex items-center gap-3 px-4 py-3 rounded-md text-sm transition-all duration-150',
-        isActive
-          ? 'bg-white text-teal-900 border-l-4 border-teal-900 font-bold shadow-xs rounded-l-none translate-x-1'
-          : 'text-slate-500 hover:text-teal-800 hover:bg-slate-200/50',
-      )}
-    >
-      <span
-        className="material-symbols-outlined text-xl"
-        style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
+    <div>
+      <Link
+        href={item.href}
+        onClick={onClick}
+        className={cn(
+          'flex items-center gap-3 px-4 py-3 rounded-md text-sm transition-all duration-150',
+          isActive
+            ? 'bg-white text-teal-900 border-l-4 border-teal-900 font-bold shadow-xs rounded-l-none translate-x-1'
+            : 'text-slate-500 hover:text-teal-800 hover:bg-slate-200/50',
+        )}
       >
-        {item.icon}
-      </span>
-      {item.label}
-    </Link>
+        <span
+          className="material-symbols-outlined text-xl"
+          style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
+        >
+          {item.icon}
+        </span>
+        {item.label}
+      </Link>
+      {isExpanded && item.children && (
+        <div className="ml-6 mt-0.5 space-y-0.5 border-l-2 border-slate-200 pl-2">
+          {item.children.map((child) => {
+            const childActive = pathname === child.href || pathname.startsWith(child.href + '/');
+            return (
+              <Link
+                key={child.href}
+                href={child.href}
+                onClick={onClick}
+                className={cn(
+                  'flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-all duration-150',
+                  childActive
+                    ? 'text-teal-900 font-bold bg-white/60'
+                    : 'text-slate-400 hover:text-teal-800 hover:bg-slate-200/50',
+                )}
+              >
+                <span
+                  className="material-symbols-outlined text-lg"
+                  style={childActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                >
+                  {child.icon}
+                </span>
+                {child.label}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
