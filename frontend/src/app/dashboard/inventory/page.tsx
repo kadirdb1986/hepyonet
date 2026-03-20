@@ -199,7 +199,7 @@ export default function InventoryPage() {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 50;
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
