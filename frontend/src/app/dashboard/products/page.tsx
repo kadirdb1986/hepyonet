@@ -238,7 +238,7 @@ export default function ProductsPage() {
             <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>restaurant</span>
           </div>
           <div>
-            <p className="text-xs font-medium text-[#70787d] uppercase tracking-wider">Toplam Menü</p>
+            <p className="text-xs font-medium text-[#70787d] uppercase tracking-wider">Menü Ürünleri Sayısı</p>
             <p className="text-2xl font-extrabold text-[#004253] font-headline">{allMenuProducts.length}</p>
           </div>
         </div>
