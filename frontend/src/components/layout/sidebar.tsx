@@ -63,8 +63,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           <span className="material-symbols-outlined text-xl">restaurant</span>
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-teal-900 leading-tight">HepyOnet</h1>
-          <p className="text-[10px] uppercase tracking-widest text-[#70787d] font-semibold">Restaurant Executive</p>
+          <h1 className="text-2xl font-bold text-teal-900 leading-tight">HepYonet</h1>
+          <p className="text-[10px] uppercase tracking-widest text-[#70787d] font-semibold">Restoran Yönetimi</p>
         </div>
       </div>
     </div>
