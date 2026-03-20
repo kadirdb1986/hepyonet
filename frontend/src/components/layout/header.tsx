@@ -21,9 +21,11 @@ const ROLE_LABELS: Record<string, string> = {
 
 interface HeaderProps {
   onMenuToggle?: () => void;
+  onDesktopMenuToggle?: () => void;
+  desktopSidebarOpen?: boolean;
 }
 
-export function Header({ onMenuToggle }: HeaderProps) {
+export function Header({ onMenuToggle, onDesktopMenuToggle, desktopSidebarOpen }: HeaderProps) {
   const { user, activeMembership, switchRestaurant, logout } = useAuth();
   const memberships = user?.memberships.filter((m) => m.restaurantStatus === 'APPROVED') || [];
 
@@ -35,6 +37,16 @@ export function Header({ onMenuToggle }: HeaderProps) {
           <button
             onClick={onMenuToggle}
             className="p-2 -ml-2 rounded-md hover:bg-slate-100 md:hidden"
+          >
+            <span className="material-symbols-outlined text-slate-600">menu</span>
+          </button>
+        )}
+
+        {/* Desktop hamburger - shown when sidebar is closed */}
+        {onDesktopMenuToggle && !desktopSidebarOpen && (
+          <button
+            onClick={onDesktopMenuToggle}
+            className="p-2 -ml-2 rounded-md hover:bg-slate-100 hidden md:flex"
           >
             <span className="material-symbols-outlined text-slate-600">menu</span>
           </button>

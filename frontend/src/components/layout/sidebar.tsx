@@ -24,6 +24,8 @@ const bottomItems = [
 interface SidebarProps {
   open?: boolean;
   onClose?: () => void;
+  desktopOpen?: boolean;
+  onDesktopClose?: () => void;
 }
 
 function NavItem({ item, pathname, onClick }: { item: typeof menuItems[0]; pathname: string; onClick?: () => void }) {
@@ -53,18 +55,20 @@ function NavItem({ item, pathname, onClick }: { item: typeof menuItems[0]; pathn
   );
 }
 
-export function Sidebar({ open, onClose }: SidebarProps) {
+export function Sidebar({ open, onClose, desktopOpen = true, onDesktopClose }: SidebarProps) {
   const pathname = usePathname();
 
   const logoArea = (
     <div className="p-6">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-[#004253] flex items-center justify-center text-white">
-          <span className="material-symbols-outlined text-xl">restaurant</span>
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-teal-900 leading-tight">HepYonet</h1>
-          <p className="text-[10px] uppercase tracking-widest text-[#70787d] font-semibold">Restoran Yönetimi</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#004253] flex items-center justify-center text-white">
+            <span className="material-symbols-outlined text-xl">restaurant</span>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-teal-900 leading-tight">HepYonet</h1>
+            <p className="text-[10px] uppercase tracking-widest text-[#70787d] font-semibold">Restoran Yönetimi</p>
+          </div>
         </div>
       </div>
     </div>
@@ -87,10 +91,25 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
   return (
     <>
-      {/* Desktop: fixed sidebar that pushes content */}
-      <aside className="hidden md:flex w-64 bg-slate-100 h-screen sticky top-0 flex-col shrink-0 font-headline text-sm font-medium tracking-tight">
-        {logoArea}
-        {navContent}
+      {/* Desktop: collapsible sidebar that pushes content */}
+      <aside
+        className={cn(
+          'hidden md:flex bg-slate-100 h-screen sticky top-0 flex-col shrink-0 font-headline text-sm font-medium tracking-tight transition-all duration-300 overflow-hidden',
+          desktopOpen ? 'w-64' : 'w-0',
+        )}
+      >
+        <div className="w-64 min-w-[16rem] flex flex-col h-full">
+          <div className="flex items-center justify-between pr-2">
+            <div className="flex-1">{logoArea}</div>
+            <button
+              onClick={onDesktopClose}
+              className="p-2 rounded-md hover:bg-slate-200 text-slate-500"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          {navContent}
+        </div>
       </aside>
 
       {/* Mobile: overlay */}

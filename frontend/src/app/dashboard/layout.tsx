@@ -82,6 +82,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { checkAuth } = useAuth();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -113,9 +114,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen bg-[#f8fafb]">
-      <Sidebar open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+      <Sidebar
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        desktopOpen={sidebarOpen}
+        onDesktopClose={() => setSidebarOpen(false)}
+      />
       <div className="flex-1 flex flex-col min-w-0">
-        <Header onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)} />
+        <Header
+          onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onDesktopMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+          desktopSidebarOpen={sidebarOpen}
+        />
         <main className="flex-1 p-3 md:p-6">
           <NextIntlClientProvider locale="tr" messages={messages}>
             {children}
