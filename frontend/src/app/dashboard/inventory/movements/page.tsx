@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -135,30 +136,30 @@ export default function StockMovementsPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label>{t('rawMaterials')}</Label>
-                <select
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  value={form.rawMaterialId}
-                  onChange={(e) => setForm({ ...form, rawMaterialId: e.target.value })}
-                  required
-                >
-                  <option value="">Stok Kalemi Secin</option>
-                  {materials.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name} ({m.unit})
-                    </option>
-                  ))}
-                </select>
+                <Select required value={form.rawMaterialId || ""} onValueChange={(value) => setForm({ ...form, rawMaterialId: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Stok Kalemi Seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {materials.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.name} ({m.unit})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label>{t('movementType')}</Label>
-                <select
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  value={form.type}
-                  onChange={(e) => setForm({ ...form, type: e.target.value as 'IN' | 'OUT' })}
-                >
-                  <option value="IN">{t('in')}</option>
-                  <option value="OUT">{t('out')}</option>
-                </select>
+                <Select value={form.type} onValueChange={(value) => setForm({ ...form, type: value as 'IN' | 'OUT' })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="IN">{t('in')}</SelectItem>
+                    <SelectItem value="OUT">{t('out')}</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
