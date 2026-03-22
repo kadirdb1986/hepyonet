@@ -17,6 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Pencil, Trash2, Check, X, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -212,16 +213,16 @@ export default function SuppliersPage() {
             </div>
             <div>
               <Label>Tedarik Tipi</Label>
-              <select
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                value={newDeliveryType}
-                onChange={(e) => setNewDeliveryType(e.target.value)}
-              >
-                <option value="">Tedarik tipi seçin...</option>
-                {DELIVERY_TYPES.map((dt) => (
-                  <option key={dt} value={dt}>{dt}</option>
-                ))}
-              </select>
+              <Select value={newDeliveryType || ""} onValueChange={setNewDeliveryType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Tedarik tipi seçin..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {DELIVERY_TYPES.map((dt) => (
+                    <SelectItem key={dt} value={dt}>{dt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="md:col-span-2 flex justify-end">
               <Button type="submit" disabled={createSupplierMutation.isPending || !newName.trim()}>
@@ -273,16 +274,16 @@ export default function SuppliersPage() {
                         />
                       </TableCell>
                       <TableCell>
-                        <select
-                          className="flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                          value={editingDeliveryType}
-                          onChange={(e) => setEditingDeliveryType(e.target.value)}
-                        >
-                          <option value="">Tedarik tipi seçin...</option>
-                          {DELIVERY_TYPES.map((dt) => (
-                            <option key={dt} value={dt}>{dt}</option>
-                          ))}
-                        </select>
+                        <Select value={editingDeliveryType || ""} onValueChange={setEditingDeliveryType}>
+                          <SelectTrigger className="h-8">
+                            <SelectValue placeholder="Tedarik tipi seçin..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {DELIVERY_TYPES.map((dt) => (
+                              <SelectItem key={dt} value={dt}>{dt}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                       <TableCell>
                         <Input
