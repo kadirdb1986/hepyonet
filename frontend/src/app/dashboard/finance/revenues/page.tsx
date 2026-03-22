@@ -2,13 +2,14 @@
 
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ColumnDef } from '@tanstack/react-table';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TrendingUp, ChevronLeft, ChevronRight, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { DataTable } from '@/components/ui/data-table';
 import {
   BarChart,
   Bar,
@@ -42,6 +43,16 @@ const formatCurrency = (amount: number) => {
 
 const dayNames = ['Paz', 'Pzt', 'Sal', 'Car', 'Per', 'Cum', 'Cmt'];
 
+interface DayRow {
+  day: number;
+  dateStr: string;
+  dayName: string;
+  amount: number;
+  id: string | null;
+  notes: string;
+  hasData: boolean;
+}
+
 export default function RevenuesPage() {
   const queryClient = useQueryClient();
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
@@ -68,20 +79,18 @@ export default function RevenuesPage() {
     },
   });
 
-  // Build full month days with revenue data
   const monthDays = useMemo(() => {
     const [y, m] = selectedMonth.split('-').map(Number);
     const now = new Date();
     const isCurrentMonth = now.getFullYear() === y && now.getMonth() + 1 === m;
     const maxDay = isCurrentMonth ? now.getDate() : new Date(y, m, 0).getDate();
-    const days = [];
+    const days: DayRow[] = [];
 
     for (let day = 1; day <= maxDay; day++) {
       const dateStr = `${selectedMonth}-${String(day).padStart(2, '0')}`;
       const dateObj = new Date(y, m - 1, day);
       const dayName = dayNames[dateObj.getDay()];
 
-      // Find matching revenue
       const revenue = revenues.find((r: any) => {
         const rDate = new Date(r.date);
         return rDate.getFullYear() === y && rDate.getMonth() === m - 1 && rDate.getDate() === day;
@@ -109,14 +118,11 @@ export default function RevenuesPage() {
     amount: d.amount,
   }));
 
-  // Create or update revenue for a day
   const saveMutation = useMutation({
-    mutationFn: async ({ day, amount }: { day: typeof monthDays[0]; amount: number }) => {
+    mutationFn: async ({ day, amount }: { day: DayRow; amount: number }) => {
       if (day.id) {
-        // Update existing
         await api.patch(`/revenues/${day.id}`, { amount });
       } else {
-        // Create new
         await api.post('/revenues', { date: day.dateStr, amount });
       }
     },
@@ -130,7 +136,7 @@ export default function RevenuesPage() {
     onError: () => toast.error('Ciro kaydedilemedi'),
   });
 
-  const startEdit = (day: typeof monthDays[0]) => {
+  const startEdit = (day: DayRow) => {
     setEditingDay(day.day);
     setEditAmount(day.amount > 0 ? String(day.amount) : '');
   };
@@ -157,6 +163,86 @@ export default function RevenuesPage() {
     setEditingDay(null);
     setEditAmount('');
   };
+
+  const isWeekend = (dayName: string) => dayName === 'Paz' || dayName === 'Cmt';
+
+  const columns: ColumnDef<DayRow>[] = [
+    {
+      accessorKey: 'dayName',
+      header: 'Gün',
+      cell: ({ row }) => {
+        const day = row.original;
+        return (
+          <span
+            className={`font-bold ${isWeekend(day.dayName) ? 'text-muted-foreground' : ''}`}
+          >
+            {day.dayName}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: 'day',
+      header: 'Tarih',
+      cell: ({ row }) => {
+        const day = row.original;
+        return (
+          <span className={isWeekend(day.dayName) ? 'text-muted-foreground' : ''}>
+            {day.day} {formatMonth(selectedMonth)}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: 'amount',
+      header: () => <div className="text-right">Tutar</div>,
+      cell: ({ row }) => {
+        const day = row.original;
+        if (editingDay === day.day) {
+          return (
+            <div className="flex items-center justify-end gap-1">
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={editAmount}
+                onChange={(e) => setEditAmount(e.target.value)}
+                className="w-32 h-8 text-right"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') confirmEdit();
+                  if (e.key === 'Escape') cancelEdit();
+                }}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={confirmEdit}
+                disabled={saveMutation.isPending}
+              >
+                <Check className="h-4 w-4 text-green-600" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={cancelEdit}>
+                <X className="h-4 w-4 text-red-500" />
+              </Button>
+            </div>
+          );
+        }
+
+        return (
+          <div className="text-right">
+            <span
+              className={`cursor-pointer hover:underline ${day.hasData ? 'font-medium' : 'text-muted-foreground'}`}
+              onClick={() => startEdit(day)}
+            >
+              {day.hasData ? formatCurrency(day.amount) : '—'}
+            </span>
+          </div>
+        );
+      },
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -220,71 +306,19 @@ export default function RevenuesPage() {
         <CardHeader>
           <CardTitle className="text-base">Ciro Kayıtları</CardTitle>
         </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <p className="text-muted-foreground text-center py-8">Yukleniyor...</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[50px]">Gün</TableHead>
-                  <TableHead>Tarih</TableHead>
-                  <TableHead className="text-right">Tutar</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {monthDays.map((day) => (
-                  <TableRow
-                    key={day.day}
-                    className={`${day.dayName === 'Paz' || day.dayName === 'Cmt' ? 'bg-muted' : ''} ${!day.hasData && editingDay !== day.day ? 'text-muted-foreground' : ''}`}
-                  >
-                    <TableCell className="font-medium">{day.dayName}</TableCell>
-                    <TableCell>
-                      {day.day} {formatMonth(selectedMonth)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {editingDay === day.day ? (
-                        <div className="flex items-center justify-end gap-1">
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={editAmount}
-                            onChange={(e) => setEditAmount(e.target.value)}
-                            className="w-32 h-8 text-right"
-                            autoFocus
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') confirmEdit();
-                              if (e.key === 'Escape') cancelEdit();
-                            }}
-                          />
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={confirmEdit} disabled={saveMutation.isPending}>
-                            <Check className="h-4 w-4 text-green-600" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={cancelEdit}>
-                            <X className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <span
-                          className={`cursor-pointer hover:underline ${day.hasData ? 'font-medium' : ''}`}
-                          onClick={() => startEdit(day)}
-                        >
-                          {day.hasData ? formatCurrency(day.amount) : '—'}
-                        </span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TableCell colSpan={2} className="font-bold">Toplam</TableCell>
-                  <TableCell className="text-right font-bold text-green-600">{formatCurrency(totalRevenue)}</TableCell>
-                </TableRow>
-              </TableFooter>
-            </Table>
-          )}
+        <CardContent className="p-0">
+          <DataTable
+            columns={columns}
+            data={monthDays}
+            isLoading={isLoading}
+            showPagination={false}
+            showToolbar={false}
+            emptyMessage="Bu ay için veri bulunamadı."
+          />
+          <div className="flex items-center justify-between border-t px-4 py-3 font-bold">
+            <span>Toplam</span>
+            <span className="text-green-600">{formatCurrency(totalRevenue)}</span>
+          </div>
         </CardContent>
       </Card>
     </div>
