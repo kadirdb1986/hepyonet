@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { UtensilsCrossed } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Gizlilik Politikası - HepYonet',
@@ -7,23 +8,23 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-[#f8fafb] font-[Inter,sans-serif] text-[#191c1d]">
+    <div className="min-h-screen bg-background font-body text-foreground">
       <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
         <nav className="flex items-center gap-3 px-6 py-4 max-w-4xl mx-auto">
-          <div className="w-10 h-10 bg-[#004253] rounded-lg flex items-center justify-center text-white">
-            <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>restaurant</span>
+          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white">
+            <UtensilsCrossed className="size-6" />
           </div>
-          <h1 className="font-[Manrope,sans-serif] font-extrabold text-[#004253] text-xl tracking-tight">HepYonet</h1>
+          <h1 className="font-headline font-extrabold text-primary text-xl tracking-tight">HepYonet</h1>
         </nav>
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-12">
-        <h1 className="font-[Manrope,sans-serif] font-extrabold text-3xl text-[#004253] mb-2">Gizlilik Politikası</h1>
-        <p className="text-[#70787d] text-sm mb-10">Son güncelleme: 22 Mart 2026</p>
+        <h1 className="font-headline font-extrabold text-3xl text-primary mb-2">Gizlilik Politikası</h1>
+        <p className="text-muted-foreground text-sm mb-10">Son güncelleme: 22 Mart 2026</p>
 
-        <div className="space-y-8 text-[#40484c] text-sm leading-relaxed">
+        <div className="space-y-8 text-muted-foreground text-sm leading-relaxed">
           <section>
-            <h2 className="font-[Manrope,sans-serif] font-bold text-lg text-[#004253] mb-3">1. Genel Bakış</h2>
+            <h2 className="font-headline font-bold text-lg text-primary mb-3">1. Genel Bakış</h2>
             <p>
               HepYonet (&quot;biz&quot;, &quot;bizim&quot; veya &quot;Platform&quot;), restoran sahipleri ve yöneticileri için geliştirilmiş bir
               restoran yönetim sistemidir. Bu gizlilik politikası, platformumuz aracılığıyla topladığımız, kullandığımız ve
@@ -32,7 +33,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-[Manrope,sans-serif] font-bold text-lg text-[#004253] mb-3">2. Topladığımız Veriler</h2>
+            <h2 className="font-headline font-bold text-lg text-primary mb-3">2. Topladığımız Veriler</h2>
             <p className="mb-3">Platformumuzu kullanırken aşağıdaki bilgileri toplayabiliriz:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li><strong>Hesap Bilgileri:</strong> Ad, soyad, e-posta adresi, telefon numarası.</li>
@@ -43,7 +44,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-[Manrope,sans-serif] font-bold text-lg text-[#004253] mb-3">3. Verilerin Kullanım Amacı</h2>
+            <h2 className="font-headline font-bold text-lg text-primary mb-3">3. Verilerin Kullanım Amacı</h2>
             <p className="mb-3">Topladığımız verileri şu amaçlarla kullanıyoruz:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>Platform hizmetlerinin sunulması ve iyileştirilmesi.</li>
@@ -55,7 +56,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-[Manrope,sans-serif] font-bold text-lg text-[#004253] mb-3">4. Üçüncü Taraf Entegrasyonlar</h2>
+            <h2 className="font-headline font-bold text-lg text-primary mb-3">4. Üçüncü Taraf Entegrasyonlar</h2>
             <p className="mb-3">
               Platformumuz, kullanıcıların izniyle aşağıdaki üçüncü taraf hizmetlerle entegre çalışabilir:
             </p>
@@ -75,7 +76,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-[Manrope,sans-serif] font-bold text-lg text-[#004253] mb-3">5. Veri Güvenliği</h2>
+            <h2 className="font-headline font-bold text-lg text-primary mb-3">5. Veri Güvenliği</h2>
             <p>
               Kişisel verilerinizi korumak için endüstri standardı güvenlik önlemleri uyguluyoruz. Tüm veri iletişimi SSL/TLS
               şifreleme ile korunmaktadır. Şifreler hash algoritmaları ile saklanmakta olup düz metin olarak tutulmamaktadır.
@@ -84,7 +85,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-[Manrope,sans-serif] font-bold text-lg text-[#004253] mb-3">6. Veri Paylaşımı</h2>
+            <h2 className="font-headline font-bold text-lg text-primary mb-3">6. Veri Paylaşımı</h2>
             <p className="mb-3">Kişisel verilerinizi aşağıdaki durumlar dışında üçüncü taraflarla paylaşmayız:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>Yasal zorunluluk halinde (mahkeme kararı, yasal talep).</li>
@@ -94,7 +95,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-[Manrope,sans-serif] font-bold text-lg text-[#004253] mb-3">7. Kullanıcı Hakları</h2>
+            <h2 className="font-headline font-bold text-lg text-primary mb-3">7. Kullanıcı Hakları</h2>
             <p className="mb-3">KVKK ve GDPR kapsamında aşağıdaki haklara sahipsiniz:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>Kişisel verilerinize erişim talep etme.</li>
@@ -106,7 +107,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-[Manrope,sans-serif] font-bold text-lg text-[#004253] mb-3">8. Çerezler</h2>
+            <h2 className="font-headline font-bold text-lg text-primary mb-3">8. Çerezler</h2>
             <p>
               Platformumuz, oturum yönetimi ve kullanıcı deneyimini iyileştirmek amacıyla çerezler kullanmaktadır.
               Kimlik doğrulama token&apos;ları tarayıcı yerel depolama alanında saklanmaktadır.
@@ -114,7 +115,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-[Manrope,sans-serif] font-bold text-lg text-[#004253] mb-3">9. Veri Saklama Süresi</h2>
+            <h2 className="font-headline font-bold text-lg text-primary mb-3">9. Veri Saklama Süresi</h2>
             <p>
               Kişisel verileriniz, hesabınız aktif olduğu sürece saklanır. Hesap silinmesi durumunda verileriniz
               yasal saklama yükümlülükleri saklı kalmak kaydıyla 30 gün içinde silinir.
@@ -122,7 +123,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-[Manrope,sans-serif] font-bold text-lg text-[#004253] mb-3">10. Değişiklikler</h2>
+            <h2 className="font-headline font-bold text-lg text-primary mb-3">10. Değişiklikler</h2>
             <p>
               Bu gizlilik politikasını zaman zaman güncelleyebiliriz. Önemli değişiklikler yapıldığında kullanıcılarımızı
               e-posta veya platform üzerinden bilgilendireceğiz.
@@ -130,7 +131,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-[Manrope,sans-serif] font-bold text-lg text-[#004253] mb-3">11. İletişim</h2>
+            <h2 className="font-headline font-bold text-lg text-primary mb-3">11. İletişim</h2>
             <p>
               Gizlilik politikamız hakkında sorularınız için bizimle iletişime geçebilirsiniz:
             </p>
@@ -142,8 +143,8 @@ export default function PrivacyPolicyPage() {
         </div>
       </main>
 
-      <footer className="mt-12 pt-8 border-t border-[#bfc8cc]/30 text-center pb-8">
-        <p className="font-[Manrope,sans-serif] font-bold text-sm tracking-widest uppercase text-[#40484c]">
+      <footer className="mt-12 pt-8 border-t border text-center pb-8">
+        <p className="font-headline font-bold text-sm tracking-widest uppercase text-muted-foreground">
           &copy; {new Date().getFullYear()} HepYonet
         </p>
       </footer>
