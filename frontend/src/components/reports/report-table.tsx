@@ -54,7 +54,7 @@ export function ReportTable({
           </Table>
         </div>
         <div>
-          <h3 className="text-lg font-semibold mb-4 text-red-700 border-b pb-2">Giderler</h3>
+          <h3 className="text-lg font-semibold mb-4 text-destructive border-b pb-2">Giderler</h3>
           <Table>
             <TableHeader><TableRow><TableHead>Kategori</TableHead><TableHead className="text-right">Tutar</TableHead></TableRow></TableHeader>
             <TableBody>
@@ -68,7 +68,7 @@ export function ReportTable({
                   </TableRow>
                 );
               })}
-              <TableRow className="bg-red-50 font-bold"><TableCell>Toplam Gider</TableCell><TableCell className="text-right text-red-700">{formatCurrency(totalExpense)}</TableCell></TableRow>
+              <TableRow className="bg-destructive/10 font-bold"><TableCell>Toplam Gider</TableCell><TableCell className="text-right text-destructive">{formatCurrency(totalExpense)}</TableCell></TableRow>
             </TableBody>
           </Table>
         </div>
@@ -76,11 +76,11 @@ export function ReportTable({
       <div className="bg-muted/30 border rounded-lg p-6 space-y-3">
         <h3 className="text-lg font-semibold mb-4 border-b pb-2">Ozet</h3>
         <div className="flex justify-between items-center py-2"><span className="font-medium">Toplam Gelir</span><span className="text-green-700 font-semibold">{formatCurrency(totalRevenue)}</span></div>
-        <div className="flex justify-between items-center py-2"><span className="font-medium">Toplam Gider</span><span className="text-red-700 font-semibold">{formatCurrency(totalExpense)}</span></div>
+        <div className="flex justify-between items-center py-2"><span className="font-medium">Toplam Gider</span><span className="text-destructive font-semibold">{formatCurrency(totalExpense)}</span></div>
         <div className="flex justify-between items-center py-2"><span className="font-medium">Vergi (KDV %20)</span><EditableCell value={taxAmount} originalValue={originalTaxAmount} onChange={onTaxEdit} /></div>
         <div className="flex justify-between items-center py-3 border-t-2 border-foreground mt-2">
           <span className="text-xl font-bold">Net Kar/Zarar</span>
-          <span className={`text-xl font-bold ${netProfit >= 0 ? 'text-green-700' : 'text-red-700'}`}>{formatCurrency(netProfit)}</span>
+          <span className={`text-xl font-bold ${netProfit >= 0 ? 'text-green-700' : 'text-destructive'}`}>{formatCurrency(netProfit)}</span>
         </div>
       </div>
     </div>

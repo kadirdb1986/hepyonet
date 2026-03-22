@@ -72,13 +72,13 @@ export function ComparisonReport() {
           <div className="bg-card border rounded-lg p-6">
             <h3 className="text-lg font-semibold mb-4">Gelir / Gider / Net Kar Karsilastirmasi</h3>
             <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={overviewChartData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="period" /><YAxis /><Tooltip formatter={(value) => formatCurrency(Number(value))} /><Legend /><Bar dataKey="Gelir" fill="#22c55e" /><Bar dataKey="Gider" fill="#ef4444" /><Bar dataKey="Vergi" fill="#f59e0b" /><Bar dataKey="Net Kar" fill="#3b82f6" /></BarChart>
+              <BarChart data={overviewChartData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="period" /><YAxis /><Tooltip formatter={(value) => formatCurrency(Number(value))} /><Legend /><Bar dataKey="Gelir" fill="var(--chart-2)" /><Bar dataKey="Gider" fill="var(--chart-1)" /><Bar dataKey="Vergi" fill="var(--chart-3)" /><Bar dataKey="Net Kar" fill="var(--chart-4)" /></BarChart>
             </ResponsiveContainer>
           </div>
           <div className="bg-card border rounded-lg p-6">
             <h3 className="text-lg font-semibold mb-4">Kar Marjı Trendi</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={marginChartData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="period" /><YAxis unit="%" /><Tooltip formatter={(value) => `${value}%`} /><Legend /><Line type="monotone" dataKey="Kar Marjı (%)" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 5 }} /></LineChart>
+              <LineChart data={marginChartData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="period" /><YAxis unit="%" /><Tooltip formatter={(value) => `${value}%`} /><Legend /><Line type="monotone" dataKey="Kar Marjı (%)" stroke="var(--chart-5)" strokeWidth={2} dot={{ r: 5 }} /></LineChart>
             </ResponsiveContainer>
           </div>
           <div className="bg-card border rounded-lg p-6">
@@ -91,9 +91,9 @@ export function ComparisonReport() {
                   {['SALARY', 'BILL', 'TAX', 'RENT', 'SUPPLIER', 'OTHER'].map((cat) => (
                     <TableRow key={cat}><TableCell className="sticky left-0 bg-background">{CATEGORY_LABELS[cat]}</TableCell>{reports.map((r) => { const catData = r.expensesByCategory.find((e) => e.category === cat); return (<TableCell key={r.period} className="text-right">{formatCurrency(catData?.amount || 0)}</TableCell>); })}</TableRow>
                   ))}
-                  <TableRow className="bg-red-50"><TableCell className="sticky left-0 bg-red-50 font-medium">Toplam Gider</TableCell>{reports.map((r) => (<TableCell key={r.period} className="text-right text-red-700 font-medium">{formatCurrency(r.totalExpense)}</TableCell>))}</TableRow>
+                  <TableRow className="bg-destructive/10"><TableCell className="sticky left-0 bg-destructive/10 font-medium">Toplam Gider</TableCell>{reports.map((r) => (<TableCell key={r.period} className="text-right text-destructive font-medium">{formatCurrency(r.totalExpense)}</TableCell>))}</TableRow>
                   <TableRow><TableCell className="sticky left-0 bg-background font-medium">Vergi</TableCell>{reports.map((r) => (<TableCell key={r.period} className="text-right">{formatCurrency(r.taxAmount)}</TableCell>))}</TableRow>
-                  <TableRow className="border-t-2 font-bold"><TableCell className="sticky left-0 bg-background font-bold text-lg">Net Kar/Zarar</TableCell>{reports.map((r) => (<TableCell key={r.period} className={`text-right text-lg font-bold ${r.netProfit >= 0 ? 'text-green-700' : 'text-red-700'}`}>{formatCurrency(r.netProfit)}</TableCell>))}</TableRow>
+                  <TableRow className="border-t-2 font-bold"><TableCell className="sticky left-0 bg-background font-bold text-lg">Net Kar/Zarar</TableCell>{reports.map((r) => (<TableCell key={r.period} className={`text-right text-lg font-bold ${r.netProfit >= 0 ? 'text-green-700' : 'text-destructive'}`}>{formatCurrency(r.netProfit)}</TableCell>))}</TableRow>
                   <TableRow><TableCell className="sticky left-0 bg-background font-medium">Kar Marjı</TableCell>{reports.map((r) => (<TableCell key={r.period} className="text-right font-medium">{formatMargin(r.totalRevenue, r.totalExpense, r.taxAmount)}</TableCell>))}</TableRow>
                 </TableBody>
               </Table>
