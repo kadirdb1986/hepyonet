@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { ColumnDef } from '@tanstack/react-table';
 import api from '@/lib/api';
 import { handleNumericInput, displayNumericValue, parseNumericValue } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -14,14 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,
@@ -30,6 +23,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table';
 import { toast } from 'sonner';
 import {
   ChevronRight,
@@ -40,6 +40,7 @@ import {
   Pencil,
   Trash2,
   PlusCircle,
+  MoreHorizontal,
 } from 'lucide-react';
 
 interface Ingredient {
@@ -190,14 +191,6 @@ export default function ProductsPage() {
   const menuProducts = filtered.filter((p) => p.isMenuItem);
   const intermediateProducts = filtered.filter((p) => !p.isMenuItem);
 
-  // Compute summary stats from unfiltered products
-  const allMenuProducts = products.filter((p) => p.isMenuItem);
-  const allIntermediateProducts = products.filter((p) => !p.isMenuItem);
-  const lowMarginCount = allMenuProducts.filter(
-    (p) => p.profitMargin != null && Number(p.price) > 0 && Number(p.profitMargin) < 30
-  ).length;
-  const activeSalesCount = allMenuProducts.filter((p) => Number(p.price) > 0).length;
-
   function handleDirectSaleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!selectedRawMaterialId) {
@@ -210,6 +203,160 @@ export default function ProductsPage() {
     }
     createDirectSaleMutation.mutate();
   }
+
+  const menuColumns: ColumnDef<Product>[] = [
+    {
+      accessorKey: 'name',
+      meta: { label: 'Ürün Adı' },
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Ürün Adı" />,
+      cell: ({ row }) => {
+        const product = row.original;
+        return (
+          <div className="flex items-center gap-3">
+            {product.image ? (
+              <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted shrink-0">
+                <img alt={product.name} className="w-full h-full object-cover" src={product.image} />
+              </div>
+            ) : (
+              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-primary font-extrabold text-sm shrink-0">
+                {getInitials(product.name)}
+              </div>
+            )}
+            <span className="font-semibold text-primary">{product.name}</span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'code',
+      meta: { label: 'Kod' },
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Kod" />,
+      cell: ({ row }) => (
+        <span className="font-mono text-border">{row.original.code || '-'}</span>
+      ),
+    },
+    {
+      id: 'category',
+      accessorFn: (row) => row.category?.name ?? '',
+      meta: { label: 'Kategori' },
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Kategori" />,
+      cell: ({ row }) =>
+        row.original.category?.name ? (
+          <Badge variant="secondary">{row.original.category.name}</Badge>
+        ) : (
+          '-'
+        ),
+    },
+    {
+      accessorKey: 'price',
+      meta: { label: 'Satış Fiyatı' },
+      header: ({ column }) => (
+        <div className="text-right">
+          <DataTableColumnHeader column={column} title="Satış Fiyatı" />
+        </div>
+      ),
+      cell: ({ row }) => {
+        const price = Number(row.original.price);
+        return (
+          <div className="text-right font-bold text-foreground">
+            {price > 0 ? `${formatCurrency(price)} TL` : <span className="text-muted-foreground">-</span>}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'calculatedCost',
+      meta: { label: 'Maliyet' },
+      header: ({ column }) => (
+        <div className="text-right">
+          <DataTableColumnHeader column={column} title="Maliyet" />
+        </div>
+      ),
+      cell: ({ row }) => {
+        const cost = row.original.calculatedCost;
+        return (
+          <div className="text-right text-muted-foreground">
+            {cost != null && Number(cost) > 0 ? `${formatCurrency(Number(cost))} TL` : '-'}
+          </div>
+        );
+      },
+    },
+    {
+      id: 'profitMargin',
+      accessorFn: (row) => {
+        const margin = row.profitMargin;
+        const price = Number(row.price);
+        return margin != null && price > 0 ? Number(margin) : null;
+      },
+      meta: { label: 'Kar Marjı' },
+      header: ({ column }) => (
+        <div className="text-right">
+          <DataTableColumnHeader column={column} title="Kar Marjı" />
+        </div>
+      ),
+      cell: ({ row }) => {
+        const margin = row.original.profitMargin;
+        const price = Number(row.original.price);
+        if (margin == null || price <= 0) {
+          return <div className="text-right">-</div>;
+        }
+        const m = Number(margin);
+        return (
+          <div className="text-right">
+            <Badge
+              variant="secondary"
+              className={`font-extrabold ${m >= 30 ? 'text-green-600' : 'text-yellow-600'}`}
+            >
+              %{formatPercent(m)}
+            </Badge>
+          </div>
+        );
+      },
+    },
+    {
+      id: 'type',
+      meta: { label: 'Tip' },
+      header: 'Tip',
+      cell: ({ row }) => {
+        const productType = getProductType(row.original);
+        return <Badge variant={productType.variant}>{productType.label}</Badge>;
+      },
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        const product = row.original;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <span className="sr-only">Menüyü aç</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => router.push(`/dashboard/products/${product.id}`)}>
+                <Pencil className="h-4 w-4 mr-2" />
+                Düzenle
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => {
+                  if (confirm('Bu ürünü silmek istediğinize emin misiniz?')) {
+                    deleteMutation.mutate(product.id);
+                  }
+                }}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Sil
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   if (isLoading) {
     return <div className="p-6 text-muted-foreground">Yükleniyor...</div>;
@@ -279,100 +426,13 @@ export default function ProductsPage() {
             </div>
             <Button variant="link" className="p-0 h-auto text-sm font-semibold">Tümünü Gör</Button>
           </div>
-          <div className="overflow-hidden bg-muted rounded-xl">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted text-muted-foreground text-[11px] font-bold uppercase tracking-widest hover:bg-muted">
-                  <TableHead className="px-6 py-4">Ürün Adı</TableHead>
-                  <TableHead className="px-4 py-4">Kod</TableHead>
-                  <TableHead className="px-4 py-4">Kategori</TableHead>
-                  <TableHead className="px-4 py-4 text-right">Satış Fiyatı</TableHead>
-                  <TableHead className="px-4 py-4 text-right">Maliyet</TableHead>
-                  <TableHead className="px-4 py-4 text-center">Kar Marjı</TableHead>
-                  <TableHead className="px-4 py-4">Tip</TableHead>
-                  <TableHead className="px-6 py-4 text-center">İşlemler</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="text-sm">
-                {menuProducts.map((product, idx) => {
-                  const productType = getProductType(product);
-                  const margin = product.profitMargin != null && Number(product.price) > 0 ? Number(product.profitMargin) : null;
-
-                  return (
-                    <TableRow key={product.id} className={`${idx % 2 === 0 ? 'bg-card' : 'bg-muted'} hover:bg-muted transition-colors group`}>
-                      <TableCell className="px-6 py-4 font-semibold text-primary">
-                        <div className="flex items-center gap-3">
-                          {product.image ? (
-                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted shrink-0">
-                              <img alt={product.name} className="w-full h-full object-cover" src={product.image} />
-                            </div>
-                          ) : (
-                            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-primary font-extrabold text-sm shrink-0">
-                              {getInitials(product.name)}
-                            </div>
-                          )}
-                          {product.name}
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-4 py-4 font-mono text-border">{product.code || '-'}</TableCell>
-                      <TableCell className="px-4 py-4">
-                        {product.category?.name ? (
-                          <Badge variant="secondary">{product.category.name}</Badge>
-                        ) : '-'}
-                      </TableCell>
-                      <TableCell className="px-4 py-4 text-right font-bold text-foreground">
-                        {Number(product.price) > 0
-                          ? `${formatCurrency(Number(product.price))} TL`
-                          : <span className="text-muted-foreground">-</span>}
-                      </TableCell>
-                      <TableCell className="px-4 py-4 text-right text-muted-foreground">
-                        {product.calculatedCost != null && Number(product.calculatedCost) > 0
-                          ? `${formatCurrency(Number(product.calculatedCost))} TL`
-                          : '-'}
-                      </TableCell>
-                      <TableCell className="px-4 py-4 text-center">
-                        {margin != null ? (
-                          <Badge variant="secondary" className="font-extrabold">
-                            %{formatPercent(margin)}
-                          </Badge>
-                        ) : '-'}
-                      </TableCell>
-                      <TableCell className="px-4 py-4">
-                        <Badge variant={productType.variant}>{productType.label}</Badge>
-                      </TableCell>
-                      <TableCell className="px-6 py-4 text-center">
-                        <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="hover:bg-primary/10 text-primary"
-                            onClick={() => router.push(`/dashboard/products/${product.id}`)}
-                          >
-                            <Pencil className="size-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="hover:bg-destructive/10 text-destructive"
-                            onClick={() => { if (confirm('Bu ürünü silmek istediğinize emin misiniz?')) deleteMutation.mutate(product.id); }}
-                          >
-                            <Trash2 className="size-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-                {menuProducts.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                      Henüz menü ürünü bulunamadı
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+          <DataTable
+            columns={menuColumns}
+            data={menuProducts}
+            showToolbar={false}
+            isLoading={isLoading}
+            emptyMessage="Henüz menü ürünü bulunamadı"
+          />
         </section>
 
         {/* Section: Ara Ürünler (Card Grid Layout) */}
