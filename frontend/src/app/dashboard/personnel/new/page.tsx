@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface PositionConfig {
   id: string;
@@ -162,21 +163,16 @@ export default function NewPersonnelPage() {
 
             <div className="space-y-2">
               <Label htmlFor="position">Pozisyon</Label>
-              <select
-                id="position"
-                value={form.positionId}
-                onChange={(e) =>
-                  setForm({ ...form, positionId: e.target.value })
-                }
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-              >
-                <option value="">Pozisyon Seçin</option>
-                {positions.map((pos) => (
-                  <option key={pos.id} value={pos.id}>
-                    {pos.name}
-                  </option>
-                ))}
-              </select>
+              <Select value={form.positionId || ""} onValueChange={(value) => setForm({ ...form, positionId: value })}>
+                <SelectTrigger id="position">
+                  <SelectValue placeholder="Pozisyon Seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  {positions.map((pos) => (
+                    <SelectItem key={pos.id} value={pos.id}>{pos.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
