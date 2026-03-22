@@ -3,19 +3,12 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { ColumnDef } from '@tanstack/react-table';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -23,8 +16,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Trash2 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table';
+import { Plus, Trash2, MoreHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 
 // ─── Types ───
@@ -34,6 +34,8 @@ interface Simulation {
   name: string;
   month: string;
   createdAt: string;
+  totalRevenue?: number;
+  netProfit?: number;
 }
 
 interface FixedExpense {
@@ -59,12 +61,6 @@ interface FixedRevenue {
 // ─── Helpers ───
 
 type TabType = 'simulations' | 'fixedExpenses' | 'fixedRevenues';
-
-function formatMonth(ym: string): string {
-  const [y, m] = ym.split('-');
-  const months = ['Oca', 'Sub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Agu', 'Eyl', 'Eki', 'Kas', 'Ara'];
-  return `${months[parseInt(m, 10) - 1]} ${y}`;
-}
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount);
@@ -271,6 +267,252 @@ export default function SimulationPage() {
     createRevMutation.mutate({ productId: revenueProductId, quantity });
   };
 
+  // ─── Column Definitions ───
+
+  const simulationColumns: ColumnDef<Simulation>[] = [
+    {
+      accessorKey: 'name',
+      meta: { label: 'Ad' },
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Ad" />,
+      cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
+    },
+    {
+      accessorKey: 'totalRevenue',
+      meta: { label: 'Ciro' },
+      header: ({ column }) => (
+        <div className="text-right">
+          <DataTableColumnHeader column={column} title="Ciro" />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-right">{formatCurrency(row.original.totalRevenue ?? 0)}</div>
+      ),
+    },
+    {
+      accessorKey: 'netProfit',
+      meta: { label: 'Net Kar' },
+      header: ({ column }) => (
+        <div className="text-right">
+          <DataTableColumnHeader column={column} title="Net Kar" />
+        </div>
+      ),
+      cell: ({ row }) => {
+        const netProfit = row.original.netProfit ?? 0;
+        return (
+          <div className={`text-right font-medium ${netProfit >= 0 ? 'text-green-600' : 'text-destructive'}`}>
+            {formatCurrency(netProfit)}
+          </div>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        const sim = row.original;
+        return (
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <span className="sr-only">Menüyü aç</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm(`"${sim.name}" simülasyonunu silmek istediğinize emin misiniz?`)) {
+                      deleteSimMutation.mutate(sim.id);
+                    }
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Sil
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    },
+  ];
+
+  const fixedExpenseColumns: ColumnDef<FixedExpense>[] = [
+    {
+      accessorKey: 'name',
+      meta: { label: 'Ad' },
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Ad" />,
+      cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
+    },
+    {
+      accessorKey: 'amount',
+      meta: { label: 'Tutar' },
+      header: ({ column }) => (
+        <div className="text-right">
+          <DataTableColumnHeader column={column} title="Tutar" />
+        </div>
+      ),
+      cell: ({ row }) => {
+        const exp = row.original;
+        if (editingExpenseId === exp.id) {
+          return (
+            <div className="flex items-center justify-end gap-2">
+              <Input
+                type="number"
+                step="0.01"
+                min="0.01"
+                value={editingExpenseAmount}
+                onChange={(e) => setEditingExpenseAmount(e.target.value)}
+                className="w-32 h-8 text-right"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSaveExpense(exp.id);
+                  }
+                  if (e.key === 'Escape') {
+                    setEditingExpenseId(null);
+                    setEditingExpenseAmount('');
+                  }
+                }}
+              />
+              <Button
+                size="sm"
+                className="h-8"
+                onClick={() => handleSaveExpense(exp.id)}
+                disabled={updateExpMutation.isPending}
+              >
+                Kaydet
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8"
+                onClick={() => {
+                  setEditingExpenseId(null);
+                  setEditingExpenseAmount('');
+                }}
+              >
+                İptal
+              </Button>
+            </div>
+          );
+        }
+        return (
+          <div className="text-right">
+            <span
+              className="cursor-pointer hover:underline"
+              onClick={() => {
+                setEditingExpenseId(exp.id);
+                setEditingExpenseName(exp.name);
+                setEditingExpenseAmount(String(exp.amount));
+              }}
+            >
+              {formatCurrency(exp.amount)}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        const exp = row.original;
+        return (
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <span className="sr-only">Menüyü aç</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => {
+                    if (confirm(`"${exp.name}" sabit giderini silmek istediğinize emin misiniz?`)) {
+                      deleteExpMutation.mutate(exp.id);
+                    }
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Sil
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    },
+  ];
+
+  const fixedRevenueColumns: ColumnDef<FixedRevenue>[] = [
+    {
+      accessorKey: 'productName',
+      meta: { label: 'Ürün' },
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Ürün" />,
+      cell: ({ row }) => (
+        <span className="font-medium">
+          {row.original.product?.name || row.original.productName}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'quantity',
+      meta: { label: 'Adet' },
+      header: ({ column }) => (
+        <div className="text-right">
+          <DataTableColumnHeader column={column} title="Adet" />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-right">{row.original.quantity}</div>
+      ),
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        const rev = row.original;
+        return (
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <span className="sr-only">Menüyü aç</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => {
+                    if (confirm('Bu sabit geliri silmek istediğinize emin misiniz?')) {
+                      deleteRevMutation.mutate(rev.id);
+                    }
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Sil
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -351,55 +593,15 @@ export default function SimulationPage() {
             <CardTitle className="text-base">Simülasyonlar</CardTitle>
           </CardHeader>
           <CardContent>
-            {simLoading ? (
-              <p className="text-muted-foreground text-center py-8">Yükleniyor...</p>
-            ) : simulations.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">
-                Henüz simülasyon oluşturulmamış
-              </p>
-            ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Ad</TableHead>
-                      <TableHead className="text-right">Ciro</TableHead>
-                      <TableHead className="text-right">Net Kar</TableHead>
-                      <TableHead className="text-right w-[80px]">İşlemler</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {simulations.map((sim: any) => (
-                      <TableRow
-                        key={sim.id}
-                        className="cursor-pointer"
-                        onClick={() => router.push(`/dashboard/simulation/${sim.id}`)}
-                      >
-                        <TableCell className="font-medium">{sim.name}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(sim.totalRevenue ?? 0)}</TableCell>
-                        <TableCell className={`text-right font-medium ${(sim.netProfit ?? 0) >= 0 ? 'text-green-600' : 'text-destructive'}`}>
-                          {formatCurrency(sim.netProfit ?? 0)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (confirm(`"${sim.name}" simülasyonunu silmek istediğinize emin misiniz?`)) {
-                                deleteSimMutation.mutate(sim.id);
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+            <DataTable
+              columns={simulationColumns}
+              data={simulations}
+              isLoading={simLoading}
+              showPagination={false}
+              showToolbar={false}
+              emptyMessage="Henüz simülasyon oluşturulmamış"
+              onRowClick={(sim) => router.push(`/dashboard/simulation/${sim.id}`)}
+            />
           </CardContent>
         </Card>
       )}
@@ -441,99 +643,14 @@ export default function SimulationPage() {
               </Button>
             </form>
 
-            {expLoading ? (
-              <p className="text-muted-foreground text-center py-8">Yükleniyor...</p>
-            ) : fixedExpenses.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">
-                Henüz sabit gider eklenmemiş
-              </p>
-            ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Ad</TableHead>
-                      <TableHead className="text-right">Tutar</TableHead>
-                      <TableHead className="text-right w-[80px]">İşlemler</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {fixedExpenses.map((exp) => (
-                      <TableRow key={exp.id}>
-                        <TableCell className="font-medium">{exp.name}</TableCell>
-                        <TableCell className="text-right">
-                          {editingExpenseId === exp.id ? (
-                            <div className="flex items-center justify-end gap-2">
-                              <Input
-                                type="number"
-                                step="0.01"
-                                min="0.01"
-                                value={editingExpenseAmount}
-                                onChange={(e) => setEditingExpenseAmount(e.target.value)}
-                                className="w-32 h-8 text-right"
-                                autoFocus
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    handleSaveExpense(exp.id);
-                                  }
-                                  if (e.key === 'Escape') {
-                                    setEditingExpenseId(null);
-                                    setEditingExpenseAmount('');
-                                  }
-                                }}
-                              />
-                              <Button
-                                size="sm"
-                                className="h-8"
-                                onClick={() => handleSaveExpense(exp.id)}
-                                disabled={updateExpMutation.isPending}
-                              >
-                                Kaydet
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-8"
-                                onClick={() => {
-                                  setEditingExpenseId(null);
-                                  setEditingExpenseAmount('');
-                                }}
-                              >
-                                İptal
-                              </Button>
-                            </div>
-                          ) : (
-                            <span
-                              className="cursor-pointer hover:underline"
-                              onClick={() => {
-                                setEditingExpenseId(exp.id);
-                                setEditingExpenseAmount(String(exp.amount));
-                              }}
-                            >
-                              {formatCurrency(exp.amount)}
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              if (confirm(`"${exp.name}" sabit giderini silmek istediğinize emin misiniz?`)) {
-                                deleteExpMutation.mutate(exp.id);
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+            <DataTable
+              columns={fixedExpenseColumns}
+              data={fixedExpenses}
+              isLoading={expLoading}
+              showPagination={false}
+              showToolbar={false}
+              emptyMessage="Henüz sabit gider eklenmemiş"
+            />
           </CardContent>
         </Card>
       )}
@@ -551,7 +668,7 @@ export default function SimulationPage() {
             <form onSubmit={handleAddRevenue} className="flex items-end gap-2">
               <div className="flex-1 space-y-1">
                 <Label htmlFor="rev-product">Ürün</Label>
-                <Select value={revenueProductId || ""} onValueChange={setRevenueProductId}>
+                <Select value={revenueProductId || ''} onValueChange={setRevenueProductId}>
                   <SelectTrigger id="rev-product">
                     <SelectValue placeholder="Ürün seçin..." />
                   </SelectTrigger>
@@ -578,48 +695,14 @@ export default function SimulationPage() {
               </Button>
             </form>
 
-            {revLoading ? (
-              <p className="text-muted-foreground text-center py-8">Yükleniyor...</p>
-            ) : fixedRevenues.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">
-                Henüz sabit gelir eklenmemiş
-              </p>
-            ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Ürün</TableHead>
-                      <TableHead className="text-right">Adet</TableHead>
-                      <TableHead className="text-right w-[80px]">İşlemler</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {fixedRevenues.map((rev) => (
-                      <TableRow key={rev.id}>
-                        <TableCell className="font-medium">
-                          {rev.product?.name || rev.productName}
-                        </TableCell>
-                        <TableCell className="text-right">{rev.quantity}</TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              if (confirm('Bu sabit geliri silmek istediğinize emin misiniz?')) {
-                                deleteRevMutation.mutate(rev.id);
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+            <DataTable
+              columns={fixedRevenueColumns}
+              data={fixedRevenues}
+              isLoading={revLoading}
+              showPagination={false}
+              showToolbar={false}
+              emptyMessage="Henüz sabit gelir eklenmemiş"
+            />
           </CardContent>
         </Card>
       )}
