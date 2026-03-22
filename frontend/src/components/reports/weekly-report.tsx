@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, FileText, FileDown } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 function getCurrentWeek(): string {
   const now = new Date();
@@ -89,9 +90,15 @@ export function WeeklyReport() {
           <div className="flex flex-wrap items-center gap-4 pt-4 border-t">
             <div className="space-y-2">
               <Label>Cikti Formati</Label>
-              <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={format} onChange={(e) => setFormat(e.target.value as 'pdf' | 'html')}>
-                <option value="pdf">PDF</option><option value="html">HTML</option>
-              </select>
+              <Select value={format} onValueChange={(value) => setFormat(value as 'pdf' | 'html')}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf">PDF</SelectItem>
+                  <SelectItem value="html">HTML</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <Button onClick={handleGenerate} disabled={generateReport.isPending} className="mt-auto" size="lg">
               {generateReport.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : format === 'pdf' ? <FileDown className="h-4 w-4 mr-2" /> : <FileText className="h-4 w-4 mr-2" />}

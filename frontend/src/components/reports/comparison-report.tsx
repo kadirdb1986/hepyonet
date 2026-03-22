@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Loader2, Plus, X } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -46,9 +47,15 @@ export function ComparisonReport() {
         <div className="flex items-center gap-4">
           <div className="space-y-2">
             <Label>Karsilastirma Turu</Label>
-            <select className="flex h-9 w-40 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={type} onChange={(e) => setType(e.target.value as 'monthly' | 'weekly')}>
-              <option value="monthly">Aylık</option><option value="weekly">Haftalık</option>
-            </select>
+            <Select value={type} onValueChange={(value) => setType(value as 'monthly' | 'weekly')}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="monthly">Aylık</SelectItem>
+                <SelectItem value="weekly">Haftalık</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <div className="space-y-2">
