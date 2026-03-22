@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { MoreHorizontal } from 'lucide-react';
+import { ColumnDef } from '@tanstack/react-table';
+import api from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import api from '@/lib/api';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table';
 
 interface Restaurant {
   id: string;
@@ -48,11 +49,109 @@ export default function AdminRestaurantsPage() {
     loadRestaurants();
   };
 
+  const columns: ColumnDef<Restaurant>[] = [
+    {
+      accessorKey: 'name',
+      meta: { label: 'Restoran' },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Restoran" />
+      ),
+      cell: ({ row }) => (
+        <span className="font-medium text-foreground">
+          {row.original.name}
+        </span>
+      ),
+    },
+    {
+      id: 'manager',
+      meta: { label: 'Yönetici' },
+      header: 'Yönetici',
+      cell: ({ row }) => {
+        const user = row.original.members[0]?.user;
+        if (!user) return <span className="text-muted-foreground">—</span>;
+        return (
+          <span className="text-muted-foreground">
+            {user.name} ({user.email})
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: 'status',
+      meta: { label: 'Durum' },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Durum" />
+      ),
+      cell: ({ row }) => {
+        const s = row.original.status;
+        return (
+          <Badge variant={statusMap[s].variant}>
+            {statusMap[s].label}
+          </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: 'createdAt',
+      meta: { label: 'Kayıt Tarihi' },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Kayıt Tarihi" />
+      ),
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {new Date(row.original.createdAt).toLocaleDateString('tr-TR')}
+        </span>
+      ),
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        const r = row.original;
+        if (r.status !== 'PENDING') return null;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className="sr-only">Menüyü aç</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleStatusChange(r.id, 'APPROVED');
+                }}
+              >
+                Onayla
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleStatusChange(r.id, 'REJECTED');
+                }}
+              >
+                Reddet
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
+
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Restoranlar</h1>
       <div className="flex gap-2 mb-4">
-        {['', 'PENDING', 'APPROVED', 'REJECTED'].map((s) => (
+        {(['', 'PENDING', 'APPROVED', 'REJECTED'] as const).map((s) => (
           <Button
             key={s}
             variant={filter === s ? 'default' : 'outline'}
@@ -60,53 +159,17 @@ export default function AdminRestaurantsPage() {
             onClick={() => setFilter(s)}
             className={filter !== s ? 'border text-muted-foreground' : ''}
           >
-            {s === '' ? 'Tümü' : statusMap[s as keyof typeof statusMap].label}
+            {s === '' ? 'Tümü' : statusMap[s].label}
           </Button>
         ))}
       </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow className="border">
-              <TableHead className="text-muted-foreground">Restoran</TableHead>
-              <TableHead className="text-muted-foreground">Yönetici</TableHead>
-              <TableHead className="text-muted-foreground">Durum</TableHead>
-              <TableHead className="text-muted-foreground">Kayıt Tarihi</TableHead>
-              <TableHead className="text-muted-foreground">İşlemler</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {restaurants.map((r) => (
-              <TableRow key={r.id} className="border">
-                <TableCell className="text-foreground font-medium cursor-pointer hover:underline" onClick={() => router.push(`/admin/restaurants/${r.id}`)}>{r.name}</TableCell>
-                <TableCell className="text-muted-foreground">
-                  {r.members[0]?.user?.name} ({r.members[0]?.user?.email})
-                </TableCell>
-                <TableCell>
-                  <Badge variant={statusMap[r.status].variant}>
-                    {statusMap[r.status].label}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {new Date(r.createdAt).toLocaleDateString('tr-TR')}
-                </TableCell>
-                <TableCell>
-                  {r.status === 'PENDING' && (
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={() => handleStatusChange(r.id, 'APPROVED')}>
-                        Onayla
-                      </Button>
-                      <Button size="sm" variant="destructive" onClick={() => handleStatusChange(r.id, 'REJECTED')}>
-                        Reddet
-                      </Button>
-                    </div>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTable
+        columns={columns}
+        data={restaurants}
+        showToolbar={false}
+        onRowClick={(row) => router.push(`/admin/restaurants/${row.id}`)}
+        emptyMessage="Restoran bulunamadı."
+      />
     </div>
   );
 }
