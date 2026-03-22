@@ -24,6 +24,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Pencil, Plus, Trash2, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { handleNumericInput, displayNumericValue, parseNumericValue } from '@/lib/utils';
@@ -332,16 +334,20 @@ export default function ProductDetailPage() {
                 </div>
                 <div>
                   <Label>Kategori</Label>
-                  <select
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    value={form.categoryId}
-                    onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+                  <Select
+                    value={form.categoryId || "none"}
+                    onValueChange={(value) => setForm({ ...form, categoryId: value === "none" ? "" : value })}
                   >
-                    <option value="">Kategorisiz</option>
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Kategorisiz" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Kategorisiz</SelectItem>
+                      {categories.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div>
@@ -360,11 +366,9 @@ export default function ProductDetailPage() {
               </div>
               <div>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={form.isMenuItem}
-                    onChange={(e) => setForm({ ...form, isMenuItem: e.target.checked })}
-                    className="rounded border-input"
+                    onCheckedChange={(checked) => setForm({ ...form, isMenuItem: checked === true })}
                   />
                   <span className="text-sm">Menüde Göster</span>
                 </label>
@@ -594,55 +598,60 @@ export default function ProductDetailPage() {
           <form onSubmit={handleAddIngredient} className="space-y-4">
             <div>
               <Label>İçerik Tipi</Label>
-              <select
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                value={ingredientType}
-                onChange={(e) => setIngredientType(e.target.value as 'raw' | 'sub')}
-              >
-                <option value="raw">Stok Kalemi</option>
-                <option value="sub">Alt Ürün</option>
-              </select>
+              <Select value={ingredientType} onValueChange={(value) => setIngredientType(value as 'raw' | 'sub')}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="raw">Stok Kalemi</SelectItem>
+                  <SelectItem value="sub">Alt Ürün</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {ingredientType === 'raw' ? (
               <div>
                 <Label>Stok Kalemi Seç</Label>
-                <select
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  value={ingredientForm.rawMaterialId}
-                  onChange={(e) => {
-                    const rmId = e.target.value;
+                <Select
+                  value={ingredientForm.rawMaterialId || ""}
+                  onValueChange={(value) => {
+                    const rmId = value;
                     const rm = rawMaterials.find((m) => m.id === rmId);
                     const compatible = rm ? (COMPATIBLE_UNITS[rm.unit.toUpperCase()] || [rm.unit]) : UNITS as unknown as string[];
                     const newUnit = rm && !compatible.includes(ingredientForm.unit) ? compatible[0] : ingredientForm.unit;
                     setIngredientForm({ ...ingredientForm, rawMaterialId: rmId, unit: newUnit });
                   }}
-                  required
                 >
-                  <option value="">Stok kalemi seçin...</option>
-                  {rawMaterials.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name} ({UNIT_LABELS[m.unit] || m.unit}) - {formatCurrency(Number(m.lastPurchasePrice))} TL/{m.unit}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Stok kalemi seçin..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {rawMaterials.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.name} ({UNIT_LABELS[m.unit] || m.unit}) - {formatCurrency(Number(m.lastPurchasePrice))} TL/{m.unit}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             ) : (
               <div>
                 <Label>Alt Ürün Seç</Label>
-                <select
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  value={ingredientForm.subProductId}
-                  onChange={(e) => setIngredientForm({ ...ingredientForm, subProductId: e.target.value })}
-                  required
+                <Select
+                  value={ingredientForm.subProductId || ""}
+                  onValueChange={(value) => setIngredientForm({ ...ingredientForm, subProductId: value })}
                 >
-                  <option value="">Ürün seçin...</option>
-                  {otherProducts.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} {p.calculatedCost != null ? `- ${formatCurrency(Number(p.calculatedCost))} TL` : ''}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Ürün seçin..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {otherProducts.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name} {p.calculatedCost != null ? `- ${formatCurrency(Number(p.calculatedCost))} TL` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
 
@@ -660,24 +669,28 @@ export default function ProductDetailPage() {
               </div>
               <div>
                 <Label>Birim</Label>
-                <select
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                <Select
                   value={ingredientForm.unit}
-                  onChange={(e) => setIngredientForm({ ...ingredientForm, unit: e.target.value })}
+                  onValueChange={(value) => setIngredientForm({ ...ingredientForm, unit: value })}
                 >
-                  {(() => {
-                    if (ingredientType === 'raw' && ingredientForm.rawMaterialId) {
-                      const rm = rawMaterials.find((m) => m.id === ingredientForm.rawMaterialId);
-                      const compatible = rm ? (COMPATIBLE_UNITS[rm.unit.toUpperCase()] || [rm.unit]) : (UNITS as unknown as string[]);
-                      return compatible.map((u) => (
-                        <option key={u} value={u}>{UNIT_LABELS[u] || u}</option>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(() => {
+                      if (ingredientType === 'raw' && ingredientForm.rawMaterialId) {
+                        const rm = rawMaterials.find((m) => m.id === ingredientForm.rawMaterialId);
+                        const compatible = rm ? (COMPATIBLE_UNITS[rm.unit.toUpperCase()] || [rm.unit]) : (UNITS as unknown as string[]);
+                        return compatible.map((u) => (
+                          <SelectItem key={u} value={u}>{UNIT_LABELS[u] || u}</SelectItem>
+                        ));
+                      }
+                      return UNITS.map((u) => (
+                        <SelectItem key={u} value={u}>{UNIT_LABELS[u]}</SelectItem>
                       ));
-                    }
-                    return UNITS.map((u) => (
-                      <option key={u} value={u}>{UNIT_LABELS[u]}</option>
-                    ));
-                  })()}
-                </select>
+                    })()}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
