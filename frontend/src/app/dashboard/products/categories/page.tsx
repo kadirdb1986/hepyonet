@@ -3,27 +3,27 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { ColumnDef } from '@tanstack/react-table';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ArrowLeft, ArrowUp, ArrowDown, Plus, Pencil, Trash2, Save } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ArrowLeft, ArrowUp, ArrowDown, Plus, MoreHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
+import { DataTable } from '@/components/ui/data-table';
 
 interface Category {
   id: string;
@@ -137,9 +137,94 @@ export default function CategoriesPage() {
     }
   }
 
-  if (isLoading) {
-    return <div className="p-6 text-muted-foreground">Yükleniyor...</div>;
-  }
+  const columns: ColumnDef<Category>[] = [
+    {
+      accessorKey: 'displayOrder',
+      header: 'Sıra',
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">{row.index + 1}</span>
+      ),
+    },
+    {
+      accessorKey: 'name',
+      header: 'Kategori Adı',
+      cell: ({ row }) => (
+        <span className="font-medium">{row.original.name}</span>
+      ),
+    },
+    {
+      id: 'productCount',
+      header: () => <div className="text-center">Ürün Sayısı</div>,
+      cell: ({ row }) => (
+        <div className="text-center">{row.original._count.products}</div>
+      ),
+    },
+    {
+      id: 'reorder',
+      header: () => <div className="text-center">Sırala</div>,
+      cell: ({ row }) => {
+        const index = row.index;
+        return (
+          <div className="flex items-center justify-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => moveCategory(index, 'up')}
+              disabled={index === 0 || reorderMutation.isPending}
+            >
+              <ArrowUp className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => moveCategory(index, 'down')}
+              disabled={index === categories.length - 1 || reorderMutation.isPending}
+            >
+              <ArrowDown className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        const cat = row.original;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <span className="sr-only">Menüyü aç</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => openEdit(cat)}>
+                Düzenle
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => {
+                  if (
+                    confirm(
+                      `"${cat.name}" kategorisini silmek istediğinize emin misiniz? Ürünlerin kategorisi boş kalacaktır.`
+                    )
+                  ) {
+                    deleteMutation.mutate(cat.id);
+                  }
+                }}
+              >
+                Sil
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   return (
     <div className="p-6 space-y-6">
@@ -160,73 +245,14 @@ export default function CategoriesPage() {
           <CardTitle>Kategori Listesi ({categories.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[80px]">Sıra</TableHead>
-                <TableHead>Kategori Adı</TableHead>
-                <TableHead className="text-center">Ürün Sayısı</TableHead>
-                <TableHead className="text-center w-[100px]">Sırala</TableHead>
-                <TableHead className="text-right">İşlemler</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {categories.map((cat, index) => (
-                <TableRow key={cat.id}>
-                  <TableCell className="text-muted-foreground">{index + 1}</TableCell>
-                  <TableCell className="font-medium">{cat.name}</TableCell>
-                  <TableCell className="text-center">{cat._count.products}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => moveCategory(index, 'up')}
-                        disabled={index === 0 || reorderMutation.isPending}
-                      >
-                        <ArrowUp className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => moveCategory(index, 'down')}
-                        disabled={index === categories.length - 1 || reorderMutation.isPending}
-                      >
-                        <ArrowDown className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openEdit(cat)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          if (confirm(`"${cat.name}" kategorisini silmek istediğinize emin misiniz? Ürünlerin kategorisi boş kalacaktır.`)) {
-                            deleteMutation.mutate(cat.id);
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {categories.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                    Henüz kategori eklenmemiş
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={categories}
+            isLoading={isLoading}
+            showPagination={false}
+            showToolbar={false}
+            emptyMessage="Henüz kategori eklenmemiş"
+          />
         </CardContent>
       </Card>
 
