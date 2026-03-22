@@ -292,7 +292,7 @@ export default function ProductsPage() {
                   const margin = product.profitMargin != null && Number(product.price) > 0 ? Number(product.profitMargin) : null;
 
                   return (
-                    <TableRow key={product.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-muted'} hover:bg-slate-50 transition-colors group`}>
+                    <TableRow key={product.id} className={`${idx % 2 === 0 ? 'bg-card' : 'bg-muted'} hover:bg-muted transition-colors group`}>
                       <TableCell className="px-6 py-4 font-semibold text-primary">
                         <div className="flex items-center gap-3">
                           {product.image ? (
@@ -386,7 +386,7 @@ export default function ProductsPage() {
               return (
                 <div
                   key={product.id}
-                  className="bg-white p-5 rounded-xl shadow-xs hover:shadow-md transition-shadow flex items-center justify-between group border-l-4 border-transparent hover:border-primary cursor-pointer"
+                  className="bg-card p-5 rounded-xl shadow-xs hover:shadow-md transition-shadow flex items-center justify-between group border-l-4 border-transparent hover:border-primary cursor-pointer"
                   onClick={() => router.push(`/dashboard/products/${product.id}`)}
                 >
                   <div className="flex items-center gap-4">

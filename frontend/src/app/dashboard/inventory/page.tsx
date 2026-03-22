@@ -546,7 +546,7 @@ export default function InventoryPage() {
         {/* Critical Alert Card */}
         {lowStockMaterials.length > 0 && (
           <div className={`col-span-12 ${totalStockValue > 0 ? 'lg:col-span-8' : ''} bg-destructive/10 p-1 rounded-3xl border border-destructive/10 overflow-hidden`}>
-            <div className="bg-white/60 backdrop-blur-sm p-6 rounded-[22px] flex items-center justify-between h-full">
+            <div className="bg-card/60 backdrop-blur-sm p-6 rounded-[22px] flex items-center justify-between h-full">
               <div className="flex items-center gap-6">
                 <div className="w-16 h-16 bg-destructive/10 text-destructive rounded-2xl flex items-center justify-center shrink-0">
                   <AlertTriangle className="size-9" />
@@ -565,7 +565,7 @@ export default function InventoryPage() {
 
       {/* Filters & Main Data Table Section */}
       <div className="bg-muted rounded-[32px] p-2">
-        <div className="bg-white rounded-[28px] shadow-xs p-6 md:p-8">
+        <div className="bg-card rounded-[28px] shadow-xs p-6 md:p-8">
           {/* Filter Chips & Actions */}
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
             <div className="flex gap-2 flex-wrap">
@@ -616,7 +616,7 @@ export default function InventoryPage() {
                   <SlidersHorizontal className="size-5" />
                 </button>
                 {columnMenuOpen && (
-                  <div className="absolute right-0 top-full mt-1 z-50 w-52 rounded-xl border bg-white p-1 shadow-lg">
+                  <div className="absolute right-0 top-full mt-1 z-50 w-52 rounded-xl border bg-card p-1 shadow-lg">
                     <p className="px-3 py-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">Görünür Sütunlar</p>
                     <div className="h-px bg-border/30 my-1" />
                     {TOGGLEABLE_COLUMNS.map((col) => (

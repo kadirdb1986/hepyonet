@@ -201,17 +201,17 @@ export default function DashboardPage() {
 
         {/* Brüt Kar */}
         <Card className="bg-primary flex flex-col justify-between text-primary-foreground relative overflow-hidden group shadow-xl">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary-foreground/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
           <CardContent className="p-6 flex flex-col justify-between h-full">
             <div className="flex justify-between items-start mb-4 relative z-10">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-primary-foreground">
+              <div className="w-12 h-12 bg-primary-foreground/20 rounded-xl flex items-center justify-center text-primary-foreground">
                 <Wallet className="size-5" />
               </div>
               {!loading && data?.profitChangePercent != null && (
                 <Badge
                   className={
                     data.profitChangePercent >= 0
-                      ? 'text-primary-foreground bg-white/20'
+                      ? 'text-primary-foreground bg-primary-foreground/20'
                       : 'text-destructive-foreground bg-destructive/30'
                   }
                 >

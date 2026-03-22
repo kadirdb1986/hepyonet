@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground">
-      <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+      <header className="bg-background/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
         <nav className="flex items-center gap-3 px-6 py-4 max-w-4xl mx-auto">
           <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white">
             <UtensilsCrossed className="size-6" />

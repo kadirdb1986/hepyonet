@@ -56,7 +56,7 @@ export function Header({ onMenuToggle, onDesktopMenuToggle, desktopSidebarOpen }
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
           <input
-            className="pl-10 pr-4 py-2 bg-white/40 backdrop-blur-sm border border-border/30 rounded-full w-64 focus:ring-2 focus:ring-primary/20 text-sm outline-none placeholder:text-muted-foreground"
+            className="pl-10 pr-4 py-2 bg-background/40 backdrop-blur-sm border border-border/30 rounded-full w-64 focus:ring-2 focus:ring-primary/20 text-sm outline-none placeholder:text-muted-foreground"
             placeholder="Ara..."
             type="text"
           />

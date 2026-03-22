@@ -113,7 +113,7 @@ export default function QRMenuPage() {
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-6">
             {qrDataUrl ? (
-              <div className="bg-white p-4 rounded-xl border shadow-sm">
+              <div className="bg-card p-4 rounded-xl border shadow-sm">
                 <img src={qrDataUrl} alt="QR Menu Code" className="w-64 h-64" />
               </div>
             ) : (

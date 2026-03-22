@@ -97,7 +97,7 @@ export function PublicMenuClient({ data }: { data: PublicMenuData }) {
   return (
     <div className="min-h-screen bg-background font-body text-foreground">
       {/* Header */}
-      <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm">
+      <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md shadow-sm">
         <nav className="flex justify-between items-center px-6 py-4 w-full max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
             {restaurant.logo ? (
@@ -122,7 +122,7 @@ export function PublicMenuClient({ data }: { data: PublicMenuData }) {
         {/* Category Navigation */}
         {categories.length > 0 && (
           <div
-            className="sticky top-[72px] z-40 -mx-4 px-4 py-4 mb-8 backdrop-blur-[12px] bg-white/85 shadow-sm overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none]"
+            className="sticky top-[72px] z-40 -mx-4 px-4 py-4 mb-8 backdrop-blur-[12px] bg-background/85 shadow-sm overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none]"
             ref={navRef}
           >
             <div className="flex gap-4 min-w-max">
@@ -168,7 +168,7 @@ export function PublicMenuClient({ data }: { data: PublicMenuData }) {
                   {category.items.map((product) => (
                     <div
                       key={product.id}
-                      className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col group"
+                      className="bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col group"
                     >
                       {/* Image */}
                       {product.image && (
