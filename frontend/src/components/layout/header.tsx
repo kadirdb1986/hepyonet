@@ -7,6 +7,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { LogOut, ChevronDown, Menu, Search, Bell } from 'lucide-react';
 
 const ROLE_LABELS: Record<string, string> = {
@@ -34,29 +36,33 @@ export function Header({ onMenuToggle, onDesktopMenuToggle, desktopSidebarOpen }
       <div className="flex items-center gap-4">
         {/* Mobile hamburger */}
         {onMenuToggle && (
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onMenuToggle}
-            className="p-2 -ml-2 rounded-md hover:bg-muted md:hidden"
+            className="-ml-2 md:hidden"
           >
-            <Menu className="size-5 text-muted-foreground" />
-          </button>
+            <Menu className="size-5" />
+          </Button>
         )}
 
         {/* Desktop hamburger - shown when sidebar is closed */}
         {onDesktopMenuToggle && !desktopSidebarOpen && (
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onDesktopMenuToggle}
-            className="p-2 -ml-2 rounded-md hover:bg-muted hidden md:flex"
+            className="-ml-2 hidden md:flex"
           >
-            <Menu className="size-5 text-muted-foreground" />
-          </button>
+            <Menu className="size-5" />
+          </Button>
         )}
 
         {/* Search input */}
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
-          <input
-            className="pl-10 pr-4 py-2 bg-background/40 backdrop-blur-sm border border-border/30 rounded-full w-64 focus:ring-2 focus:ring-primary/20 text-sm outline-none placeholder:text-muted-foreground"
+          <Input
+            className="pl-10 pr-4 py-2 bg-background/40 backdrop-blur-sm border-border/30 rounded-full w-64"
             placeholder="Ara..."
             type="text"
           />
@@ -93,9 +99,9 @@ export function Header({ onMenuToggle, onDesktopMenuToggle, desktopSidebarOpen }
 
       <div className="flex items-center gap-4">
         {/* Notification bell */}
-        <button className="p-2 rounded-full hover:bg-muted relative">
-          <Bell className="size-5 text-muted-foreground" />
-        </button>
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <Bell className="size-5" />
+        </Button>
 
         {/* Separator */}
         <div className="h-8 w-[1px] bg-border/30" />

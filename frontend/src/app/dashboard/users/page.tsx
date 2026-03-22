@@ -6,6 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Table,
   TableBody,
   TableCell,
@@ -185,15 +192,19 @@ export default function UsersPage() {
                         {ROLE_LABELS[m.role]}
                       </Badge>
                     ) : (
-                      <select
-                        className="flex h-8 rounded-md border border-input bg-transparent px-2 py-1 text-sm"
+                      <Select
                         value={m.role}
-                        onChange={(e) => handleRoleChange(m.userId, e.target.value)}
+                        onValueChange={(value) => handleRoleChange(m.userId, value)}
                       >
-                        {ROLES.map((r) => (
-                          <option key={r} value={r}>{ROLE_LABELS[r]}</option>
-                        ))}
-                      </select>
+                        <SelectTrigger className="h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ROLES.map((r) => (
+                            <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     )}
                   </TableCell>
                   <TableCell>
@@ -253,15 +264,19 @@ export default function UsersPage() {
             </div>
             <div className="space-y-2">
               <Label>Rol</Label>
-              <select
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+              <Select
                 value={newRole}
-                onChange={(e) => setNewRole(e.target.value)}
+                onValueChange={(value) => setNewRole(value)}
               >
-                {ROLES.map((r) => (
-                  <option key={r} value={r}>{ROLE_LABELS[r]}</option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLES.map((r) => (
+                    <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>İptal</Button>

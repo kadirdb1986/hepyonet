@@ -10,6 +10,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -111,12 +119,12 @@ function SupplierPopover({ supplier }: { supplier: Supplier }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="text-sm font-medium underline decoration-dotted underline-offset-2 cursor-pointer hover:text-primary"
+        <Button
+          variant="link"
+          className="text-sm font-medium underline decoration-dotted underline-offset-2 cursor-pointer hover:text-primary p-0 h-auto"
         >
           {supplier.name}
-        </button>
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64 p-3">
         <p className="font-semibold text-sm">{supplier.name}</p>
@@ -404,27 +412,28 @@ export default function InventoryPage() {
           <h1 className="text-4xl font-extrabold tracking-tight text-primary font-headline">{t('title')}</h1>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Link href="/dashboard/inventory/suppliers">
-            <button className="flex items-center gap-2 px-5 py-3 rounded-xl bg-secondary text-muted-foreground font-semibold text-sm hover:brightness-95 transition-all active:scale-95">
+          <Button variant="secondary" className="rounded-xl px-5 py-3 h-auto" asChild>
+            <Link href="/dashboard/inventory/suppliers">
               <Truck className="size-5" />
               Tedarikçiler
-            </button>
-          </Link>
-          <button
-            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-secondary text-muted-foreground font-semibold text-sm hover:brightness-95 transition-all active:scale-95"
+            </Link>
+          </Button>
+          <Button
+            variant="secondary"
+            className="rounded-xl px-5 py-3 h-auto"
             onClick={() => setTypeDialogOpen(true)}
           >
             <Tag className="size-5" />
             Stok Tipleri
-          </button>
+          </Button>
           <Dialog open={dialogOpen} onOpenChange={(open) => setDialogOpen(open)}>
-            <button
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br from-primary to-primary/80 text-white font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all active:scale-95"
+            <Button
+              className="rounded-xl px-6 py-3 h-auto bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95"
               onClick={openCreate}
             >
               <Plus className="size-5" />
               {t('addMaterial')}
-            </button>
+            </Button>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
@@ -442,43 +451,54 @@ export default function InventoryPage() {
                 </div>
                 <div>
                   <Label>Stok Tipi</Label>
-                  <select
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    value={form.type}
-                    onChange={(e) => setForm({ ...form, type: e.target.value })}
+                  <Select
+                    value={form.type || undefined}
+                    onValueChange={(value) => setForm({ ...form, type: value })}
                   >
-                    {materialTypes.length === 0 && <option value="">Tip tanımlanmamış</option>}
-                    {materialTypes.map((mt) => (
-                      <option key={mt.id} value={mt.name}>{mt.name}</option>
-                    ))}
-                  </select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={materialTypes.length === 0 ? 'Tip tanımlanmamış' : 'Stok tipi seçin'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {materialTypes.map((mt) => (
+                        <SelectItem key={mt.id} value={mt.name}>{mt.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label>{t('unit')}</Label>
-                  <select
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  <Select
                     value={form.unit}
-                    onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                    onValueChange={(value) => setForm({ ...form, unit: value })}
                   >
-                    {UNITS.map((u) => (
-                      <option key={u} value={u}>
-                        {t(`units.${u}`)}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {UNITS.map((u) => (
+                        <SelectItem key={u} value={u}>
+                          {t(`units.${u}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label>Tedarikçi</Label>
-                  <select
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    value={form.supplierId}
-                    onChange={(e) => setForm({ ...form, supplierId: e.target.value })}
+                  <Select
+                    value={form.supplierId || 'none'}
+                    onValueChange={(value) => setForm({ ...form, supplierId: value === 'none' ? '' : value })}
                   >
-                    <option value="">Tedarikçi seçilmedi</option>
-                    {suppliers.map((s) => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Tedarikçi seçilmedi" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Tedarikçi seçilmedi</SelectItem>
+                      {suppliers.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -570,51 +590,52 @@ export default function InventoryPage() {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
             <div className="flex gap-2 flex-wrap">
               {[{ key: 'ALL', label: 'Tümü' }, ...materialTypes.map((mt) => ({ key: mt.name, label: mt.name }))].map((tab) => (
-                <button
+                <Button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`px-5 py-2 rounded-full text-xs font-bold transition-colors ${
-                    activeTab === tab.key
-                      ? 'bg-primary text-white shadow-xs'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }`}
+                  variant={activeTab === tab.key ? 'default' : 'secondary'}
+                  size="sm"
+                  className="rounded-full"
                 >
                   {tab.label}
                   <span className="ml-1.5 opacity-70">
                     ({tab.key === 'ALL' ? materials.length : materials.filter((m) => m.type === tab.key).length})
                   </span>
-                </button>
+                </Button>
               ))}
             </div>
             <div className="flex items-center gap-3">
               {/* Search */}
               <div className="relative">
                 <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
+                <Input
                   placeholder="Stok kalemi ara..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-9 py-2 bg-muted border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/20 w-56 outline-none"
+                  className="pl-10 pr-9 py-2 bg-muted border-none rounded-xl w-56"
                 />
                 {searchQuery && (
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
                   >
                     <X className="h-4 w-4" />
-                  </button>
+                  </Button>
                 )}
               </div>
               {/* Column toggle */}
               <div className="relative" ref={columnMenuRef}>
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setColumnMenuOpen((v) => !v)}
-                  className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors"
                   title="Sütunları Ayarla"
                 >
                   <SlidersHorizontal className="size-5" />
-                </button>
+                </Button>
                 {columnMenuOpen && (
                   <div className="absolute right-0 top-full mt-1 z-50 w-52 rounded-xl border bg-card p-1 shadow-lg">
                     <p className="px-3 py-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">Görünür Sütunlar</p>
@@ -624,11 +645,9 @@ export default function InventoryPage() {
                         key={col.key}
                         className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm cursor-pointer hover:bg-muted transition-colors"
                       >
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={isColumnVisible(col.key)}
-                          onChange={() => toggleColumn(col.key)}
-                          className="h-4 w-4 rounded border-border accent-primary"
+                          onCheckedChange={() => toggleColumn(col.key)}
                         />
                         {col.label}
                       </label>
@@ -637,9 +656,9 @@ export default function InventoryPage() {
                 )}
               </div>
               {/* Download */}
-              <button className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title="Dışa Aktar">
+              <Button variant="ghost" size="icon" title="Dışa Aktar">
                 <Download className="size-5" />
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -757,14 +776,18 @@ export default function InventoryPage() {
                       {/* Actions - visible on hover */}
                       <td className="px-6 py-5">
                         <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            className="p-2 text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-primary hover:bg-primary/5"
                             onClick={() => openEdit(material)}
                           >
                             <Pencil className="size-4" />
-                          </button>
-                          <button
-                            className="p-2 text-destructive hover:bg-destructive/5 rounded-lg transition-colors"
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:bg-destructive/5"
                             onClick={() => {
                               if (confirm(tc('confirm') + '?')) {
                                 deleteMutation.mutate(material.id);
@@ -772,7 +795,7 @@ export default function InventoryPage() {
                             }}
                           >
                             <Trash2 className="size-4" />
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -801,13 +824,15 @@ export default function InventoryPage() {
                 Toplam {totalItems} stok kaleminden {(safeCurrentPage - 1) * itemsPerPage + 1}-{Math.min(safeCurrentPage * itemsPerPage, totalItems)} arası gösteriliyor
               </p>
               <div className="flex gap-1">
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={safeCurrentPage <= 1}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="w-8 h-8"
                 >
                   <ChevronLeft className="size-4" />
-                </button>
+                </Button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
                   .filter((page) => {
                     // Show first, last, current, and neighbors
@@ -829,26 +854,26 @@ export default function InventoryPage() {
                     typeof item === 'string' ? (
                       <span key={`ellipsis-${idx}`} className="w-8 h-8 flex items-center justify-center text-xs text-muted-foreground">...</span>
                     ) : (
-                      <button
+                      <Button
                         key={item}
+                        variant={item === safeCurrentPage ? 'default' : 'ghost'}
+                        size="icon"
                         onClick={() => setCurrentPage(item)}
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition-colors ${
-                          item === safeCurrentPage
-                            ? 'bg-primary text-white'
-                            : 'text-muted-foreground hover:bg-muted'
-                        }`}
+                        className="w-8 h-8 text-xs font-bold"
                       >
                         {item}
-                      </button>
+                      </Button>
                     )
                   )}
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={safeCurrentPage >= totalPages}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="w-8 h-8"
                 >
                   <ChevronRight className="size-4" />
-                </button>
+                </Button>
               </div>
             </div>
           )}

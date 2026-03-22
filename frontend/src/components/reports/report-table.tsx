@@ -33,7 +33,7 @@ export function ReportTable({
     <div className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
-          <h3 className="text-lg font-semibold mb-4 text-green-700 border-b pb-2">Gelirler (Ciro)</h3>
+          <h3 className="text-lg font-semibold mb-4 text-primary border-b pb-2">Gelirler (Ciro)</h3>
           <Table>
             <TableHeader><TableRow><TableHead>Tarih</TableHead><TableHead className="text-right">Tutar</TableHead><TableHead>Not</TableHead></TableRow></TableHeader>
             <TableBody>
@@ -49,7 +49,7 @@ export function ReportTable({
                 );
               })}
               {revenues.length === 0 && (<TableRow><TableCell colSpan={3} className="text-center text-muted-foreground">Bu dönem için gelir kaydı bulunamadı</TableCell></TableRow>)}
-              <TableRow className="bg-green-50 font-bold"><TableCell>Toplam Gelir</TableCell><TableCell className="text-right text-green-700">{formatCurrency(totalRevenue)}</TableCell><TableCell /></TableRow>
+              <TableRow className="bg-primary/10 font-bold"><TableCell>Toplam Gelir</TableCell><TableCell className="text-right text-primary">{formatCurrency(totalRevenue)}</TableCell><TableCell /></TableRow>
             </TableBody>
           </Table>
         </div>
@@ -75,12 +75,12 @@ export function ReportTable({
       </div>
       <div className="bg-muted/30 border rounded-lg p-6 space-y-3">
         <h3 className="text-lg font-semibold mb-4 border-b pb-2">Ozet</h3>
-        <div className="flex justify-between items-center py-2"><span className="font-medium">Toplam Gelir</span><span className="text-green-700 font-semibold">{formatCurrency(totalRevenue)}</span></div>
+        <div className="flex justify-between items-center py-2"><span className="font-medium">Toplam Gelir</span><span className="text-primary font-semibold">{formatCurrency(totalRevenue)}</span></div>
         <div className="flex justify-between items-center py-2"><span className="font-medium">Toplam Gider</span><span className="text-destructive font-semibold">{formatCurrency(totalExpense)}</span></div>
         <div className="flex justify-between items-center py-2"><span className="font-medium">Vergi (KDV %20)</span><EditableCell value={taxAmount} originalValue={originalTaxAmount} onChange={onTaxEdit} /></div>
         <div className="flex justify-between items-center py-3 border-t-2 border-foreground mt-2">
           <span className="text-xl font-bold">Net Kar/Zarar</span>
-          <span className={`text-xl font-bold ${netProfit >= 0 ? 'text-green-700' : 'text-destructive'}`}>{formatCurrency(netProfit)}</span>
+          <span className={`text-xl font-bold ${netProfit >= 0 ? 'text-primary' : 'text-destructive'}`}>{formatCurrency(netProfit)}</span>
         </div>
       </div>
     </div>

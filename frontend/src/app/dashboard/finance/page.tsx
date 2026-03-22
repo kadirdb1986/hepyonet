@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Calendar,
   ChevronLeft,
@@ -225,16 +226,16 @@ export default function FinanceOverviewPage() {
           </div>
 
           {/* Disa Aktar button */}
-          <button className="flex items-center gap-2 bg-card text-primary px-5 py-2.5 rounded-xl font-bold shadow-xs hover:bg-muted transition-all text-sm">
+          <Button variant="outline" className="rounded-xl">
             <Upload className="size-5" />
             Disa Aktar
-          </button>
+          </Button>
 
           {/* Yeni Islem button */}
-          <button className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 rounded-xl font-bold shadow-lg hover:opacity-90 transition-all text-sm">
+          <Button className="rounded-xl">
             <Plus className="size-5" />
             Yeni Islem
-          </button>
+          </Button>
         </div>
       </section>
 
@@ -357,28 +358,12 @@ export default function FinanceOverviewPage() {
                   <h3 className="text-xl font-bold text-foreground">Gunluk Ciro Analizi</h3>
                   <p className="text-sm text-muted-foreground">{formatMonth(selectedMonth)} ayi {chartTab === 'daily' ? 'gunluk' : 'haftalik'} performans grafigi</p>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setChartTab('daily')}
-                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${
-                      chartTab === 'daily'
-                        ? 'bg-muted text-primary'
-                        : 'text-muted-foreground hover:bg-muted'
-                    }`}
-                  >
-                    Gunluk
-                  </button>
-                  <button
-                    onClick={() => setChartTab('weekly')}
-                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${
-                      chartTab === 'weekly'
-                        ? 'bg-muted text-primary'
-                        : 'text-muted-foreground hover:bg-muted'
-                    }`}
-                  >
-                    Haftalik
-                  </button>
-                </div>
+                <Tabs value={chartTab} onValueChange={(v) => setChartTab(v as 'daily' | 'weekly')}>
+                  <TabsList>
+                    <TabsTrigger value="daily">Gunluk</TabsTrigger>
+                    <TabsTrigger value="weekly">Haftalik</TabsTrigger>
+                  </TabsList>
+                </Tabs>
               </div>
               {chartTab === 'daily' ? (
                 /* Gunluk: thin-bar chart */
@@ -531,14 +516,14 @@ export default function FinanceOverviewPage() {
                   <p className="text-sm text-muted-foreground">Son 30 gunluk detayli islem listesi</p>
                 </div>
                 <div className="flex gap-2">
-                  <button className="flex items-center gap-2 px-4 py-2 border border-border/30 rounded-lg text-sm font-bold hover:bg-muted transition-colors">
+                  <Button variant="outline">
                     <Filter className="size-4" />
                     Filtrele
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 border border-border/30 rounded-lg text-sm font-bold hover:bg-muted transition-colors">
+                  </Button>
+                  <Button variant="outline">
                     <Search className="size-4" />
                     Bul
-                  </button>
+                  </Button>
                 </div>
               </div>
               <div className="overflow-x-auto">
@@ -580,7 +565,7 @@ export default function FinanceOverviewPage() {
                           </div>
                         </td>
                         <td className="px-8 py-5">
-                          <button className="text-primary hover:underline text-sm font-bold">Incele</button>
+                          <Button variant="link" className="p-0 h-auto text-sm font-bold">Incele</Button>
                         </td>
                       </tr>
                     ))}

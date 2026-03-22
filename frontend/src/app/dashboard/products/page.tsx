@@ -23,6 +23,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 import {
   ChevronRight,
@@ -270,7 +277,7 @@ export default function ProductsPage() {
               <h2 className="text-2xl font-bold tracking-tight text-foreground font-headline">Menü Ürünleri</h2>
               <span className="text-sm text-muted-foreground">({menuProducts.length})</span>
             </div>
-            <button className="text-sm font-semibold text-primary hover:underline">Tümünü Gör</button>
+            <Button variant="link" className="p-0 h-auto text-sm font-semibold">Tümünü Gör</Button>
           </div>
           <div className="overflow-hidden bg-muted rounded-xl">
             <Table>
@@ -325,13 +332,13 @@ export default function ProductsPage() {
                       </TableCell>
                       <TableCell className="px-4 py-4 text-center">
                         {margin != null ? (
-                          <span className="px-2 py-1 bg-secondary/30 text-primary rounded-lg text-xs font-extrabold">
+                          <Badge variant="secondary" className="font-extrabold">
                             %{formatPercent(margin)}
-                          </span>
+                          </Badge>
                         ) : '-'}
                       </TableCell>
                       <TableCell className="px-4 py-4">
-                        <span className="px-3 py-1 bg-muted text-foreground rounded-full text-[10px] font-medium uppercase tracking-tight">{productType.label}</span>
+                        <Badge variant={productType.variant}>{productType.label}</Badge>
                       </TableCell>
                       <TableCell className="px-6 py-4 text-center">
                         <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -401,9 +408,9 @@ export default function ProductsPage() {
                           <span className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground font-medium">{product.category.name}</span>
                         )}
                         {costValue != null && (
-                          <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${isHighCost ? 'bg-destructive/10 text-destructive' : 'bg-secondary/20 text-primary'}`}>
+                          <Badge variant={isHighCost ? 'destructive' : 'secondary'} className="text-[10px]">
                             Maliyet: {formatCurrency(costValue)} TL
-                          </span>
+                          </Badge>
                         )}
                       </div>
                     </div>
@@ -443,13 +450,14 @@ export default function ProductsPage() {
             })}
 
             {/* Hızlı Ara Ürün Ekle */}
-            <button
-              className="border-2 border-dashed border-border/50 rounded-xl p-5 flex flex-col items-center justify-center gap-2 hover:bg-muted hover:border-primary transition-all group min-h-[96px]"
+            <Button
+              variant="outline"
+              className="border-2 border-dashed border-border/50 rounded-xl p-5 h-auto flex flex-col items-center justify-center gap-2 hover:bg-muted hover:border-primary min-h-[96px]"
               onClick={() => router.push('/dashboard/products/new')}
             >
-              <PlusCircle className="size-5 text-muted-foreground group-hover:text-primary transition-colors" />
-              <span className="text-sm font-bold text-muted-foreground group-hover:text-primary transition-colors">Hızlı Ara Ürün Ekle</span>
-            </button>
+              <PlusCircle className="size-5" />
+              <span className="text-sm font-bold">Hızlı Ara Ürün Ekle</span>
+            </Button>
           </div>
 
           {intermediateProducts.length === 0 && (
@@ -475,19 +483,21 @@ export default function ProductsPage() {
           <form onSubmit={handleDirectSaleSubmit} className="space-y-4">
             <div>
               <Label>Stok Kalemi</Label>
-              <select
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                value={selectedRawMaterialId}
-                onChange={(e) => setSelectedRawMaterialId(e.target.value)}
-                required
+              <Select
+                value={selectedRawMaterialId || undefined}
+                onValueChange={(value) => setSelectedRawMaterialId(value)}
               >
-                <option value="">Stok kalemi seçin...</option>
-                {rawMaterials.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name} ({m.unit}) - {formatCurrency(Number(m.lastPurchasePrice))} TL
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Stok kalemi seçin..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {rawMaterials.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.name} ({m.unit}) - {formatCurrency(Number(m.lastPurchasePrice))} TL
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Satış Fiyatı (TL)</Label>

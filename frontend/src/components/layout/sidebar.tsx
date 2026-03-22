@@ -150,12 +150,14 @@ export function Sidebar({ open, onClose, desktopOpen = true, onDesktopClose }: S
         <div className="w-64 min-w-[16rem] flex flex-col h-full">
           <div className="flex items-center justify-between pr-2">
             <div className="flex-1">{logoArea}</div>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onDesktopClose}
-              className="p-2 rounded-md hover:bg-sidebar-accent text-sidebar-foreground/60"
+              className="hover:bg-sidebar-accent text-sidebar-foreground/60"
             >
               <X className="h-5 w-5" />
-            </button>
+            </Button>
           </div>
           {navContent}
         </div>
@@ -168,9 +170,14 @@ export function Sidebar({ open, onClose, desktopOpen = true, onDesktopClose }: S
           <aside className="absolute left-0 top-0 bottom-0 w-72 bg-sidebar flex flex-col shadow-xl animate-in slide-in-from-left duration-200 font-headline text-sm font-medium tracking-tight">
             <div className="flex items-center justify-between pr-2">
               {logoArea}
-              <button onClick={onClose} className="p-2 rounded-md hover:bg-sidebar-accent text-sidebar-foreground/60">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="hover:bg-sidebar-accent text-sidebar-foreground/60"
+              >
                 <X className="h-5 w-5" />
-              </button>
+              </Button>
             </div>
             {navContent}
           </aside>
