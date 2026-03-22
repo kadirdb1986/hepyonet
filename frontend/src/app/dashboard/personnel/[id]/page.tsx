@@ -34,6 +34,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface LeaveRecord {
   id: string;
@@ -384,21 +385,19 @@ export default function PersonnelDetailPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="edit-position">Pozisyon</Label>
-                    <select
-                      id="edit-position"
-                      value={editForm.positionId}
-                      onChange={(e) =>
-                        setEditForm({ ...editForm, positionId: e.target.value })
-                      }
-                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                    <Select
+                      value={editForm.positionId || ""}
+                      onValueChange={(value) => setEditForm({ ...editForm, positionId: value })}
                     >
-                      <option value="">Pozisyon Seçin</option>
-                      {positions.map((pos) => (
-                        <option key={pos.id} value={pos.id}>
-                          {pos.name}
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger id="edit-position">
+                        <SelectValue placeholder="Pozisyon Seçin" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {positions.map((pos) => (
+                          <SelectItem key={pos.id} value={pos.id}>{pos.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -664,21 +663,19 @@ export default function PersonnelDetailPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="leave-type">Izin Turu</Label>
-              <select
-                id="leave-type"
+              <Select
                 value={leaveForm.type}
-                onChange={(e) =>
-                  setLeaveForm({
-                    ...leaveForm,
-                    type: e.target.value as 'ANNUAL' | 'SICK' | 'OTHER',
-                  })
-                }
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                onValueChange={(value) => setLeaveForm({ ...leaveForm, type: value as 'ANNUAL' | 'SICK' | 'OTHER' })}
               >
-                <option value="ANNUAL">Yillik Izin</option>
-                <option value="SICK">Hastalik Izni</option>
-                <option value="OTHER">Diğer</option>
-              </select>
+                <SelectTrigger id="leave-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ANNUAL">Yıllık İzin</SelectItem>
+                  <SelectItem value="SICK">Hastalık İzni</SelectItem>
+                  <SelectItem value="OTHER">Diğer</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="leave-notes">Notlar (opsiyonel)</Label>
