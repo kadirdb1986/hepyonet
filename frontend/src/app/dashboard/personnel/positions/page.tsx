@@ -3,18 +3,12 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { ColumnDef } from '@tanstack/react-table';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { DataTable } from '@/components/ui/data-table';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -35,7 +29,7 @@ export default function PositionsPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (name: string) => api.post('/position-configs', { name }),
+    mutationFn: (positionName: string) => api.post('/position-configs', { name: positionName }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['position-configs'] });
       setName('');
@@ -69,9 +63,33 @@ export default function PositionsPage() {
     createMutation.mutate(trimmed);
   };
 
-  if (isLoading) {
-    return <div className="p-6 text-muted-foreground">Yükleniyor...</div>;
-  }
+  const columns: ColumnDef<PositionConfig>[] = [
+    {
+      accessorKey: 'name',
+      header: 'Pozisyon Adı',
+      cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      header: () => <div className="text-right">İşlemler</div>,
+      cell: ({ row }) => (
+        <div className="text-right">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              if (confirm(`"${row.original.name}" pozisyonunu silmek istediğinize emin misiniz?`)) {
+                deleteMutation.mutate(row.original.id);
+              }
+            }}
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div>
@@ -99,42 +117,14 @@ export default function PositionsPage() {
             </Button>
           </form>
 
-          {positions.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Henüz pozisyon eklenmemiş
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Pozisyon Adi</TableHead>
-                    <TableHead className="text-right w-[80px]">İşlemler</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {positions.map((pos) => (
-                    <TableRow key={pos.id}>
-                      <TableCell className="font-medium">{pos.name}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            if (confirm(`"${pos.name}" pozisyonunu silmek istediğinize emin misiniz?`)) {
-                              deleteMutation.mutate(pos.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+          <DataTable
+            columns={columns}
+            data={positions}
+            isLoading={isLoading}
+            showPagination={false}
+            showToolbar={false}
+            emptyMessage="Henüz pozisyon eklenmemiş"
+          />
         </CardContent>
       </Card>
     </div>
