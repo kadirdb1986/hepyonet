@@ -285,7 +285,7 @@ export default function PersonnelDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Yükleniyor...</p>
+        <p className="text-muted-foreground">Yükleniyor...</p>
       </div>
     );
   }
@@ -293,7 +293,7 @@ export default function PersonnelDetailPage() {
   if (!personnel) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Personel bulunamadı.</p>
+        <p className="text-muted-foreground">Personel bulunamadı.</p>
       </div>
     );
   }
@@ -331,7 +331,7 @@ export default function PersonnelDetailPage() {
               {isEditing ? (
                 <form onSubmit={handleEditSubmit} className="space-y-4">
                   {editError && (
-                    <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">
+                    <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
                       {editError}
                     </div>
                   )}
@@ -445,35 +445,35 @@ export default function PersonnelDetailPage() {
               ) : (
                 <div className="grid grid-cols-2 gap-y-4">
                   <div>
-                    <p className="text-sm text-gray-500">Ad</p>
+                    <p className="text-sm text-muted-foreground">Ad</p>
                     <p className="font-medium">{personnel.name}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Soyad</p>
+                    <p className="text-sm text-muted-foreground">Soyad</p>
                     <p className="font-medium">{personnel.surname}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Telefon</p>
+                    <p className="text-sm text-muted-foreground">Telefon</p>
                     <p className="font-medium">{personnel.phone ? formatPhone(personnel.phone) : '\u2014'}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">TC Kimlik No</p>
+                    <p className="text-sm text-muted-foreground">TC Kimlik No</p>
                     <p className="font-medium">{personnel.tcNo || '\u2014'}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Pozisyon</p>
+                    <p className="text-sm text-muted-foreground">Pozisyon</p>
                     <p className="font-medium">{personnel.positionConfig?.name || '\u2014'}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Başlangıç Tarihi</p>
+                    <p className="text-sm text-muted-foreground">Başlangıç Tarihi</p>
                     <p className="font-medium">{formatDate(personnel.startDate)}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Maaş</p>
+                    <p className="text-sm text-muted-foreground">Maaş</p>
                     <p className="font-medium">{formatCurrency(personnel.salary)}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Kayıt Tarihi</p>
+                    <p className="text-sm text-muted-foreground">Kayıt Tarihi</p>
                     <p className="font-medium">{formatDate(personnel.createdAt)}</p>
                   </div>
                 </div>
@@ -501,19 +501,19 @@ export default function PersonnelDetailPage() {
               {workDays ? (
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Toplam Gun</span>
+                    <span className="text-sm text-muted-foreground">Toplam Gun</span>
                     <span className="font-medium">{workDays.totalDaysInMonth}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Hafta Sonu</span>
+                    <span className="text-sm text-muted-foreground">Hafta Sonu</span>
                     <span className="font-medium">{workDays.weekends}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Is Gunu</span>
+                    <span className="text-sm text-muted-foreground">Is Gunu</span>
                     <span className="font-medium">{workDays.businessDays}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Izinli Gun</span>
+                    <span className="text-sm text-muted-foreground">Izinli Gun</span>
                     <span className="font-medium text-orange-600">
                       {workDays.leaveDays}
                     </span>
@@ -528,7 +528,7 @@ export default function PersonnelDetailPage() {
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">Yükleniyor...</p>
+                <p className="text-sm text-muted-foreground">Yükleniyor...</p>
               )}
             </CardContent>
           </Card>
@@ -549,7 +549,7 @@ export default function PersonnelDetailPage() {
         </CardHeader>
         <CardContent>
           {personnel.leaveRecords.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-muted-foreground">
               Henüz izin kaydı yok.
             </div>
           ) : (
@@ -610,7 +610,7 @@ export default function PersonnelDetailPage() {
                                 })
                               }
                             >
-                              <XCircle className="h-4 w-4 text-red-600" />
+                              <XCircle className="h-4 w-4 text-destructive" />
                             </Button>
                           </div>
                         )}
@@ -632,7 +632,7 @@ export default function PersonnelDetailPage() {
           </DialogHeader>
           <form onSubmit={handleLeaveSubmit} className="space-y-4">
             {leaveError && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">
+              <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
                 {leaveError}
               </div>
             )}

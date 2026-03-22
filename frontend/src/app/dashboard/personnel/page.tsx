@@ -121,7 +121,7 @@ export default function PersonnelListPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Yükleniyor...</p>
+        <p className="text-muted-foreground">Yükleniyor...</p>
       </div>
     );
   }
@@ -160,7 +160,7 @@ export default function PersonnelListPage() {
         </CardHeader>
         <CardContent>
           {filtered.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-muted-foreground">
               {search ? 'Aramanızla eşleşen personel bulunamadı.' : 'Henüz personel kaydı yok.'}
             </div>
           ) : (
@@ -205,7 +205,7 @@ export default function PersonnelListPage() {
                               size="sm"
                               onClick={() => setDeactivateId(p.id)}
                             >
-                              <UserX className="h-4 w-4 text-red-500" />
+                              <UserX className="h-4 w-4 text-destructive" />
                             </Button>
                           ) : (
                             <>
@@ -221,7 +221,7 @@ export default function PersonnelListPage() {
                                 size="sm"
                                 onClick={() => handleDelete(p.id, `${p.name} ${p.surname}`)}
                               >
-                                <Trash2 className="h-4 w-4 text-red-500" />
+                                <Trash2 className="h-4 w-4 text-destructive" />
                               </Button>
                             </>
                           )}
