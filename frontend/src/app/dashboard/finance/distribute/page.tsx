@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ColumnDef } from '@tanstack/react-table';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,10 +29,19 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { DataTable } from '@/components/ui/data-table';
 import { Split, Undo2, Info, AlertTriangle } from 'lucide-react';
 
-// Kategori adı artık doğrudan expense.category'de saklanıyor
-const CATEGORY_LABELS: Record<string, string> = {};
+interface Expense {
+  id: string;
+  title: string;
+  category: string;
+  amount: string | number;
+  paymentDate: string;
+  isDistributed: boolean;
+  distributionType?: string;
+  distributions?: { id: string; month: string; amount: string | number }[];
+}
 
 const DISTRIBUTION_TYPE_LABELS: Record<string, string> = {
   NONE: 'Dağıtım Yok (Tek Aya Yaz)',
@@ -47,7 +57,7 @@ export default function DistributePage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [error, setError] = useState('');
 
-  const { data: expenses = [], isLoading } = useQuery({
+  const { data: expenses = [], isLoading } = useQuery<Expense[]>({
     queryKey: ['expenses-all'],
     queryFn: async () => {
       const { data } = await api.get('/expenses');
@@ -137,8 +147,61 @@ export default function DistributePage() {
     return new Date(date).toLocaleDateString('tr-TR');
   };
 
-  const undistributedExpenses = expenses.filter((e: any) => !e.isDistributed);
-  const distributedExpenses = expenses.filter((e: any) => e.isDistributed);
+  const undistributedExpenses = expenses.filter((e) => !e.isDistributed);
+  const distributedExpenses = expenses.filter((e) => e.isDistributed);
+
+  const selectedExpense = expenses.find((e) => e.id === selectedExpenseId);
+
+  const columns: ColumnDef<Expense>[] = [
+    {
+      accessorKey: 'title',
+      meta: { label: 'Başlık' },
+      header: 'Başlık',
+      cell: ({ row }) => <span className="font-medium">{row.original.title}</span>,
+    },
+    {
+      accessorKey: 'category',
+      meta: { label: 'Kategori' },
+      header: 'Kategori',
+      cell: ({ row }) => (
+        <Badge variant="outline">{row.original.category}</Badge>
+      ),
+    },
+    {
+      accessorKey: 'amount',
+      meta: { label: 'Tutar' },
+      header: () => <div className="text-right">Tutar</div>,
+      cell: ({ row }) => (
+        <div className="text-right font-medium">
+          {formatCurrency(Number(row.original.amount))}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'paymentDate',
+      meta: { label: 'Ödeme Tarihi' },
+      header: 'Ödeme Tarihi',
+      cell: ({ row }) => formatDate(row.original.paymentDate),
+    },
+    {
+      id: 'actions',
+      meta: { label: 'İşlem' },
+      header: () => <div className="text-right">İşlem</div>,
+      enableHiding: false,
+      cell: ({ row }) => (
+        <div className="text-right">
+          <Button
+            size="sm"
+            className="gap-1"
+            onClick={() => openDistributeDialog(row.original.id)}
+          >
+            <Split className="h-3 w-3" />
+            Dağıt
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -188,23 +251,12 @@ export default function DistributePage() {
               </div>
             )}
 
-            {selectedExpenseId && (
+            {selectedExpense && (
               <div className="p-3 bg-muted rounded-md text-sm">
-                <p className="font-medium">
-                  {expenses.find((e: any) => e.id === selectedExpenseId)?.title}
-                </p>
+                <p className="font-medium">{selectedExpense.title}</p>
                 <p className="text-muted-foreground">
-                  {formatCurrency(
-                    Number(
-                      expenses.find((e: any) => e.id === selectedExpenseId)
-                        ?.amount,
-                    ),
-                  )}{' '}
-                  -{' '}
-                  {formatDate(
-                    expenses.find((e: any) => e.id === selectedExpenseId)
-                      ?.paymentDate,
-                  )}
+                  {formatCurrency(Number(selectedExpense.amount))} -{' '}
+                  {formatDate(selectedExpense.paymentDate)}
                 </p>
               </div>
             )}
@@ -247,16 +299,14 @@ export default function DistributePage() {
               </div>
             )}
 
-            {distributionType === 'EQUAL' && selectedExpenseId && (
+            {distributionType === 'EQUAL' && selectedExpense && (
               <div className="p-3 bg-green-50 rounded-md text-sm text-green-800">
                 <p>
                   Her aya düşecek tutar:{' '}
                   <strong>
                     {formatCurrency(
-                      Number(
-                        expenses.find((e: any) => e.id === selectedExpenseId)
-                          ?.amount,
-                      ) / parseInt(distributionMonths || '1', 10),
+                      Number(selectedExpense.amount) /
+                        parseInt(distributionMonths || '1', 10),
                     )}
                   </strong>
                 </p>
@@ -291,158 +341,116 @@ export default function DistributePage() {
         </DialogContent>
       </Dialog>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Yükleniyor...</p>
-        </div>
-      ) : (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">
-                Dağıtılmamış Giderler ({undistributedExpenses.length})
-              </CardTitle>
-              <CardDescription>
-                Aşağıdaki giderler henüz aylara dağıtılmamıştır
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {undistributedExpenses.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">
-                  Dağıtılacak gider yok
-                </p>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Başlık</TableHead>
-                      <TableHead>Kategori</TableHead>
-                      <TableHead className="text-right">Tutar</TableHead>
-                      <TableHead>Ödeme Tarihi</TableHead>
-                      <TableHead className="text-right">İşlem</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {undistributedExpenses.map((expense: any) => (
-                      <TableRow key={expense.id}>
-                        <TableCell>{expense.title}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {CATEGORY_LABELS[expense.category] || expense.category}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right font-medium">
-                          {formatCurrency(Number(expense.amount))}
-                        </TableCell>
-                        <TableCell>{formatDate(expense.paymentDate)}</TableCell>
-                        <TableCell className="text-right">
-                          <Button size="sm" className="gap-1" onClick={() => openDistributeDialog(expense.id)}>
-                            <Split className="h-3 w-3" />
-                            Dağıt
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">
+            Dağıtılmamış Giderler ({undistributedExpenses.length})
+          </CardTitle>
+          <CardDescription>
+            Aşağıdaki giderler henüz aylara dağıtılmamıştır
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            columns={columns}
+            data={undistributedExpenses}
+            isLoading={isLoading}
+            showPagination={false}
+            showToolbar={false}
+            emptyMessage="Dağıtılacak gider yok"
+          />
+        </CardContent>
+      </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">
-                Dağıtılmış Giderler ({distributedExpenses.length})
-              </CardTitle>
-              <CardDescription>
-                Aylara dağıtılmış giderler ve dağıtım detayları
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {distributedExpenses.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">
-                  Dağıtılmış gider yok
-                </p>
-              ) : (
-                <Accordion type="multiple" className="w-full">
-                  {distributedExpenses.map((expense: any) => (
-                    <AccordionItem key={expense.id} value={expense.id}>
-                      <AccordionTrigger className="no-underline hover:no-underline">
-                        <div className="flex items-center justify-between w-full pr-4">
-                          <div className="flex items-center gap-3">
-                            <span className="font-medium">
-                              {expense.title}
-                            </span>
-                            <Badge variant="outline">
-                              {CATEGORY_LABELS[expense.category] ||
-                                expense.category}
-                            </Badge>
-                            <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                              {DISTRIBUTION_TYPE_LABELS[
-                                expense.distributionType
-                              ] || expense.distributionType}
-                            </Badge>
-                          </div>
-                          <span className="font-medium text-right mr-2">
-                            {formatCurrency(Number(expense.amount))}
-                          </span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-3 pt-2">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Ay</TableHead>
-                                <TableHead className="text-right">Dağıtılan Tutar</TableHead>
-                                <TableHead className="text-right">Oran</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {expense.distributions
-                                ?.sort((a: any, b: any) => a.month.localeCompare(b.month))
-                                .map((dist: any) => {
-                                  const ratio = Number(expense.amount) > 0
-                                    ? (Number(dist.amount) / Number(expense.amount)) * 100
-                                    : 0;
-                                  return (
-                                    <TableRow key={dist.id}>
-                                      <TableCell>{dist.month}</TableCell>
-                                      <TableCell className="text-right font-medium">
-                                        {formatCurrency(Number(dist.amount))}
-                                      </TableCell>
-                                      <TableCell className="text-right text-muted-foreground">
-                                        %{ratio.toFixed(1)}
-                                      </TableCell>
-                                    </TableRow>
-                                  );
-                                })}
-                            </TableBody>
-                          </Table>
-                          <div className="flex justify-end">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="gap-1 text-red-600 hover:text-red-700"
-                              onClick={() =>
-                                handleUndistribute(expense.id)
-                              }
-                              disabled={undistributeMutation.isPending}
-                            >
-                              <Undo2 className="h-3 w-3" />
-                              Dağıtımı İptal Et
-                            </Button>
-                          </div>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              )}
-            </CardContent>
-          </Card>
-        </>
-      )}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">
+            Dağıtılmış Giderler ({distributedExpenses.length})
+          </CardTitle>
+          <CardDescription>
+            Aylara dağıtılmış giderler ve dağıtım detayları
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <p className="text-muted-foreground text-center py-8">
+              Yükleniyor...
+            </p>
+          ) : distributedExpenses.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">
+              Dağıtılmış gider yok
+            </p>
+          ) : (
+            <Accordion type="multiple" className="w-full">
+              {distributedExpenses.map((expense) => (
+                <AccordionItem key={expense.id} value={expense.id}>
+                  <AccordionTrigger className="no-underline hover:no-underline">
+                    <div className="flex items-center justify-between w-full pr-4">
+                      <div className="flex items-center gap-3">
+                        <span className="font-medium">{expense.title}</span>
+                        <Badge variant="outline">{expense.category}</Badge>
+                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                          {DISTRIBUTION_TYPE_LABELS[expense.distributionType ?? ''] ||
+                            expense.distributionType}
+                        </Badge>
+                      </div>
+                      <span className="font-medium text-right mr-2">
+                        {formatCurrency(Number(expense.amount))}
+                      </span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-3 pt-2">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Ay</TableHead>
+                            <TableHead className="text-right">Dağıtılan Tutar</TableHead>
+                            <TableHead className="text-right">Oran</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {expense.distributions
+                            ?.sort((a, b) => a.month.localeCompare(b.month))
+                            .map((dist) => {
+                              const ratio =
+                                Number(expense.amount) > 0
+                                  ? (Number(dist.amount) / Number(expense.amount)) * 100
+                                  : 0;
+                              return (
+                                <TableRow key={dist.id}>
+                                  <TableCell>{dist.month}</TableCell>
+                                  <TableCell className="text-right font-medium">
+                                    {formatCurrency(Number(dist.amount))}
+                                  </TableCell>
+                                  <TableCell className="text-right text-muted-foreground">
+                                    %{ratio.toFixed(1)}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                        </TableBody>
+                      </Table>
+                      <div className="flex justify-end">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1 text-red-600 hover:text-red-700"
+                          onClick={() => handleUndistribute(expense.id)}
+                          disabled={undistributeMutation.isPending}
+                        >
+                          <Undo2 className="h-3 w-3" />
+                          Dağıtımı İptal Et
+                        </Button>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
