@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter, 'Inter'), sans-serif;
+  --font-sans: var(--font-sans);
   --font-headline: var(--font-manrope, 'Manrope'), sans-serif;
   --font-body: var(--font-inter, 'Inter'), sans-serif;
   --font-mono: var(--font-geist-mono);
@@ -48,56 +48,9 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* Design system colors */
-  --color-ds-primary: #004253;
-  --color-ds-primary-container: #005b71;
-  --color-ds-on-primary: #ffffff;
-  --color-ds-surface: #f8fafb;
-  --color-ds-surface-container-low: #f2f4f5;
-  --color-ds-surface-container: #eceeef;
-  --color-ds-surface-container-high: #e6e8e9;
-  --color-ds-surface-container-highest: #e1e3e4;
-  --color-ds-surface-container-lowest: #ffffff;
-  --color-ds-on-surface: #191c1d;
-  --color-ds-on-surface-variant: #40484c;
-  --color-ds-outline: #70787d;
-  --color-ds-outline-variant: #bfc8cc;
-  --color-ds-secondary: #516164;
-  --color-ds-secondary-container: #d4e6e9;
-  --color-ds-on-secondary-container: #57676a;
-  --color-ds-error: #ba1a1a;
-  --color-ds-error-container: #ffdad6;
-  --color-ds-tertiary: #004448;
-  --color-ds-tertiary-fixed: #7df4ff;
-  --color-ds-on-tertiary-fixed-variant: #004f54;
-
 }
 
 :root {
-  --color-primary: #004253;
-  --color-primary-container: #005b71;
-  --color-on-primary: #ffffff;
-  --color-surface: #f8fafb;
-  --color-surface-container-low: #f2f4f5;
-  --color-surface-container: #eceeef;
-  --color-surface-container-high: #e6e8e9;
-  --color-surface-container-highest: #e1e3e4;
-  --color-surface-container-lowest: #ffffff;
-  --color-on-surface: #191c1d;
-  --color-on-surface-variant: #40484c;
-  --color-outline: #70787d;
-  --color-outline-variant: #bfc8cc;
-  --color-secondary: #516164;
-  --color-secondary-container: #d4e6e9;
-  --color-on-secondary-container: #57676a;
-  --color-error: #ba1a1a;
-  --color-error-container: #ffdad6;
-  --color-tertiary: #004448;
-  --color-tertiary-fixed: #7df4ff;
-  --color-on-tertiary-fixed-variant: #004f54;
-
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -114,11 +67,11 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -128,6 +81,8 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
 }
 
 .dark {
@@ -149,11 +104,11 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -164,9 +119,6 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-.material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
 
 @layer base {
   * {
@@ -176,9 +128,7 @@
     @apply font-sans;
   }
   body {
-    @apply font-body;
-    background-color: var(--color-surface);
-    color: var(--color-on-surface);
+    @apply font-body bg-background text-foreground;
   }
   h1, h2, h3, .font-headline {
     @apply font-headline;

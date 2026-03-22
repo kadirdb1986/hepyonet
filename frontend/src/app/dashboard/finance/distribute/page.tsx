@@ -387,7 +387,7 @@ export default function DistributePage() {
                   Dağıtılmış gider yok
                 </p>
               ) : (
-                <Accordion className="w-full">
+                <Accordion type="multiple" className="w-full">
                   {distributedExpenses.map((expense: any) => (
                     <AccordionItem key={expense.id} value={expense.id}>
                       <AccordionTrigger className="no-underline hover:no-underline">
