@@ -421,7 +421,7 @@ export default function SimulationDetailPage() {
                         </TableCell>
                         <TableCell>
                           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeRevenueMutation.mutate(product.id)}>
-                            <Trash2 className="h-3.5 w-3.5 text-red-500" />
+                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -477,7 +477,7 @@ export default function SimulationDetailPage() {
                           <TableCell className="text-right font-medium">{formatCurrency(product.quantity * product.costPrice)}</TableCell>
                           <TableCell>
                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeRevenueMutation.mutate(product.id)}>
-                              <Trash2 className="h-3.5 w-3.5 text-red-500" />
+                              <Trash2 className="h-3.5 w-3.5 text-destructive" />
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -518,7 +518,7 @@ export default function SimulationDetailPage() {
                           </TableCell>
                           <TableCell>
                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeExpenseMutation.mutate(exp.id)}>
-                              <Trash2 className="h-3.5 w-3.5 text-red-500" />
+                              <Trash2 className="h-3.5 w-3.5 text-destructive" />
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -547,11 +547,11 @@ export default function SimulationDetailPage() {
 
       {/* ─── Bottom Summary ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="flex items-center justify-between px-4 py-4 bg-white border rounded-lg">
+        <div className="flex items-center justify-between px-4 py-4 bg-card border rounded-lg">
           <span className="font-semibold text-lg">Toplam Ciro</span>
           <span className="font-bold text-xl">{formatCurrency(totalRevenue)}</span>
         </div>
-        <div className="flex items-center justify-between px-4 py-4 bg-white border rounded-lg">
+        <div className="flex items-center justify-between px-4 py-4 bg-card border rounded-lg">
           <span className="font-semibold text-lg">Toplam Gider</span>
           <span className="font-bold text-xl">{formatCurrency(totalExpense)}</span>
         </div>
@@ -563,7 +563,7 @@ export default function SimulationDetailPage() {
           <CardContent className="pt-6 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Brut Kar</span>
-              <span className={`font-bold ${grossProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <span className={`font-bold ${grossProfit >= 0 ? 'text-green-600' : 'text-destructive'}`}>
                 {formatCurrency(grossProfit)}
               </span>
             </div>
@@ -607,7 +607,7 @@ export default function SimulationDetailPage() {
             <div className="flex items-center justify-between py-2">
               <span className="text-lg font-bold">NET Kar</span>
               <span
-                className={`text-xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                className={`text-xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-destructive'}`}
               >
                 {formatCurrency(netProfit)}
               </span>

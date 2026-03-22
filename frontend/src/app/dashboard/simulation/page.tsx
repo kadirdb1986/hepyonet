@@ -378,7 +378,7 @@ export default function SimulationPage() {
                       >
                         <TableCell className="font-medium">{sim.name}</TableCell>
                         <TableCell className="text-right">{formatCurrency(sim.totalRevenue ?? 0)}</TableCell>
-                        <TableCell className={`text-right font-medium ${(sim.netProfit ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <TableCell className={`text-right font-medium ${(sim.netProfit ?? 0) >= 0 ? 'text-green-600' : 'text-destructive'}`}>
                           {formatCurrency(sim.netProfit ?? 0)}
                         </TableCell>
                         <TableCell className="text-right">
@@ -392,7 +392,7 @@ export default function SimulationPage() {
                               }
                             }}
                           >
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                            <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -526,7 +526,7 @@ export default function SimulationPage() {
                               }
                             }}
                           >
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                            <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -615,7 +615,7 @@ export default function SimulationPage() {
                               }
                             }}
                           >
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                            <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </TableCell>
                       </TableRow>
