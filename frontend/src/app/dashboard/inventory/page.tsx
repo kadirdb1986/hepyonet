@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   Plus, Pencil, Trash2, X, Check, Truck, Tag, AlertTriangle,
   Search, SlidersHorizontal, Download, Package, ChevronLeft, ChevronRight,
@@ -663,159 +664,157 @@ export default function InventoryPage() {
           </div>
 
           {/* Data Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-muted/50">
-                  <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground rounded-l-xl">{t('name')}</th>
-                  {isColumnVisible('type') && (
-                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Tip</th>
-                  )}
-                  {isColumnVisible('supplier') && (
-                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Tedarikçi</th>
-                  )}
-                  {isColumnVisible('currentStock') && (
-                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Mevcut Stok</th>
-                  )}
-                  {isColumnVisible('minStockLevel') && (
-                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Min. Stok</th>
-                  )}
-                  {isColumnVisible('lastPurchasePrice') && (
-                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-right">Son Alış Fiyatı</th>
-                  )}
-                  {isColumnVisible('stockStatus') && (
-                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-center">Durum</th>
-                  )}
-                  <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground rounded-r-xl text-center">İşlemler</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-transparent">
-                {paginatedMaterials.map((material) => {
-                  const unitLabel = UNIT_LABELS[material.unit] || material.unit;
-                  const unitShort = UNIT_SHORT[material.unit] || material.unit;
-                  const low = isLowStock(material);
-                  const stockPct = getStockPercent(material);
-
-                  return (
-                    <tr key={material.id} className="hover:bg-muted transition-colors group">
-                      {/* Name */}
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground shrink-0">
-                            <Package className="size-5" />
-                          </div>
-                          <div>
-                            <p className="font-bold text-sm text-foreground">{material.name}</p>
-                            <p className="text-[10px] text-muted-foreground">{material.type || '-'} / {unitLabel}</p>
-                          </div>
-                        </div>
-                      </td>
-                      {/* Type */}
-                      {isColumnVisible('type') && (
-                        <td className="px-6 py-5">
-                          <span className="px-3 py-1 bg-muted text-foreground rounded-full text-[10px] font-medium uppercase tracking-tight">
-                            {material.type || '-'}
-                          </span>
-                        </td>
-                      )}
-                      {/* Supplier */}
-                      {isColumnVisible('supplier') && (
-                        <td className="px-6 py-5">
-                          {material.supplier ? (
-                            <SupplierPopover supplier={material.supplier} />
-                          ) : (
-                            <span className="text-muted-foreground text-sm">-</span>
-                          )}
-                        </td>
-                      )}
-                      {/* Current Stock with progress bar */}
-                      {isColumnVisible('currentStock') && (
-                        <td className="px-6 py-5">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-sm font-bold ${low ? 'text-destructive' : 'text-foreground'}`}>
-                              {formatQuantity(Number(material.currentStock))} {unitShort}
-                            </span>
-                            <div className={`w-20 h-1.5 rounded-full overflow-hidden ${low ? 'bg-destructive/10' : 'bg-muted'}`}>
-                              <div
-                                className={`h-full rounded-full ${low ? 'bg-destructive' : 'bg-primary'}`}
-                                style={{ width: `${stockPct}%` }}
-                              />
-                            </div>
-                          </div>
-                        </td>
-                      )}
-                      {/* Min Stock Level */}
-                      {isColumnVisible('minStockLevel') && (
-                        <td className="px-6 py-5 text-sm text-muted-foreground">
-                          {formatQuantity(Number(material.minStockLevel))} {unitShort}
-                        </td>
-                      )}
-                      {/* Last Purchase Price */}
-                      {isColumnVisible('lastPurchasePrice') && (
-                        <td className="px-6 py-5 text-right">
-                          <p className="text-sm font-bold text-foreground">
-                            ₺{formatCurrency(Number(material.lastPurchasePrice))}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground">/{unitShort}</p>
-                        </td>
-                      )}
-                      {/* Stock Status */}
-                      {isColumnVisible('stockStatus') && (
-                        <td className="px-6 py-5 text-center">
-                          {low ? (
-                            <span className="px-3 py-1 bg-destructive/10 text-destructive rounded-full text-[10px] font-bold uppercase">
-                              {t('critical')}
-                            </span>
-                          ) : (
-                            <span className="px-3 py-1 bg-secondary text-primary rounded-full text-[10px] font-bold uppercase">
-                              {t('normal')}
-                            </span>
-                          )}
-                        </td>
-                      )}
-                      {/* Actions - visible on hover */}
-                      <td className="px-6 py-5">
-                        <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-primary hover:bg-primary/5"
-                            onClick={() => openEdit(material)}
-                          >
-                            <Pencil className="size-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive hover:bg-destructive/5"
-                            onClick={() => {
-                              if (confirm(tc('confirm') + '?')) {
-                                deleteMutation.mutate(material.id);
-                              }
-                            }}
-                          >
-                            <Trash2 className="size-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {filteredMaterials.length === 0 && (
-                  <tr>
-                    <td colSpan={visibleDataColCount} className="text-center text-muted-foreground py-12">
-                      <div className="flex flex-col items-center gap-2">
-                        <Package className="size-12 text-border" />
-                        <p className="text-sm">
-                          {searchQuery ? `"${searchQuery}" ile eşleşen stok kalemi bulunamadı` : t('materialNotFound')}
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
+          <Table className="w-full text-left border-collapse">
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground rounded-l-xl">{t('name')}</TableHead>
+                {isColumnVisible('type') && (
+                  <TableHead className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Tip</TableHead>
                 )}
-              </tbody>
-            </table>
-          </div>
+                {isColumnVisible('supplier') && (
+                  <TableHead className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Tedarikçi</TableHead>
+                )}
+                {isColumnVisible('currentStock') && (
+                  <TableHead className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Mevcut Stok</TableHead>
+                )}
+                {isColumnVisible('minStockLevel') && (
+                  <TableHead className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Min. Stok</TableHead>
+                )}
+                {isColumnVisible('lastPurchasePrice') && (
+                  <TableHead className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-right">Son Alış Fiyatı</TableHead>
+                )}
+                {isColumnVisible('stockStatus') && (
+                  <TableHead className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-center">Durum</TableHead>
+                )}
+                <TableHead className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground rounded-r-xl text-center">İşlemler</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-transparent">
+              {paginatedMaterials.map((material) => {
+                const unitLabel = UNIT_LABELS[material.unit] || material.unit;
+                const unitShort = UNIT_SHORT[material.unit] || material.unit;
+                const low = isLowStock(material);
+                const stockPct = getStockPercent(material);
+
+                return (
+                  <TableRow key={material.id} className="hover:bg-muted transition-colors group">
+                    {/* Name */}
+                    <TableCell className="px-6 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground shrink-0">
+                          <Package className="size-5" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm text-foreground">{material.name}</p>
+                          <p className="text-[10px] text-muted-foreground">{material.type || '-'} / {unitLabel}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    {/* Type */}
+                    {isColumnVisible('type') && (
+                      <TableCell className="px-6 py-5">
+                        <span className="px-3 py-1 bg-muted text-foreground rounded-full text-[10px] font-medium uppercase tracking-tight">
+                          {material.type || '-'}
+                        </span>
+                      </TableCell>
+                    )}
+                    {/* Supplier */}
+                    {isColumnVisible('supplier') && (
+                      <TableCell className="px-6 py-5">
+                        {material.supplier ? (
+                          <SupplierPopover supplier={material.supplier} />
+                        ) : (
+                          <span className="text-muted-foreground text-sm">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {/* Current Stock with progress bar */}
+                    {isColumnVisible('currentStock') && (
+                      <TableCell className="px-6 py-5">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-sm font-bold ${low ? 'text-destructive' : 'text-foreground'}`}>
+                            {formatQuantity(Number(material.currentStock))} {unitShort}
+                          </span>
+                          <div className={`w-20 h-1.5 rounded-full overflow-hidden ${low ? 'bg-destructive/10' : 'bg-muted'}`}>
+                            <div
+                              className={`h-full rounded-full ${low ? 'bg-destructive' : 'bg-primary'}`}
+                              style={{ width: `${stockPct}%` }}
+                            />
+                          </div>
+                        </div>
+                      </TableCell>
+                    )}
+                    {/* Min Stock Level */}
+                    {isColumnVisible('minStockLevel') && (
+                      <TableCell className="px-6 py-5 text-sm text-muted-foreground">
+                        {formatQuantity(Number(material.minStockLevel))} {unitShort}
+                      </TableCell>
+                    )}
+                    {/* Last Purchase Price */}
+                    {isColumnVisible('lastPurchasePrice') && (
+                      <TableCell className="px-6 py-5 text-right">
+                        <p className="text-sm font-bold text-foreground">
+                          ₺{formatCurrency(Number(material.lastPurchasePrice))}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">/{unitShort}</p>
+                      </TableCell>
+                    )}
+                    {/* Stock Status */}
+                    {isColumnVisible('stockStatus') && (
+                      <TableCell className="px-6 py-5 text-center">
+                        {low ? (
+                          <span className="px-3 py-1 bg-destructive/10 text-destructive rounded-full text-[10px] font-bold uppercase">
+                            {t('critical')}
+                          </span>
+                        ) : (
+                          <span className="px-3 py-1 bg-secondary text-primary rounded-full text-[10px] font-bold uppercase">
+                            {t('normal')}
+                          </span>
+                        )}
+                      </TableCell>
+                    )}
+                    {/* Actions - visible on hover */}
+                    <TableCell className="px-6 py-5">
+                      <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-primary hover:bg-primary/5"
+                          onClick={() => openEdit(material)}
+                        >
+                          <Pencil className="size-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:bg-destructive/5"
+                          onClick={() => {
+                            if (confirm(tc('confirm') + '?')) {
+                              deleteMutation.mutate(material.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              {filteredMaterials.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={visibleDataColCount} className="text-center text-muted-foreground py-12">
+                    <div className="flex flex-col items-center gap-2">
+                      <Package className="size-12 text-border" />
+                      <p className="text-sm">
+                        {searchQuery ? `"${searchQuery}" ile eşleşen stok kalemi bulunamadı` : t('materialNotFound')}
+                      </p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
 
           {/* Pagination */}
           {totalPages > 1 && (
