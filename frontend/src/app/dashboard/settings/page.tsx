@@ -107,7 +107,7 @@ export default function SettingsPage() {
           <h2 className="text-lg font-semibold">Hesap Durumu</h2>
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Durum:</span>
-            <span className={`text-sm font-medium ${restaurant?.status === 'APPROVED' ? 'text-green-600' : restaurant?.status === 'PENDING' ? 'text-yellow-600' : 'text-red-600'}`}>
+            <span className={`text-sm font-medium ${restaurant?.status === 'APPROVED' ? 'text-green-600' : restaurant?.status === 'PENDING' ? 'text-yellow-600' : 'text-destructive'}`}>
               {restaurant?.status === 'APPROVED' ? 'Onaylandi' : restaurant?.status === 'PENDING' ? 'Onay Bekliyor' : 'Reddedildi'}
             </span>
           </div>
