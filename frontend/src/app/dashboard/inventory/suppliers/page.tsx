@@ -3,22 +3,22 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ColumnDef } from '@tanstack/react-table';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Pencil, Trash2, Check, X, ArrowLeft } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table';
+import { Plus, Check, X, ArrowLeft, MoreHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Supplier {
@@ -150,9 +150,169 @@ export default function SuppliersPage() {
     setEditingPhone('');
   }
 
-  if (isLoading) {
-    return <div className="p-6 text-muted-foreground">Yükleniyor...</div>;
-  }
+  const columns: ColumnDef<Supplier>[] = [
+    {
+      accessorKey: 'name',
+      meta: { label: 'Tedarikçi Adı' },
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Tedarikçi Adı" />,
+      cell: ({ row }) => {
+        const s = row.original;
+        if (editingSupplier?.id === s.id) {
+          return (
+            <Input
+              value={editingName}
+              onChange={(e) => setEditingName(e.target.value)}
+              className="h-8"
+              autoFocus
+            />
+          );
+        }
+        return <span className="font-medium">{s.name}</span>;
+      },
+    },
+    {
+      accessorKey: 'description',
+      meta: { label: 'Açıklama' },
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Açıklama" />,
+      cell: ({ row }) => {
+        const s = row.original;
+        if (editingSupplier?.id === s.id) {
+          return (
+            <Textarea
+              value={editingDesc}
+              onChange={(e) => setEditingDesc(e.target.value)}
+              rows={2}
+              placeholder="Açıklama..."
+              className="min-h-[2rem]"
+            />
+          );
+        }
+        return s.description ? (
+          <span className="text-sm text-muted-foreground max-w-[200px] truncate block">{s.description}</span>
+        ) : (
+          <span className="italic text-muted-foreground text-sm">-</span>
+        );
+      },
+    },
+    {
+      accessorKey: 'deliveryType',
+      meta: { label: 'Tedarik Tipi' },
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Tedarik Tipi" />,
+      cell: ({ row }) => {
+        const s = row.original;
+        if (editingSupplier?.id === s.id) {
+          return (
+            <Select value={editingDeliveryType || ''} onValueChange={setEditingDeliveryType}>
+              <SelectTrigger className="h-8">
+                <SelectValue placeholder="Tedarik tipi seçin..." />
+              </SelectTrigger>
+              <SelectContent>
+                {DELIVERY_TYPES.map((dt) => (
+                  <SelectItem key={dt} value={dt}>{dt}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          );
+        }
+        return s.deliveryType ? (
+          <span className="text-sm">{s.deliveryType}</span>
+        ) : (
+          <span className="text-muted-foreground text-sm">-</span>
+        );
+      },
+    },
+    {
+      accessorKey: 'phone',
+      meta: { label: 'Telefon' },
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Telefon" />,
+      cell: ({ row }) => {
+        const s = row.original;
+        if (editingSupplier?.id === s.id) {
+          return (
+            <Input
+              placeholder="0 (5xx) xxx xx xx"
+              value={formatPhone(editingPhone)}
+              onChange={(e) => setEditingPhone(stripPhone(e.target.value))}
+              type="tel"
+              className="h-8"
+            />
+          );
+        }
+        return s.phone ? (
+          <span className="text-sm">{formatPhone(s.phone)}</span>
+        ) : (
+          <span className="text-muted-foreground text-sm">-</span>
+        );
+      },
+    },
+    {
+      id: 'kalem',
+      meta: { label: 'Kalem' },
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Kalem" />,
+      cell: ({ row }) => (
+        <span className="text-sm text-muted-foreground">{getKalemCount(row.original.id)}</span>
+      ),
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        const s = row.original;
+        if (editingSupplier?.id === s.id) {
+          return (
+            <div className="flex justify-end gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  if (editingName.trim()) {
+                    updateSupplierMutation.mutate({
+                      id: s.id,
+                      name: editingName.trim(),
+                      description: editingDesc.trim() || undefined,
+                      deliveryType: editingDeliveryType || undefined,
+                      phone: stripPhone(editingPhone) || undefined,
+                    });
+                  }
+                }}
+                disabled={updateSupplierMutation.isPending}
+              >
+                <Check className="h-4 w-4 text-green-600" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={cancelEditing}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          );
+        }
+        return (
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <span className="sr-only">Menüyü aç</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => startEditing(s)}>Düzenle</DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => {
+                    if (confirm(`"${s.name}" tedarikçisini silmek istediğinize emin misiniz?`)) {
+                      deleteSupplierMutation.mutate(s.id);
+                    }
+                  }}
+                >
+                  Sil
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    },
+  ];
 
   return (
     <div className="p-6 space-y-6">
@@ -213,7 +373,7 @@ export default function SuppliersPage() {
             </div>
             <div>
               <Label>Tedarik Tipi</Label>
-              <Select value={newDeliveryType || ""} onValueChange={setNewDeliveryType}>
+              <Select value={newDeliveryType || ''} onValueChange={setNewDeliveryType}>
                 <SelectTrigger>
                   <SelectValue placeholder="Tedarik tipi seçin..." />
                 </SelectTrigger>
@@ -240,144 +400,13 @@ export default function SuppliersPage() {
           <CardTitle>Tedarikçiler ({suppliers.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Tedarikçi Adı</TableHead>
-                <TableHead>Açıklama</TableHead>
-                <TableHead className="text-center">Tedarik Tipi</TableHead>
-                <TableHead className="text-center">Telefon</TableHead>
-                <TableHead className="text-center">Kalem</TableHead>
-                <TableHead className="text-right">İşlemler</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {suppliers.map((s) => (
-                <TableRow key={s.id}>
-                  {editingSupplier?.id === s.id ? (
-                    <>
-                      <TableCell>
-                        <Input
-                          value={editingName}
-                          onChange={(e) => setEditingName(e.target.value)}
-                          className="h-8"
-                          autoFocus
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Textarea
-                          value={editingDesc}
-                          onChange={(e) => setEditingDesc(e.target.value)}
-                          rows={2}
-                          placeholder="Açıklama..."
-                          className="min-h-[2rem]"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Select value={editingDeliveryType || ""} onValueChange={setEditingDeliveryType}>
-                          <SelectTrigger className="h-8">
-                            <SelectValue placeholder="Tedarik tipi seçin..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {DELIVERY_TYPES.map((dt) => (
-                              <SelectItem key={dt} value={dt}>{dt}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          placeholder="0 (5xx) xxx xx xx"
-                          value={formatPhone(editingPhone)}
-                          onChange={(e) => setEditingPhone(stripPhone(e.target.value))}
-                          type="tel"
-                          className="h-8"
-                        />
-                      </TableCell>
-                      <TableCell className="text-center text-sm text-muted-foreground">
-                        {getKalemCount(s.id)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              if (editingName.trim()) {
-                                updateSupplierMutation.mutate({
-                                  id: s.id,
-                                  name: editingName.trim(),
-                                  description: editingDesc.trim() || undefined,
-                                  deliveryType: editingDeliveryType || undefined,
-                                  phone: stripPhone(editingPhone) || undefined,
-                                });
-                              }
-                            }}
-                            disabled={updateSupplierMutation.isPending}
-                          >
-                            <Check className="h-4 w-4 text-green-600" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={cancelEditing}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </>
-                  ) : (
-                    <>
-                      <TableCell className="font-medium">{s.name}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">
-                        {s.description || <span className="italic">-</span>}
-                      </TableCell>
-                      <TableCell className="text-center text-sm">
-                        {s.deliveryType || <span className="text-muted-foreground">-</span>}
-                      </TableCell>
-                      <TableCell className="text-center text-sm">
-                        {s.phone ? formatPhone(s.phone) : <span className="text-muted-foreground">-</span>}
-                      </TableCell>
-                      <TableCell className="text-center text-sm text-muted-foreground">
-                        {getKalemCount(s.id)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => startEditing(s)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              if (confirm(`"${s.name}" tedarikçisini silmek istediğinize emin misiniz?`)) {
-                                deleteSupplierMutation.mutate(s.id);
-                              }
-                            }}
-                            disabled={deleteSupplierMutation.isPending}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </>
-                  )}
-                </TableRow>
-              ))}
-              {suppliers.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                    Henüz tedarikçi tanımlanmamış
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={suppliers}
+            showToolbar={false}
+            isLoading={isLoading}
+            emptyMessage="Henüz tedarikçi tanımlanmamış"
+          />
         </CardContent>
       </Card>
     </div>
