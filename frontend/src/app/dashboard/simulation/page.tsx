@@ -23,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -68,8 +69,6 @@ function formatMonth(ym: string): string {
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount);
 
-const selectClass =
-  'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring';
 
 export default function SimulationPage() {
   const router = useRouter();
@@ -552,19 +551,16 @@ export default function SimulationPage() {
             <form onSubmit={handleAddRevenue} className="flex items-end gap-2">
               <div className="flex-1 space-y-1">
                 <Label htmlFor="rev-product">Ürün</Label>
-                <select
-                  id="rev-product"
-                  className={selectClass}
-                  value={revenueProductId}
-                  onChange={(e) => setRevenueProductId(e.target.value)}
-                >
-                  <option value="">Ürün seçin...</option>
-                  {menuProducts.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
+                <Select value={revenueProductId || ""} onValueChange={setRevenueProductId}>
+                  <SelectTrigger id="rev-product">
+                    <SelectValue placeholder="Ürün seçin..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {menuProducts.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="w-32 space-y-1">
                 <Label htmlFor="rev-quantity">Adet</Label>
