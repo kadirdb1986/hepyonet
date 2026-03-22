@@ -8,25 +8,17 @@ import {
   ArrowLeft,
   Save,
   Plus,
-  CheckCircle,
-  XCircle,
   Calendar,
   Briefcase,
+  MoreHorizontal,
 } from 'lucide-react';
+import { ColumnDef } from '@tanstack/react-table';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -35,6 +27,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { DataTable } from '@/components/ui/data-table';
 
 interface LeaveRecord {
   id: string;
@@ -94,14 +93,14 @@ function formatPhone(raw: string): string {
 }
 
 const leaveTypeMap = {
-  ANNUAL: { label: 'Yillik Izin', variant: 'default' as const },
-  SICK: { label: 'Hastalik Izni', variant: 'secondary' as const },
+  ANNUAL: { label: 'Yıllık', variant: 'default' as const },
+  SICK: { label: 'Hastalık', variant: 'secondary' as const },
   OTHER: { label: 'Diğer', variant: 'outline' as const },
 };
 
 const leaveStatusMap = {
-  PENDING: { label: 'Beklemede', variant: 'secondary' as const },
-  APPROVED: { label: 'Onaylandi', variant: 'default' as const },
+  PENDING: { label: 'Bekliyor', variant: 'secondary' as const },
+  APPROVED: { label: 'Onaylı', variant: 'default' as const },
   REJECTED: { label: 'Reddedildi', variant: 'destructive' as const },
 };
 
@@ -282,6 +281,87 @@ export default function PersonnelDetailPage() {
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('tr-TR');
   };
+
+  const leaveColumns: ColumnDef<LeaveRecord>[] = [
+    {
+      accessorKey: 'startDate',
+      header: 'Başlangıç',
+      cell: ({ row }) => formatDate(row.original.startDate),
+    },
+    {
+      accessorKey: 'endDate',
+      header: 'Bitiş',
+      cell: ({ row }) => formatDate(row.original.endDate),
+    },
+    {
+      accessorKey: 'type',
+      header: 'İzin Türü',
+      cell: ({ row }) => {
+        const { label, variant } = leaveTypeMap[row.original.type];
+        return <Badge variant={variant}>{label}</Badge>;
+      },
+    },
+    {
+      accessorKey: 'status',
+      header: 'Durum',
+      cell: ({ row }) => {
+        const { label, variant } = leaveStatusMap[row.original.status];
+        return <Badge variant={variant}>{label}</Badge>;
+      },
+    },
+    {
+      accessorKey: 'notes',
+      header: 'Notlar',
+      cell: ({ row }) => (
+        <span className="max-w-[200px] truncate block">
+          {row.original.notes || '\u2014'}
+        </span>
+      ),
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        const leave = row.original;
+        if (leave.status !== 'PENDING') return null;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <span className="sr-only">Menüyü aç</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() =>
+                  updateLeaveStatusMutation.mutate({
+                    leaveId: leave.id,
+                    status: 'APPROVED',
+                  })
+                }
+                disabled={updateLeaveStatusMutation.isPending}
+              >
+                Onayla
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() =>
+                  updateLeaveStatusMutation.mutate({
+                    leaveId: leave.id,
+                    status: 'REJECTED',
+                  })
+                }
+                disabled={updateLeaveStatusMutation.isPending}
+              >
+                Reddet
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   if (isLoading) {
     return (
@@ -547,79 +627,13 @@ export default function PersonnelDetailPage() {
           </Button>
         </CardHeader>
         <CardContent>
-          {personnel.leaveRecords.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Henüz izin kaydı yok.
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Başlangıç</TableHead>
-                    <TableHead>Bitis</TableHead>
-                    <TableHead>Izin Turu</TableHead>
-                    <TableHead>Durum</TableHead>
-                    <TableHead>Notlar</TableHead>
-                    <TableHead>İşlemler</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {personnel.leaveRecords.map((leave) => (
-                    <TableRow key={leave.id}>
-                      <TableCell>{formatDate(leave.startDate)}</TableCell>
-                      <TableCell>{formatDate(leave.endDate)}</TableCell>
-                      <TableCell>
-                        <Badge variant={leaveTypeMap[leave.type].variant}>
-                          {leaveTypeMap[leave.type].label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={leaveStatusMap[leave.status].variant}>
-                          {leaveStatusMap[leave.status].label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="max-w-[200px] truncate">
-                        {leave.notes || '\u2014'}
-                      </TableCell>
-                      <TableCell>
-                        {leave.status === 'PENDING' && (
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              disabled={updateLeaveStatusMutation.isPending}
-                              onClick={() =>
-                                updateLeaveStatusMutation.mutate({
-                                  leaveId: leave.id,
-                                  status: 'APPROVED',
-                                })
-                              }
-                            >
-                              <CheckCircle className="h-4 w-4 text-green-600" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              disabled={updateLeaveStatusMutation.isPending}
-                              onClick={() =>
-                                updateLeaveStatusMutation.mutate({
-                                  leaveId: leave.id,
-                                  status: 'REJECTED',
-                                })
-                              }
-                            >
-                              <XCircle className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+          <DataTable
+            columns={leaveColumns}
+            data={personnel.leaveRecords}
+            showPagination={false}
+            showToolbar={false}
+            emptyMessage="Henüz izin kaydı yok."
+          />
         </CardContent>
       </Card>
 
