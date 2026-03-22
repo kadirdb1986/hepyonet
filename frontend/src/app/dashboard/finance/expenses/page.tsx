@@ -14,6 +14,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Plus, Pencil, Trash2, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -51,8 +53,6 @@ function formatMonth(ym: string): string {
   const months = ['Oca', 'Sub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Agu', 'Eyl', 'Eki', 'Kas', 'Ara'];
   return `${months[parseInt(m, 10) - 1]} ${y}`;
 }
-
-const selectClass = 'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring';
 
 export default function ExpensesPage() {
   const queryClient = useQueryClient();
@@ -229,18 +229,16 @@ export default function ExpensesPage() {
 
   // ─── Kategori seçici (ortak) ───
   const categorySelect = (id: string) => (
-    <select
-      id={id}
-      className={selectClass}
-      value={form.category}
-      onChange={(e) => setForm({ ...form, category: e.target.value })}
-      required
-    >
-      <option value="">Kategori seçin...</option>
-      {categories.map((cat) => (
-        <option key={cat.id} value={cat.name}>{cat.name}</option>
-      ))}
-    </select>
+    <Select value={form.category || ""} onValueChange={(value) => setForm({ ...form, category: value })}>
+      <SelectTrigger id={id}>
+        <SelectValue placeholder="Kategori seçin..." />
+      </SelectTrigger>
+      <SelectContent>
+        {categories.map((cat) => (
+          <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 
   return (
@@ -379,10 +377,15 @@ export default function ExpensesPage() {
             </div>
             <div className="space-y-2">
               <Label>Ait Olduğu Dönem</Label>
-              <select className={selectClass} value={form.periodType} onChange={(e) => setForm({ ...form, periodType: e.target.value as PeriodType })}>
-                <option value="SAME_MONTH">Aynı Ay (ödeme tarihi)</option>
-                <option value="DIFFERENT_MONTH">Farklı Ay</option>
-              </select>
+              <Select value={form.periodType} onValueChange={(value) => setForm({ ...form, periodType: value as PeriodType })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SAME_MONTH">Aynı Ay (ödeme tarihi)</SelectItem>
+                  <SelectItem value="DIFFERENT_MONTH">Farklı Ay</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             {form.periodType === 'DIFFERENT_MONTH' && (
               <div className="space-y-2">
@@ -446,16 +449,17 @@ export default function ExpensesPage() {
         </div>
         <div className="flex items-center gap-2">
           <Label className="text-sm">Kategori:</Label>
-          <select
-            className="flex h-9 w-40 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-          >
-            <option value="ALL">Tümü</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.name}>{cat.name}</option>
-            ))}
-          </select>
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Tümü</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -477,57 +481,51 @@ export default function ExpensesPage() {
           ) : expenses.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">Henüz gider kaydı yok</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2 px-3 font-medium">Başlık</th>
-                    <th className="text-left py-2 px-3 font-medium">Kategori</th>
-                    <th className="text-right py-2 px-3 font-medium">Tutar</th>
-                    <th className="text-left py-2 px-3 font-medium">Ödeme Tarihi</th>
-                    <th className="text-center py-2 px-3 font-medium">Dönem</th>
-                    <th className="text-right py-2 px-3 font-medium">İşlemler</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {expenses.map((expense: any) => (
-                    <tr key={expense.id} className="border-b last:border-0 hover:bg-muted">
-                      <td className="py-2 px-3">{expense.title}</td>
-                      <td className="py-2 px-3">
-                        <Badge variant="outline">{expense.category}</Badge>
-                      </td>
-                      <td className="py-2 px-3 text-right font-medium">
-                        {formatCurrency(Number(expense.amount))}
-                      </td>
-                      <td className="py-2 px-3">{formatDate(expense.paymentDate)}</td>
-                      <td className="py-2 px-3 text-center">
-                        {expense.effectiveMonth ? (
-                          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-                            {formatMonth(expense.effectiveMonth)}
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">{formatMonth(expense.paymentDate.substring(0, 7))}</Badge>
-                        )}
-                      </td>
-                      <td className="py-2 px-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(expense)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(expense.id)}>
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Başlık</TableHead>
+                  <TableHead>Kategori</TableHead>
+                  <TableHead className="text-right">Tutar</TableHead>
+                  <TableHead>Ödeme Tarihi</TableHead>
+                  <TableHead className="text-center">Dönem</TableHead>
+                  <TableHead className="text-right">İşlemler</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {expenses.map((expense: any) => (
+                  <TableRow key={expense.id}>
+                    <TableCell>{expense.title}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{expense.category}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
+                      {formatCurrency(Number(expense.amount))}
+                    </TableCell>
+                    <TableCell>{formatDate(expense.paymentDate)}</TableCell>
+                    <TableCell className="text-center">
+                      {expense.effectiveMonth ? (
+                        <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+                          {formatMonth(expense.effectiveMonth)}
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary">{formatMonth(expense.paymentDate.substring(0, 7))}</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="sm" onClick={() => handleEdit(expense)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDelete(expense.id)}>
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
