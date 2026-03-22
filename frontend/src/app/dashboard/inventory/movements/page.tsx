@@ -252,7 +252,7 @@ export default function StockMovementsPage() {
                         {t('in')}
                       </Badge>
                     ) : (
-                      <Badge className="bg-red-100 text-red-800">
+                      <Badge className="bg-destructive/10 text-destructive">
                         <ArrowUpCircle className="mr-1 h-3 w-3" />
                         {t('out')}
                       </Badge>
