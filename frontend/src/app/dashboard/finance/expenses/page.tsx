@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ColumnDef } from '@tanstack/react-table';
+import { MoreHorizontal, Plus, Pencil, Trash2, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
+import { toast } from 'sonner';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,14 +17,28 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Pencil, Trash2, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
-import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table';
 
 interface ExpenseCategory {
   id: string;
   name: string;
+}
+
+interface Expense {
+  id: string;
+  title: string;
+  category: string;
+  amount: number | string;
+  paymentDate: string;
+  effectiveMonth?: string | null;
+  effectiveEndMonth?: string | null;
 }
 
 type PeriodType = 'SAME_MONTH' | 'DIFFERENT_MONTH' | 'MULTI_MONTH';
@@ -50,7 +67,7 @@ const emptyForm: ExpenseForm = {
 
 function formatMonth(ym: string): string {
   const [y, m] = ym.split('-');
-  const months = ['Oca', 'Sub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Agu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+  const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
   return `${months[parseInt(m, 10) - 1]} ${y}`;
 }
 
@@ -133,7 +150,7 @@ export default function ExpensesPage() {
   };
 
   // ─── Giderler ───
-  const { data: expenses = [], isLoading } = useQuery({
+  const { data: expenses = [], isLoading } = useQuery<Expense[]>({
     queryKey: ['expenses', filterCategory, dateRange.startDate, dateRange.endDate],
     queryFn: async () => {
       const params: any = {
@@ -202,7 +219,7 @@ export default function ExpensesPage() {
     });
   };
 
-  const handleEdit = (expense: any) => {
+  const handleEdit = (expense: Expense) => {
     setEditingId(expense.id);
     setForm({
       title: expense.title,
@@ -229,7 +246,7 @@ export default function ExpensesPage() {
 
   // ─── Kategori seçici (ortak) ───
   const categorySelect = (id: string) => (
-    <Select value={form.category || ""} onValueChange={(value) => setForm({ ...form, category: value })}>
+    <Select value={form.category || ''} onValueChange={(value) => setForm({ ...form, category: value })}>
       <SelectTrigger id={id}>
         <SelectValue placeholder="Kategori seçin..." />
       </SelectTrigger>
@@ -240,6 +257,94 @@ export default function ExpensesPage() {
       </SelectContent>
     </Select>
   );
+
+  // ─── Tablo kolonları ───
+  const columns: ColumnDef<Expense>[] = [
+    {
+      accessorKey: 'title',
+      meta: { label: 'Başlık' },
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Başlık" />,
+      cell: ({ row }) => <span className="font-medium">{row.original.title}</span>,
+    },
+    {
+      accessorKey: 'category',
+      meta: { label: 'Kategori' },
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Kategori" />,
+      cell: ({ row }) => <Badge variant="outline">{row.original.category}</Badge>,
+    },
+    {
+      accessorKey: 'amount',
+      meta: { label: 'Tutar' },
+      header: ({ column }) => (
+        <div className="text-right">
+          <DataTableColumnHeader column={column} title="Tutar" />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-right font-medium">
+          {formatCurrency(Number(row.original.amount))}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'paymentDate',
+      meta: { label: 'Ödeme Tarihi' },
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Ödeme Tarihi" />,
+      cell: ({ row }) => formatDate(row.original.paymentDate),
+    },
+    {
+      id: 'period',
+      meta: { label: 'Dönem' },
+      header: 'Dönem',
+      cell: ({ row }) => {
+        const expense = row.original;
+        if (expense.effectiveMonth) {
+          return (
+            <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+              {formatMonth(expense.effectiveMonth)}
+            </Badge>
+          );
+        }
+        return (
+          <Badge variant="secondary">
+            {formatMonth(expense.paymentDate.substring(0, 7))}
+          </Badge>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        const expense = row.original;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <span className="sr-only">Menüyü aç</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleEdit(expense)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Düzenle
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => handleDelete(expense.id)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Sil
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
+
+  const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
   return (
     <div className="space-y-6">
@@ -433,7 +538,7 @@ export default function ExpensesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ─── Filtre ─── */}
+      {/* ─── Filtreler (ay + kategori) ─── */}
       <div className="flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" onClick={prevMonth}>
@@ -463,70 +568,26 @@ export default function ExpensesPage() {
         </div>
       </div>
 
-      {/* ─── Tablo ─── */}
+      {/* ─── DataTable ─── */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-base">Gider Listesi</CardTitle>
             {expenses.length > 0 && (
               <span className="text-sm font-medium">
-                Toplam: {formatCurrency(expenses.reduce((sum: number, e: any) => sum + Number(e.amount), 0))}
+                Toplam: {formatCurrency(total)}
               </span>
             )}
           </div>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <p className="text-muted-foreground text-center py-8">Yükleniyor...</p>
-          ) : expenses.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">Henüz gider kaydı yok</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Başlık</TableHead>
-                  <TableHead>Kategori</TableHead>
-                  <TableHead className="text-right">Tutar</TableHead>
-                  <TableHead>Ödeme Tarihi</TableHead>
-                  <TableHead className="text-center">Dönem</TableHead>
-                  <TableHead className="text-right">İşlemler</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {expenses.map((expense: any) => (
-                  <TableRow key={expense.id}>
-                    <TableCell>{expense.title}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{expense.category}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {formatCurrency(Number(expense.amount))}
-                    </TableCell>
-                    <TableCell>{formatDate(expense.paymentDate)}</TableCell>
-                    <TableCell className="text-center">
-                      {expense.effectiveMonth ? (
-                        <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-                          {formatMonth(expense.effectiveMonth)}
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">{formatMonth(expense.paymentDate.substring(0, 7))}</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => handleEdit(expense)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDelete(expense.id)}>
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <DataTable
+            columns={columns}
+            data={expenses}
+            isLoading={isLoading}
+            showToolbar={false}
+            emptyMessage="Henüz gider kaydı yok"
+          />
         </CardContent>
       </Card>
     </div>
