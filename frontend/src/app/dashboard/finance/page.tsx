@@ -6,7 +6,8 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { DataTable } from '@/components/ui/data-table';
+import { ColumnDef } from '@tanstack/react-table';
 import {
   Calendar,
   ChevronLeft,
@@ -16,8 +17,6 @@ import {
   TrendingUp,
   TrendingDown,
   Wallet,
-  Filter,
-  Search,
   Receipt,
   Monitor,
   FileText,
@@ -65,6 +64,13 @@ function getDayName(day: number, month: string): string {
 function formatDateFull(day: number, month: string): string {
   const [y, m] = month.split('-');
   return `${day} ${MONTH_NAMES[parseInt(m, 10) - 1]} ${y}`;
+}
+
+interface DailyBreakdownRow {
+  day: number;
+  revenue: number;
+  expense: number;
+  net: number;
 }
 
 export default function FinanceOverviewPage() {
@@ -177,7 +183,7 @@ export default function FinanceOverviewPage() {
     };
   }, [summary]);
 
-  const filteredBreakdown = useMemo(() => {
+  const filteredBreakdown = useMemo((): DailyBreakdownRow[] => {
     if (!summary?.dailyBreakdown) return [];
     // Seçili ay bu ay ise bugüne kadar, geçmiş ay ise tümü
     const now = new Date();
@@ -186,7 +192,13 @@ export default function FinanceOverviewPage() {
     const maxDay = isCurrentMonth ? now.getDate() : 31;
     return [...summary.dailyBreakdown]
       .filter((d: any) => d.day <= maxDay)
-      .sort((a: any, b: any) => b.day - a.day);
+      .sort((a: any, b: any) => b.day - a.day)
+      .map((d: any) => ({
+        day: Number(d.day),
+        revenue: Number(d.revenue),
+        expense: Number(d.expense),
+        net: Number(d.net),
+      }));
   }, [summary, selectedMonth]);
 
   const formatCurrency = (amount: number) => {
@@ -203,6 +215,54 @@ export default function FinanceOverviewPage() {
     if (amount >= 1000) return `${(amount / 1000).toFixed(1)}k`;
     return amount.toString();
   };
+
+  const columns: ColumnDef<DailyBreakdownRow>[] = useMemo(() => [
+    {
+      accessorKey: 'day',
+      header: 'Tarih',
+      cell: ({ row }) => (
+        <div className="flex flex-col px-2 py-1">
+          <span className="text-sm font-bold text-foreground">{formatDateFull(row.original.day, selectedMonth)}</span>
+          <span className="text-[10px] text-muted-foreground uppercase font-bold">{getDayName(row.original.day, selectedMonth)}</span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'revenue',
+      header: 'Ciro',
+      cell: ({ row }) => (
+        <span className="text-sm font-bold text-primary">
+          {row.original.revenue > 0 ? formatCurrency(row.original.revenue) : '\u2014'}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'expense',
+      header: 'Gider',
+      cell: ({ row }) => (
+        <span className="text-sm font-medium text-destructive">
+          {row.original.expense > 0 ? formatCurrency(row.original.expense) : '\u2014'}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'net',
+      header: 'Net Durum',
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <div className={`w-1.5 h-1.5 rounded-full ${row.original.net >= 0 ? 'bg-primary' : 'bg-destructive'}`} />
+          <span className="text-sm font-bold text-foreground">{formatCurrency(row.original.net)}</span>
+        </div>
+      ),
+    },
+    {
+      id: 'actions',
+      header: 'Detay',
+      cell: () => (
+        <Button variant="link" className="p-0 h-auto text-sm font-bold">İncele</Button>
+      ),
+    },
+  ], [selectedMonth]);
 
   return (
     <div className="pb-24">
@@ -511,78 +571,32 @@ export default function FinanceOverviewPage() {
           {/* Data Table Section */}
           {filteredBreakdown.length > 0 && (
             <section className="bg-card rounded-2xl shadow-xs border border-border/5 overflow-hidden">
-              <div className="p-8 border-b border-border/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-xl font-bold text-foreground">Gun Gun Gelir / Gider</h3>
-                  <p className="text-sm text-muted-foreground">Son 30 gunluk detayli islem listesi</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline">
-                    <Filter className="size-4" />
-                    Filtrele
-                  </Button>
-                  <Button variant="outline">
-                    <Search className="size-4" />
-                    Bul
-                  </Button>
+              <div className="p-8 border-b border-border/10">
+                <h3 className="text-xl font-bold text-foreground">Gun Gun Gelir / Gider</h3>
+                <p className="text-sm text-muted-foreground">Son 30 gunluk detayli islem listesi</p>
+              </div>
+              <div className="p-0">
+                <DataTable
+                  columns={columns}
+                  data={filteredBreakdown}
+                  showPagination={false}
+                  showToolbar={false}
+                  emptyMessage="Bu ay icin veri bulunamadi."
+                />
+                {/* Footer totals row */}
+                <div className="flex items-center gap-0 border-t-2 border-border/20 bg-muted px-4 py-4 text-sm font-bold">
+                  <div className="flex-1 px-2 text-foreground font-black">Toplam</div>
+                  <div className="flex-1 px-2 text-primary">{formatCurrency(summary.totalRevenue)}</div>
+                  <div className="flex-1 px-2 text-destructive font-medium">{formatCurrency(summary.totalExpenses)}</div>
+                  <div className="flex-1 px-2">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-1.5 h-1.5 rounded-full ${summary.netIncome >= 0 ? 'bg-primary' : 'bg-destructive'}`} />
+                      <span className="text-foreground">{formatCurrency(summary.netIncome)}</span>
+                    </div>
+                  </div>
+                  <div className="flex-1 px-2" />
                 </div>
               </div>
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted">
-                    <TableHead className="px-8 py-4 text-[10px] font-black uppercase tracking-wider">Tarih</TableHead>
-                    <TableHead className="px-8 py-4 text-[10px] font-black uppercase tracking-wider">Ciro</TableHead>
-                    <TableHead className="px-8 py-4 text-[10px] font-black uppercase tracking-wider">Gider</TableHead>
-                    <TableHead className="px-8 py-4 text-[10px] font-black uppercase tracking-wider">Net Durum</TableHead>
-                    <TableHead className="px-8 py-4 text-[10px] font-black uppercase tracking-wider">Detay</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredBreakdown.map((d: any) => (
-                    <TableRow key={d.day} className="hover:bg-muted transition-colors">
-                      <TableCell className="px-8 py-5">
-                        <div className="flex flex-col">
-                          <span className="text-sm font-bold text-foreground">{formatDateFull(d.day, selectedMonth)}</span>
-                          <span className="text-[10px] text-muted-foreground uppercase font-bold">{getDayName(d.day, selectedMonth)}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-8 py-5">
-                        <span className="text-sm font-bold text-primary">
-                          {d.revenue > 0 ? formatCurrency(d.revenue) : '\u2014'}
-                        </span>
-                      </TableCell>
-                      <TableCell className="px-8 py-5">
-                        <span className="text-sm font-medium text-destructive">
-                          {d.expense > 0 ? formatCurrency(d.expense) : '\u2014'}
-                        </span>
-                      </TableCell>
-                      <TableCell className="px-8 py-5">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-1.5 h-1.5 rounded-full ${d.net >= 0 ? 'bg-primary' : 'bg-destructive'}`} />
-                          <span className="text-sm font-bold text-foreground">{formatCurrency(d.net)}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-8 py-5">
-                        <Button variant="link" className="p-0 h-auto text-sm font-bold">İncele</Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-                <TableFooter>
-                  <TableRow className="bg-muted border-t-2 border-border/20">
-                    <TableCell className="px-8 py-5 text-sm font-black text-foreground">Toplam</TableCell>
-                    <TableCell className="px-8 py-5 text-sm font-bold text-primary">{formatCurrency(summary.totalRevenue)}</TableCell>
-                    <TableCell className="px-8 py-5 text-sm font-medium text-destructive">{formatCurrency(summary.totalExpenses)}</TableCell>
-                    <TableCell className="px-8 py-5">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-1.5 h-1.5 rounded-full ${summary.netIncome >= 0 ? 'bg-primary' : 'bg-destructive'}`} />
-                        <span className="text-sm font-bold text-foreground">{formatCurrency(summary.netIncome)}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="px-8 py-5" />
-                  </TableRow>
-                </TableFooter>
-              </Table>
             </section>
           )}
 
