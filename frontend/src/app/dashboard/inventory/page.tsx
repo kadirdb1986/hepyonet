@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ColumnDef, FilterFn, Row, VisibilityState } from '@tanstack/react-table';
 import api from '@/lib/api';
 import { handleNumericInput, displayNumericValue, parseNumericValue } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -24,10 +24,17 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
-  Plus, Pencil, Trash2, X, Check, Truck, Tag, AlertTriangle,
-  Search, SlidersHorizontal, Download, Package, ChevronLeft, ChevronRight,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table';
+import {
+  Plus, Truck, Tag, AlertTriangle,
+  Download, Package, MoreHorizontal, Check, X, Pencil, Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -39,8 +46,6 @@ interface Supplier {
   phone: string | null;
 }
 
-const DELIVERY_TYPES = ['Kargo', 'Ayaga Hizmet', 'Kendin Gidip Aliyorsun'] as const;
-
 /** Telefon numarasını 0 (5xx) xxx xx xx formatına çevir */
 function formatPhone(raw: string): string {
   const digits = raw.replace(/\D/g, '').slice(0, 11);
@@ -51,11 +56,6 @@ function formatPhone(raw: string): string {
   if (digits.length > 7) result += ' ' + digits.slice(7, 9);
   if (digits.length > 9) result += ' ' + digits.slice(9, 11);
   return result;
-}
-
-/** Sadece rakamları al (kayıt için) */
-function stripPhone(formatted: string): string {
-  return formatted.replace(/\D/g, '');
 }
 
 interface RawMaterial {
@@ -92,17 +92,6 @@ const UNIT_SHORT: Record<string, string> = {
   ML: 'ml',
   ADET: 'adet',
 };
-
-const TOGGLEABLE_COLUMNS = [
-  { key: 'type', label: 'Tip' },
-  { key: 'supplier', label: 'Tedarikçi' },
-  { key: 'currentStock', label: 'Mevcut Stok' },
-  { key: 'minStockLevel', label: 'Minimum Stok' },
-  { key: 'lastPurchasePrice', label: 'Son Alış Fiyatı' },
-  { key: 'stockStatus', label: 'Stok Durumu' },
-] as const;
-
-const DEFAULT_VISIBLE_COLUMNS = ['currentStock', 'lastPurchasePrice', 'supplier'];
 
 /** Miktar formatla: tam sayıysa küsürat gösterme, varsa virgülle göster */
 function formatQuantity(val: number): string {
@@ -150,9 +139,12 @@ function getStockPercent(material: RawMaterial): number {
   const current = Number(material.currentStock);
   const min = Number(material.minStockLevel);
   if (min <= 0) return 100;
-  // max stock estimated as 5x min
   const max = min * 5;
   return Math.min(100, Math.max(5, (current / max) * 100));
+}
+
+function isLowStock(material: RawMaterial): boolean {
+  return Number(material.minStockLevel) > 0 && Number(material.currentStock) <= Number(material.minStockLevel);
 }
 
 export default function InventoryPage() {
@@ -166,9 +158,6 @@ export default function InventoryPage() {
   const [newTypeName, setNewTypeName] = useState('');
   const [editingType, setEditingType] = useState<MaterialType | null>(null);
   const [editingTypeName, setEditingTypeName] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [columnMenuOpen, setColumnMenuOpen] = useState(false);
-  const columnMenuRef = useRef<HTMLDivElement>(null);
   const [form, setForm] = useState({
     name: '',
     type: '' as string,
@@ -178,22 +167,6 @@ export default function InventoryPage() {
     minStockLevel: '' as string | number,
     supplierId: '' as string,
   });
-
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 50;
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (columnMenuRef.current && !columnMenuRef.current.contains(e.target as Node)) {
-        setColumnMenuOpen(false);
-      }
-    }
-    if (columnMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [columnMenuOpen]);
 
   const { data: materials = [], isLoading } = useQuery<RawMaterial[]>({
     queryKey: ['raw-materials'],
@@ -220,27 +193,19 @@ export default function InventoryPage() {
     queryFn: () => api.get('/restaurants/current').then((r) => r.data),
   });
 
+  // Compute initial column visibility from saved DB state or defaults
+  // DEFAULT_VISIBLE_COLUMNS was ['currentStock', 'lastPurchasePrice', 'supplier']
+  // All toggleable columns: type, supplier, currentStock, minStockLevel, lastPurchasePrice, stockStatus
   const savedColumns = restaurantData?.settings?.inventoryColumns as string[] | undefined;
-  const visibleColumns = savedColumns ?? DEFAULT_VISIBLE_COLUMNS;
-
-  const columnSettingsMutation = useMutation({
-    mutationFn: (columns: string[]) =>
-      api.patch('/restaurants/current/settings', { settings: { inventoryColumns: columns } }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['restaurant'] });
-    },
-  });
-
-  function toggleColumn(key: string) {
-    const next = visibleColumns.includes(key)
-      ? visibleColumns.filter((c) => c !== key)
-      : [...visibleColumns, key];
-    columnSettingsMutation.mutate(next);
-  }
-
-  function isColumnVisible(key: string) {
-    return visibleColumns.includes(key);
-  }
+  const visibleColumnKeys = savedColumns ?? ['currentStock', 'lastPurchasePrice', 'supplier'];
+  const initialColumnVisibility: VisibilityState = {
+    type: visibleColumnKeys.includes('type'),
+    supplier: visibleColumnKeys.includes('supplier'),
+    currentStock: visibleColumnKeys.includes('currentStock'),
+    minStockLevel: visibleColumnKeys.includes('minStockLevel'),
+    lastPurchasePrice: visibleColumnKeys.includes('lastPurchasePrice'),
+    stockStatus: visibleColumnKeys.includes('stockStatus'),
+  };
 
   const createMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => api.post('/raw-materials', data),
@@ -353,52 +318,207 @@ export default function InventoryPage() {
     }
   }
 
-  function isLowStock(material: RawMaterial) {
-    return Number(material.minStockLevel) > 0 && Number(material.currentStock) <= Number(material.minStockLevel);
-  }
+  // Filtered by active tab only; search is handled by DataTable globalFilter
+  const filteredMaterials = activeTab === 'ALL'
+    ? materials
+    : materials.filter((m) => m.type === activeTab);
 
   // Compute total stock value
   const totalStockValue = materials.reduce((sum, m) => {
     return sum + Number(m.currentStock) * Number(m.lastPurchasePrice);
   }, 0);
 
-  // Filtered materials
-  const filteredMaterials = materials.filter(
-    (m) =>
-      (activeTab === 'ALL' || m.type === activeTab) &&
-      (!searchQuery || m.name.toLocaleLowerCase('tr-TR').includes(searchQuery.toLocaleLowerCase('tr-TR')))
+  const globalFilterFn: FilterFn<RawMaterial> = (row: Row<RawMaterial>, _columnId: string, filterValue: string) => {
+    const q = filterValue.toLocaleLowerCase('tr-TR');
+    return row.original.name.toLocaleLowerCase('tr-TR').includes(q);
+  };
+
+  const columns: ColumnDef<RawMaterial>[] = [
+    {
+      accessorKey: 'name',
+      meta: { label: 'Stok Kalemi' },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Stok Kalemi" />
+      ),
+      cell: ({ row }) => {
+        const material = row.original;
+        const unitLabel = UNIT_LABELS[material.unit] || material.unit;
+        return (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground shrink-0">
+              <Package className="size-5" />
+            </div>
+            <div>
+              <p className="font-bold text-sm text-foreground">{material.name}</p>
+              <p className="text-[10px] text-muted-foreground">{material.type || '-'} / {unitLabel}</p>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'type',
+      meta: { label: 'Tip' },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Tip" />
+      ),
+      cell: ({ row }) => (
+        <span className="px-3 py-1 bg-muted text-foreground rounded-full text-[10px] font-medium uppercase tracking-tight">
+          {row.original.type || '-'}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'supplier',
+      meta: { label: 'Tedarikçi' },
+      header: 'Tedarikçi',
+      enableSorting: false,
+      cell: ({ row }) => {
+        const material = row.original;
+        return material.supplier ? (
+          <SupplierPopover supplier={material.supplier} />
+        ) : (
+          <span className="text-muted-foreground text-sm">-</span>
+        );
+      },
+    },
+    {
+      accessorKey: 'currentStock',
+      meta: { label: 'Mevcut Stok' },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Mevcut Stok" />
+      ),
+      cell: ({ row }) => {
+        const material = row.original;
+        const unitShort = UNIT_SHORT[material.unit] || material.unit;
+        const low = isLowStock(material);
+        const stockPct = getStockPercent(material);
+        return (
+          <div className="flex items-center gap-2">
+            <span className={`text-sm font-bold ${low ? 'text-destructive' : 'text-foreground'}`}>
+              {formatQuantity(Number(material.currentStock))} {unitShort}
+            </span>
+            <div className={`w-20 h-1.5 rounded-full overflow-hidden ${low ? 'bg-destructive/10' : 'bg-muted'}`}>
+              <div
+                className={`h-full rounded-full ${low ? 'bg-destructive' : 'bg-primary'}`}
+                style={{ width: `${stockPct}%` }}
+              />
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'minStockLevel',
+      meta: { label: 'Min. Stok' },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Min. Stok" />
+      ),
+      cell: ({ row }) => {
+        const material = row.original;
+        const unitShort = UNIT_SHORT[material.unit] || material.unit;
+        return (
+          <span className="text-sm text-muted-foreground">
+            {formatQuantity(Number(material.minStockLevel))} {unitShort}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: 'lastPurchasePrice',
+      meta: { label: 'Son Alış Fiyatı' },
+      header: ({ column }) => (
+        <div className="text-right">
+          <DataTableColumnHeader column={column} title="Son Alış Fiyatı" />
+        </div>
+      ),
+      cell: ({ row }) => {
+        const material = row.original;
+        const unitShort = UNIT_SHORT[material.unit] || material.unit;
+        return (
+          <div className="text-right">
+            <p className="text-sm font-bold text-foreground">
+              ₺{formatCurrency(Number(material.lastPurchasePrice))}
+            </p>
+            <p className="text-[10px] text-muted-foreground">/{unitShort}</p>
+          </div>
+        );
+      },
+    },
+    {
+      id: 'stockStatus',
+      meta: { label: 'Stok Durumu' },
+      header: 'Stok Durumu',
+      enableSorting: false,
+      cell: ({ row }) => {
+        const low = isLowStock(row.original);
+        return low ? (
+          <Badge variant="destructive" className="text-[10px] font-bold uppercase">
+            {t('critical')}
+          </Badge>
+        ) : (
+          <Badge variant="secondary" className="text-[10px] font-bold uppercase">
+            {t('normal')}
+          </Badge>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        const material = row.original;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <span className="sr-only">Menüyü aç</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => openEdit(material)}>
+                Düzenle
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => {
+                  if (confirm(tc('confirm') + '?')) {
+                    deleteMutation.mutate(material.id);
+                  }
+                }}
+              >
+                Sil
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
+
+  // Tab filter buttons passed as toolbarChildren
+  const tabButtons = (
+    <div className="flex gap-2 flex-wrap">
+      {[{ key: 'ALL', label: 'Tümü' }, ...materialTypes.map((mt) => ({ key: mt.name, label: mt.name }))].map((tab) => (
+        <Button
+          key={tab.key}
+          onClick={() => setActiveTab(tab.key)}
+          variant={activeTab === tab.key ? 'default' : 'secondary'}
+          size="sm"
+          className="rounded-full"
+        >
+          {tab.label}
+          <span className="ml-1.5 opacity-70">
+            ({tab.key === 'ALL' ? materials.length : materials.filter((m) => m.type === tab.key).length})
+          </span>
+        </Button>
+      ))}
+    </div>
   );
 
-  // Pagination logic
-  const totalItems = filteredMaterials.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-  const safeCurrentPage = Math.min(currentPage, totalPages);
-  const paginatedMaterials = filteredMaterials.slice(
-    (safeCurrentPage - 1) * itemsPerPage,
-    safeCurrentPage * itemsPerPage
-  );
-
-  // Reset to page 1 when filter/search changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [activeTab, searchQuery]);
-
-  // Count visible data columns (for colspan)
-  const visibleDataColCount = (() => {
-    let count = 1; // name column always visible
-    if (isColumnVisible('type')) count++;
-    if (isColumnVisible('supplier')) count++;
-    if (isColumnVisible('currentStock')) count++;
-    if (isColumnVisible('minStockLevel')) count++;
-    if (isColumnVisible('lastPurchasePrice')) count++;
-    if (isColumnVisible('stockStatus')) count++;
-    count++; // actions column
-    return count;
-  })();
-
-  if (isLoading) {
-    return <div className="p-6 text-muted-foreground">{tc('loading')}</div>;
-  }
+  // Suppress unused variable warning
+  void totalStockValue;
 
   return (
     <div className="p-6 md:p-10 space-y-8 max-w-[1600px] mx-auto">
@@ -426,6 +546,9 @@ export default function InventoryPage() {
           >
             <Tag className="size-5" />
             Stok Tipleri
+          </Button>
+          <Button variant="ghost" size="icon" title="Dışa Aktar">
+            <Download className="size-5" />
           </Button>
           <Dialog open={dialogOpen} onOpenChange={(open) => setDialogOpen(open)}>
             <Button
@@ -584,298 +707,20 @@ export default function InventoryPage() {
         )}
       </div>
 
-      {/* Filters & Main Data Table Section */}
+      {/* Main Data Table Section */}
       <div className="bg-muted rounded-[32px] p-2">
         <div className="bg-card rounded-[28px] shadow-xs p-6 md:p-8">
-          {/* Filter Chips & Actions */}
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
-            <div className="flex gap-2 flex-wrap">
-              {[{ key: 'ALL', label: 'Tümü' }, ...materialTypes.map((mt) => ({ key: mt.name, label: mt.name }))].map((tab) => (
-                <Button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  variant={activeTab === tab.key ? 'default' : 'secondary'}
-                  size="sm"
-                  className="rounded-full"
-                >
-                  {tab.label}
-                  <span className="ml-1.5 opacity-70">
-                    ({tab.key === 'ALL' ? materials.length : materials.filter((m) => m.type === tab.key).length})
-                  </span>
-                </Button>
-              ))}
-            </div>
-            <div className="flex items-center gap-3">
-              {/* Search */}
-              <div className="relative">
-                <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Stok kalemi ara..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-9 py-2 bg-muted border-none rounded-xl w-56"
-                />
-                {searchQuery && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-              {/* Column toggle */}
-              <div className="relative" ref={columnMenuRef}>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setColumnMenuOpen((v) => !v)}
-                  title="Sütunları Ayarla"
-                >
-                  <SlidersHorizontal className="size-5" />
-                </Button>
-                {columnMenuOpen && (
-                  <div className="absolute right-0 top-full mt-1 z-50 w-52 rounded-xl border bg-card p-1 shadow-lg">
-                    <p className="px-3 py-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">Görünür Sütunlar</p>
-                    <div className="h-px bg-border/30 my-1" />
-                    {TOGGLEABLE_COLUMNS.map((col) => (
-                      <label
-                        key={col.key}
-                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm cursor-pointer hover:bg-muted transition-colors"
-                      >
-                        <Checkbox
-                          checked={isColumnVisible(col.key)}
-                          onCheckedChange={() => toggleColumn(col.key)}
-                        />
-                        {col.label}
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {/* Download */}
-              <Button variant="ghost" size="icon" title="Dışa Aktar">
-                <Download className="size-5" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Data Table */}
-          <Table className="w-full text-left border-collapse">
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground rounded-l-xl">{t('name')}</TableHead>
-                {isColumnVisible('type') && (
-                  <TableHead className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Tip</TableHead>
-                )}
-                {isColumnVisible('supplier') && (
-                  <TableHead className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Tedarikçi</TableHead>
-                )}
-                {isColumnVisible('currentStock') && (
-                  <TableHead className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Mevcut Stok</TableHead>
-                )}
-                {isColumnVisible('minStockLevel') && (
-                  <TableHead className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Min. Stok</TableHead>
-                )}
-                {isColumnVisible('lastPurchasePrice') && (
-                  <TableHead className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-right">Son Alış Fiyatı</TableHead>
-                )}
-                {isColumnVisible('stockStatus') && (
-                  <TableHead className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-center">Durum</TableHead>
-                )}
-                <TableHead className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground rounded-r-xl text-center">İşlemler</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="divide-y divide-transparent">
-              {paginatedMaterials.map((material) => {
-                const unitLabel = UNIT_LABELS[material.unit] || material.unit;
-                const unitShort = UNIT_SHORT[material.unit] || material.unit;
-                const low = isLowStock(material);
-                const stockPct = getStockPercent(material);
-
-                return (
-                  <TableRow key={material.id} className="hover:bg-muted transition-colors group">
-                    {/* Name */}
-                    <TableCell className="px-6 py-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground shrink-0">
-                          <Package className="size-5" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-sm text-foreground">{material.name}</p>
-                          <p className="text-[10px] text-muted-foreground">{material.type || '-'} / {unitLabel}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    {/* Type */}
-                    {isColumnVisible('type') && (
-                      <TableCell className="px-6 py-5">
-                        <span className="px-3 py-1 bg-muted text-foreground rounded-full text-[10px] font-medium uppercase tracking-tight">
-                          {material.type || '-'}
-                        </span>
-                      </TableCell>
-                    )}
-                    {/* Supplier */}
-                    {isColumnVisible('supplier') && (
-                      <TableCell className="px-6 py-5">
-                        {material.supplier ? (
-                          <SupplierPopover supplier={material.supplier} />
-                        ) : (
-                          <span className="text-muted-foreground text-sm">-</span>
-                        )}
-                      </TableCell>
-                    )}
-                    {/* Current Stock with progress bar */}
-                    {isColumnVisible('currentStock') && (
-                      <TableCell className="px-6 py-5">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-sm font-bold ${low ? 'text-destructive' : 'text-foreground'}`}>
-                            {formatQuantity(Number(material.currentStock))} {unitShort}
-                          </span>
-                          <div className={`w-20 h-1.5 rounded-full overflow-hidden ${low ? 'bg-destructive/10' : 'bg-muted'}`}>
-                            <div
-                              className={`h-full rounded-full ${low ? 'bg-destructive' : 'bg-primary'}`}
-                              style={{ width: `${stockPct}%` }}
-                            />
-                          </div>
-                        </div>
-                      </TableCell>
-                    )}
-                    {/* Min Stock Level */}
-                    {isColumnVisible('minStockLevel') && (
-                      <TableCell className="px-6 py-5 text-sm text-muted-foreground">
-                        {formatQuantity(Number(material.minStockLevel))} {unitShort}
-                      </TableCell>
-                    )}
-                    {/* Last Purchase Price */}
-                    {isColumnVisible('lastPurchasePrice') && (
-                      <TableCell className="px-6 py-5 text-right">
-                        <p className="text-sm font-bold text-foreground">
-                          ₺{formatCurrency(Number(material.lastPurchasePrice))}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground">/{unitShort}</p>
-                      </TableCell>
-                    )}
-                    {/* Stock Status */}
-                    {isColumnVisible('stockStatus') && (
-                      <TableCell className="px-6 py-5 text-center">
-                        {low ? (
-                          <span className="px-3 py-1 bg-destructive/10 text-destructive rounded-full text-[10px] font-bold uppercase">
-                            {t('critical')}
-                          </span>
-                        ) : (
-                          <span className="px-3 py-1 bg-secondary text-primary rounded-full text-[10px] font-bold uppercase">
-                            {t('normal')}
-                          </span>
-                        )}
-                      </TableCell>
-                    )}
-                    {/* Actions - visible on hover */}
-                    <TableCell className="px-6 py-5">
-                      <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-primary hover:bg-primary/5"
-                          onClick={() => openEdit(material)}
-                        >
-                          <Pencil className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:bg-destructive/5"
-                          onClick={() => {
-                            if (confirm(tc('confirm') + '?')) {
-                              deleteMutation.mutate(material.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {filteredMaterials.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={visibleDataColCount} className="text-center text-muted-foreground py-12">
-                    <div className="flex flex-col items-center gap-2">
-                      <Package className="size-12 text-border" />
-                      <p className="text-sm">
-                        {searchQuery ? `"${searchQuery}" ile eşleşen stok kalemi bulunamadı` : t('materialNotFound')}
-                      </p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-8 pt-8 flex items-center justify-between border-t border-border/10">
-              <p className="text-xs text-muted-foreground">
-                Toplam {totalItems} stok kaleminden {(safeCurrentPage - 1) * itemsPerPage + 1}-{Math.min(safeCurrentPage * itemsPerPage, totalItems)} arası gösteriliyor
-              </p>
-              <div className="flex gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={safeCurrentPage <= 1}
-                  className="w-8 h-8"
-                >
-                  <ChevronLeft className="size-4" />
-                </Button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter((page) => {
-                    // Show first, last, current, and neighbors
-                    if (page === 1 || page === totalPages) return true;
-                    if (Math.abs(page - safeCurrentPage) <= 1) return true;
-                    return false;
-                  })
-                  .reduce<(number | string)[]>((acc, page, idx, arr) => {
-                    if (idx > 0) {
-                      const prev = arr[idx - 1];
-                      if (typeof prev === 'number' && page - prev > 1) {
-                        acc.push('...');
-                      }
-                    }
-                    acc.push(page);
-                    return acc;
-                  }, [])
-                  .map((item, idx) =>
-                    typeof item === 'string' ? (
-                      <span key={`ellipsis-${idx}`} className="w-8 h-8 flex items-center justify-center text-xs text-muted-foreground">...</span>
-                    ) : (
-                      <Button
-                        key={item}
-                        variant={item === safeCurrentPage ? 'default' : 'ghost'}
-                        size="icon"
-                        onClick={() => setCurrentPage(item)}
-                        className="w-8 h-8 text-xs font-bold"
-                      >
-                        {item}
-                      </Button>
-                    )
-                  )}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={safeCurrentPage >= totalPages}
-                  className="w-8 h-8"
-                >
-                  <ChevronRight className="size-4" />
-                </Button>
-              </div>
-            </div>
-          )}
+          <DataTable
+            columns={columns}
+            data={filteredMaterials}
+            searchPlaceholder="Stok kalemi ara..."
+            isLoading={isLoading}
+            globalFilterFn={globalFilterFn}
+            emptyMessage={t('materialNotFound')}
+            initialColumnVisibility={initialColumnVisibility}
+            toolbarChildren={tabButtons}
+            pageSize={50}
+          />
         </div>
       </div>
 
