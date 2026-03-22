@@ -4,19 +4,13 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
+import { ColumnDef } from '@tanstack/react-table';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
+import { DataTable } from '@/components/ui/data-table';
 import { ArrowUp, ArrowDown, QrCode, Save, UtensilsCrossed } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -111,9 +105,126 @@ export default function MenuManagementPage() {
     });
   };
 
-  if (isLoading) {
-    return <div className="p-6">{tc('loading')}</div>;
-  }
+  const columns: ColumnDef<MenuItem>[] = [
+    {
+      id: 'order',
+      header: t('order'),
+      cell: ({ row }) => (
+        <span className="font-medium text-muted-foreground">{row.index + 1}</span>
+      ),
+    },
+    {
+      id: 'product',
+      header: t('product'),
+      cell: ({ row }) => {
+        const item = row.original;
+        return (
+          <div className="flex items-center gap-3">
+            {item.product.image ? (
+              <img
+                src={item.product.image}
+                alt={item.product.name}
+                className="h-10 w-10 rounded-md object-cover"
+              />
+            ) : (
+              <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center">
+                <UtensilsCrossed className="h-5 w-5 text-muted-foreground" />
+              </div>
+            )}
+            <div>
+              <p className="font-medium">{item.product.name}</p>
+              {item.product.description && (
+                <p className="text-sm text-muted-foreground truncate max-w-[200px]">
+                  {item.product.description}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      id: 'code',
+      header: t('code'),
+      cell: ({ row }) => {
+        const code = row.original.product.code;
+        return code ? (
+          <Badge variant="outline">{code}</Badge>
+        ) : (
+          <span className="text-muted-foreground">-</span>
+        );
+      },
+    },
+    {
+      id: 'category',
+      header: t('category'),
+      cell: ({ row }) => {
+        const category = row.original.product.category;
+        return category ? (
+          <Badge variant="secondary">{category.name}</Badge>
+        ) : (
+          <span className="text-muted-foreground">-</span>
+        );
+      },
+    },
+    {
+      id: 'price',
+      header: () => <div className="text-right">{t('price')}</div>,
+      cell: ({ row }) => (
+        <div className="text-right font-medium">
+          {Number(row.original.product.price).toFixed(2)} TL
+        </div>
+      ),
+    },
+    {
+      id: 'availability',
+      header: () => <div className="text-center">{t('availability')}</div>,
+      cell: ({ row }) => {
+        const item = row.original;
+        return (
+          <div className="flex items-center justify-center gap-2">
+            <Switch
+              checked={item.isAvailable}
+              onCheckedChange={() => handleToggleAvailability(item.productId, item.isAvailable)}
+              disabled={toggleAvailabilityMutation.isPending}
+            />
+            <span className="text-sm text-muted-foreground">
+              {item.isAvailable ? t('available') : t('unavailable')}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      id: 'sort',
+      header: () => <div className="text-center w-[120px]">{t('order')}</div>,
+      cell: ({ row }) => {
+        const index = row.index;
+        return (
+          <div className="flex items-center justify-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => moveItem(index, 'up')}
+              disabled={index === 0}
+              className="h-8 w-8"
+            >
+              <ArrowUp className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => moveItem(index, 'down')}
+              disabled={index === orderedItems.length - 1}
+              className="h-8 w-8"
+            >
+              <ArrowDown className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
+    },
+  ];
 
   return (
     <div className="p-6 space-y-6">
@@ -138,7 +249,7 @@ export default function MenuManagementPage() {
         </div>
       </div>
 
-      {orderedItems.length === 0 ? (
+      {!isLoading && orderedItems.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <UtensilsCrossed className="h-12 w-12 text-muted-foreground/50 mb-4" />
@@ -159,104 +270,14 @@ export default function MenuManagementPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[60px]">{t('order')}</TableHead>
-                  <TableHead>{t('product')}</TableHead>
-                  <TableHead>{t('code')}</TableHead>
-                  <TableHead>{t('category')}</TableHead>
-                  <TableHead className="text-right">{t('price')}</TableHead>
-                  <TableHead className="text-center">{t('availability')}</TableHead>
-                  <TableHead className="text-center w-[120px]">{t('order')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {orderedItems.map((item, index) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium text-muted-foreground">
-                      {index + 1}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        {item.product.image ? (
-                          <img
-                            src={item.product.image}
-                            alt={item.product.name}
-                            className="h-10 w-10 rounded-md object-cover"
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center">
-                            <UtensilsCrossed className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                        )}
-                        <div>
-                          <p className="font-medium">{item.product.name}</p>
-                          {item.product.description && (
-                            <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-                              {item.product.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {item.product.code ? (
-                        <Badge variant="outline">{item.product.code}</Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {item.product.category ? (
-                        <Badge variant="secondary">{item.product.category.name}</Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {Number(item.product.price).toFixed(2)} TL
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <Switch
-                          checked={item.isAvailable}
-                          onCheckedChange={() =>
-                            handleToggleAvailability(item.productId, item.isAvailable)
-                          }
-                          disabled={toggleAvailabilityMutation.isPending}
-                        />
-                        <span className="text-sm text-muted-foreground">
-                          {item.isAvailable ? t('available') : t('unavailable')}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => moveItem(index, 'up')}
-                          disabled={index === 0}
-                          className="h-8 w-8"
-                        >
-                          <ArrowUp className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => moveItem(index, 'down')}
-                          disabled={index === orderedItems.length - 1}
-                          className="h-8 w-8"
-                        >
-                          <ArrowDown className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <DataTable
+              columns={columns}
+              data={orderedItems}
+              isLoading={isLoading}
+              showPagination={false}
+              showToolbar={false}
+              emptyMessage={t('emptyState')}
+            />
           </CardContent>
         </Card>
       )}
