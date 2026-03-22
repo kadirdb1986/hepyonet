@@ -58,28 +58,28 @@ export default function AdminRestaurantsPage() {
             variant={filter === s ? 'default' : 'outline'}
             size="sm"
             onClick={() => setFilter(s)}
-            className={filter !== s ? 'border-gray-600 text-gray-300' : ''}
+            className={filter !== s ? 'border text-muted-foreground' : ''}
           >
             {s === '' ? 'Tümü' : statusMap[s as keyof typeof statusMap].label}
           </Button>
         ))}
       </div>
-      <div className="rounded-md border border-gray-700">
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
-            <TableRow className="border-gray-700">
-              <TableHead className="text-gray-400">Restoran</TableHead>
-              <TableHead className="text-gray-400">Yönetici</TableHead>
-              <TableHead className="text-gray-400">Durum</TableHead>
-              <TableHead className="text-gray-400">Kayıt Tarihi</TableHead>
-              <TableHead className="text-gray-400">İşlemler</TableHead>
+            <TableRow className="border">
+              <TableHead className="text-muted-foreground">Restoran</TableHead>
+              <TableHead className="text-muted-foreground">Yönetici</TableHead>
+              <TableHead className="text-muted-foreground">Durum</TableHead>
+              <TableHead className="text-muted-foreground">Kayıt Tarihi</TableHead>
+              <TableHead className="text-muted-foreground">İşlemler</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {restaurants.map((r) => (
-              <TableRow key={r.id} className="border-gray-700">
-                <TableCell className="text-white font-medium cursor-pointer hover:underline" onClick={() => router.push(`/admin/restaurants/${r.id}`)}>{r.name}</TableCell>
-                <TableCell className="text-gray-300">
+              <TableRow key={r.id} className="border">
+                <TableCell className="text-foreground font-medium cursor-pointer hover:underline" onClick={() => router.push(`/admin/restaurants/${r.id}`)}>{r.name}</TableCell>
+                <TableCell className="text-muted-foreground">
                   {r.members[0]?.user?.name} ({r.members[0]?.user?.email})
                 </TableCell>
                 <TableCell>
@@ -87,7 +87,7 @@ export default function AdminRestaurantsPage() {
                     {statusMap[r.status].label}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-gray-300">
+                <TableCell className="text-muted-foreground">
                   {new Date(r.createdAt).toLocaleDateString('tr-TR')}
                 </TableCell>
                 <TableCell>

@@ -33,13 +33,13 @@ export default function AdminDashboardPage() {
       <h1 className="text-2xl font-bold mb-6">Istatistikler</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {cards.map((card) => (
-          <Card key={card.title} className="bg-gray-800 border-gray-700">
+          <Card key={card.title} className="bg-background border">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-400">{card.title}</CardTitle>
-              <card.icon className="h-5 w-5 text-gray-400" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">{card.title}</CardTitle>
+              <card.icon className="h-5 w-5 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-white">{card.value}</p>
+              <p className="text-2xl font-bold text-foreground">{card.value}</p>
             </CardContent>
           </Card>
         ))}

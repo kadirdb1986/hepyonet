@@ -34,17 +34,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (isLoading || !isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+      <div className="min-h-screen flex items-center justify-center bg-muted text-foreground">
         <p>Yükleniyor...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-900">
-      <aside className="w-64 border-r border-gray-700 bg-gray-800 h-screen sticky top-0 flex flex-col">
-        <div className="p-6 border-b border-gray-700">
-          <h1 className="text-xl font-bold text-white">HepYonet Admin</h1>
+    <div className="flex min-h-screen bg-muted">
+      <aside className="w-64 border-r border bg-background h-screen sticky top-0 flex flex-col">
+        <div className="p-6 border-b border">
+          <h1 className="text-xl font-bold text-foreground">HepYonet Admin</h1>
         </div>
         <nav className="flex-1 p-4 space-y-1">
           {adminMenuItems.map((item) => {
@@ -56,8 +56,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 className={cn(
                   'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-gray-700 text-white'
-                    : 'text-gray-400 hover:bg-gray-700 hover:text-white',
+                    ? 'bg-muted text-foreground'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                 )}
               >
                 <item.icon className="h-5 w-5" />
@@ -66,10 +66,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             );
           })}
         </nav>
-        <div className="p-4 border-t border-gray-700">
+        <div className="p-4 border-t border">
           <Button
             variant="ghost"
-            className="w-full text-gray-400 hover:text-white justify-start gap-2"
+            className="w-full text-muted-foreground hover:text-foreground justify-start gap-2"
             onClick={logout}
           >
             <LogOut className="h-4 w-4" />
@@ -77,7 +77,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Button>
         </div>
       </aside>
-      <main className="flex-1 p-8 text-white">{children}</main>
+      <main className="flex-1 p-8 text-foreground">{children}</main>
     </div>
   );
 }

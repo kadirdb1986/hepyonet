@@ -31,7 +31,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-muted px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">HepYonet Admin</CardTitle>
@@ -39,7 +39,7 @@ export default function AdminLoginPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">{error}</div>
+              <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">{error}</div>
             )}
             <div className="space-y-2">
               <Label htmlFor="email">E-posta</Label>

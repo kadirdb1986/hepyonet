@@ -70,7 +70,7 @@ export default function AdminRestaurantDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -78,8 +78,8 @@ export default function AdminRestaurantDetailPage() {
   if (!restaurant) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-400 text-lg">Restoran bulunamadı.</p>
-        <Button variant="outline" onClick={() => router.push('/admin/restaurants')} className="mt-4 border-gray-600 text-gray-300">
+        <p className="text-muted-foreground text-lg">Restoran bulunamadı.</p>
+        <Button variant="outline" onClick={() => router.push('/admin/restaurants')} className="mt-4 border text-muted-foreground">
           <ArrowLeft className="h-4 w-4 mr-2" /> Geri Dön
         </Button>
       </div>
@@ -88,16 +88,16 @@ export default function AdminRestaurantDetailPage() {
 
   return (
     <div>
-      <Button variant="ghost" onClick={() => router.push('/admin/restaurants')} className="mb-4 text-gray-300 hover:text-white">
+      <Button variant="ghost" onClick={() => router.push('/admin/restaurants')} className="mb-4 text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4 mr-2" /> Restoranlar
       </Button>
 
       <div className="space-y-6">
-        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+        <div className="bg-background border rounded-lg p-6">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-white">{restaurant.name}</h1>
-              <p className="text-gray-400 mt-1">/{restaurant.slug}</p>
+              <h1 className="text-2xl font-bold text-foreground">{restaurant.name}</h1>
+              <p className="text-muted-foreground mt-1">/{restaurant.slug}</p>
             </div>
             <Badge variant={statusMap[restaurant.status].variant}>
               {statusMap[restaurant.status].label}
@@ -106,50 +106,50 @@ export default function AdminRestaurantDetailPage() {
 
           <div className="grid grid-cols-2 gap-4 mt-6">
             <div>
-              <span className="text-sm text-gray-400">Adres</span>
-              <p className="text-white">{restaurant.address || '-'}</p>
+              <span className="text-sm text-muted-foreground">Adres</span>
+              <p className="text-foreground">{restaurant.address || '-'}</p>
             </div>
             <div>
-              <span className="text-sm text-gray-400">Telefon</span>
-              <p className="text-white">{restaurant.phone || '-'}</p>
+              <span className="text-sm text-muted-foreground">Telefon</span>
+              <p className="text-foreground">{restaurant.phone || '-'}</p>
             </div>
             <div>
-              <span className="text-sm text-gray-400">Kayıt Tarihi</span>
-              <p className="text-white">{new Date(restaurant.createdAt).toLocaleDateString('tr-TR')}</p>
+              <span className="text-sm text-muted-foreground">Kayıt Tarihi</span>
+              <p className="text-foreground">{new Date(restaurant.createdAt).toLocaleDateString('tr-TR')}</p>
             </div>
             <div>
-              <span className="text-sm text-gray-400">Logo</span>
-              <p className="text-white">{restaurant.logo ? 'Var' : 'Yok'}</p>
+              <span className="text-sm text-muted-foreground">Logo</span>
+              <p className="text-foreground">{restaurant.logo ? 'Var' : 'Yok'}</p>
             </div>
           </div>
 
           {restaurant.status === 'PENDING' && (
-            <div className="flex gap-2 mt-6 pt-4 border-t border-gray-700">
+            <div className="flex gap-2 mt-6 pt-4 border-t border">
               <Button onClick={() => handleStatusChange('APPROVED')}>Onayla</Button>
               <Button variant="destructive" onClick={() => handleStatusChange('REJECTED')}>Reddet</Button>
             </div>
           )}
           {restaurant.status === 'REJECTED' && (
-            <div className="flex gap-2 mt-6 pt-4 border-t border-gray-700">
+            <div className="flex gap-2 mt-6 pt-4 border-t border">
               <Button onClick={() => handleStatusChange('APPROVED')}>Yeniden Onayla</Button>
               <Button variant="destructive" onClick={handleDelete}>Restoranı Sil</Button>
             </div>
           )}
           {restaurant.status !== 'PENDING' && restaurant.status !== 'REJECTED' && (
-            <div className="mt-6 pt-4 border-t border-gray-700">
+            <div className="mt-6 pt-4 border-t border">
               <Button variant="destructive" onClick={handleDelete}>Restoranı Sil</Button>
             </div>
           )}
         </div>
 
-        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">Kullanıcılar ({restaurant.members.length})</h2>
+        <div className="bg-background border rounded-lg p-6">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Kullanıcılar ({restaurant.members.length})</h2>
           <div className="space-y-3">
             {restaurant.members.map((m) => (
-              <div key={m.user.id} className="flex items-center justify-between py-2 border-b border-gray-700 last:border-0">
+              <div key={m.user.id} className="flex items-center justify-between py-2 border-b border last:border-0">
                 <div>
-                  <p className="text-white font-medium">{m.user.name}</p>
-                  <p className="text-sm text-gray-400">{m.user.email}</p>
+                  <p className="text-foreground font-medium">{m.user.name}</p>
+                  <p className="text-sm text-muted-foreground">{m.user.email}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary">{roleLabels[m.role] || m.role}</Badge>
