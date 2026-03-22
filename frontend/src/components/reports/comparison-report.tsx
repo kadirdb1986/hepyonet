@@ -90,7 +90,6 @@ export function ComparisonReport() {
           </div>
           <div className="bg-card border rounded-lg p-6">
             <h3 className="text-lg font-semibold mb-4">Detayli Karsilastirma</h3>
-            <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow><TableHead className="sticky left-0 bg-background">Kalem</TableHead>{reports.map((r) => (<TableHead key={r.period} className="text-right">{r.period}</TableHead>))}</TableRow></TableHeader>
                 <TableBody>
@@ -104,7 +103,6 @@ export function ComparisonReport() {
                   <TableRow><TableCell className="sticky left-0 bg-background font-medium">Kar Marjı</TableCell>{reports.map((r) => (<TableCell key={r.period} className="text-right font-medium">{formatMargin(r.totalRevenue, r.totalExpense, r.taxAmount)}</TableCell>))}</TableRow>
                 </TableBody>
               </Table>
-            </div>
           </div>
         </div>
       )}
