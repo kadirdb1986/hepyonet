@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Accordion,
   AccordionContent,
@@ -311,63 +312,39 @@ export default function DistributePage() {
                   Dağıtılacak gider yok
                 </p>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-3 font-medium">
-                          Başlık
-                        </th>
-                        <th className="text-left py-2 px-3 font-medium">
-                          Kategori
-                        </th>
-                        <th className="text-right py-2 px-3 font-medium">
-                          Tutar
-                        </th>
-                        <th className="text-left py-2 px-3 font-medium">
-                          Ödeme Tarihi
-                        </th>
-                        <th className="text-right py-2 px-3 font-medium">
-                          İşlem
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {undistributedExpenses.map((expense: any) => (
-                        <tr
-                          key={expense.id}
-                          className="border-b last:border-0 hover:bg-muted"
-                        >
-                          <td className="py-2 px-3">{expense.title}</td>
-                          <td className="py-2 px-3">
-                            <Badge variant="outline">
-                              {CATEGORY_LABELS[expense.category] ||
-                                expense.category}
-                            </Badge>
-                          </td>
-                          <td className="py-2 px-3 text-right font-medium">
-                            {formatCurrency(Number(expense.amount))}
-                          </td>
-                          <td className="py-2 px-3">
-                            {formatDate(expense.paymentDate)}
-                          </td>
-                          <td className="py-2 px-3 text-right">
-                            <Button
-                              size="sm"
-                              className="gap-1"
-                              onClick={() =>
-                                openDistributeDialog(expense.id)
-                              }
-                            >
-                              <Split className="h-3 w-3" />
-                              Dağıt
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Başlık</TableHead>
+                      <TableHead>Kategori</TableHead>
+                      <TableHead className="text-right">Tutar</TableHead>
+                      <TableHead>Ödeme Tarihi</TableHead>
+                      <TableHead className="text-right">İşlem</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {undistributedExpenses.map((expense: any) => (
+                      <TableRow key={expense.id}>
+                        <TableCell>{expense.title}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {CATEGORY_LABELS[expense.category] || expense.category}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          {formatCurrency(Number(expense.amount))}
+                        </TableCell>
+                        <TableCell>{formatDate(expense.paymentDate)}</TableCell>
+                        <TableCell className="text-right">
+                          <Button size="sm" className="gap-1" onClick={() => openDistributeDialog(expense.id)}>
+                            <Split className="h-3 w-3" />
+                            Dağıt
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
             </CardContent>
           </Card>
@@ -413,54 +390,35 @@ export default function DistributePage() {
                       </AccordionTrigger>
                       <AccordionContent>
                         <div className="space-y-3 pt-2">
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-sm">
-                              <thead>
-                                <tr className="border-b">
-                                  <th className="text-left py-2 px-3 font-medium">
-                                    Ay
-                                  </th>
-                                  <th className="text-right py-2 px-3 font-medium">
-                                    Dağıtılan Tutar
-                                  </th>
-                                  <th className="text-right py-2 px-3 font-medium">
-                                    Oran
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {expense.distributions
-                                  ?.sort(
-                                    (a: any, b: any) =>
-                                      a.month.localeCompare(b.month),
-                                  )
-                                  .map((dist: any) => {
-                                    const ratio =
-                                      Number(expense.amount) > 0
-                                        ? (Number(dist.amount) /
-                                            Number(expense.amount)) *
-                                          100
-                                        : 0;
-                                    return (
-                                      <tr
-                                        key={dist.id}
-                                        className="border-b last:border-0"
-                                      >
-                                        <td className="py-2 px-3">
-                                          {dist.month}
-                                        </td>
-                                        <td className="py-2 px-3 text-right font-medium">
-                                          {formatCurrency(Number(dist.amount))}
-                                        </td>
-                                        <td className="py-2 px-3 text-right text-muted-foreground">
-                                          %{ratio.toFixed(1)}
-                                        </td>
-                                      </tr>
-                                    );
-                                  })}
-                              </tbody>
-                            </table>
-                          </div>
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Ay</TableHead>
+                                <TableHead className="text-right">Dağıtılan Tutar</TableHead>
+                                <TableHead className="text-right">Oran</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {expense.distributions
+                                ?.sort((a: any, b: any) => a.month.localeCompare(b.month))
+                                .map((dist: any) => {
+                                  const ratio = Number(expense.amount) > 0
+                                    ? (Number(dist.amount) / Number(expense.amount)) * 100
+                                    : 0;
+                                  return (
+                                    <TableRow key={dist.id}>
+                                      <TableCell>{dist.month}</TableCell>
+                                      <TableCell className="text-right font-medium">
+                                        {formatCurrency(Number(dist.amount))}
+                                      </TableCell>
+                                      <TableCell className="text-right text-muted-foreground">
+                                        %{ratio.toFixed(1)}
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                })}
+                            </TableBody>
+                          </Table>
                           <div className="flex justify-end">
                             <Button
                               variant="outline"
