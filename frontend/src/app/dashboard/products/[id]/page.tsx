@@ -315,7 +315,7 @@ export default function ProductDetailPage() {
           {editing ? (
             <form onSubmit={handleUpdate} className="space-y-4 max-w-lg">
               <div>
-                <Label>Ürün Adı <span className="text-red-500">*</span></Label>
+                <Label>Ürün Adı <span className="text-destructive">*</span></Label>
                 <Input
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -364,14 +364,14 @@ export default function ProductDetailPage() {
                     type="checkbox"
                     checked={form.isMenuItem}
                     onChange={(e) => setForm({ ...form, isMenuItem: e.target.checked })}
-                    className="rounded border-gray-300"
+                    className="rounded border-input"
                   />
                   <span className="text-sm">Menüde Göster</span>
                 </label>
               </div>
               {form.isMenuItem && (
                 <div>
-                  <Label>Satış Fiyatı (TL) <span className="text-red-500">*</span></Label>
+                  <Label>Satış Fiyatı (TL) <span className="text-destructive">*</span></Label>
                   <Input
                     type="text"
                     inputMode="decimal"
@@ -441,7 +441,7 @@ export default function ProductDetailPage() {
                             ? 'text-green-600'
                             : Number(product.profitMargin) >= 30
                               ? 'text-yellow-600'
-                              : 'text-red-600'
+                              : 'text-destructive'
                         }`}
                       >
                         %{formatPercent(Number(product.profitMargin))}
@@ -536,7 +536,7 @@ export default function ProductDetailPage() {
                           }
                         }}
                       >
-                        <Trash2 className="h-4 w-4 text-red-500" />
+                        <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -572,7 +572,7 @@ export default function ProductDetailPage() {
                           ? 'text-green-600'
                           : margin != null && margin >= 30
                             ? 'text-yellow-600'
-                            : 'text-red-600'
+                            : 'text-destructive'
                       }`}
                     >
                       %{formatPercent(Number(costBreakdown.profitMargin))}

@@ -14,7 +14,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import {
+  ChevronRight,
+  Tag,
+  GripVertical,
+  Plus,
+  Search,
+  Pencil,
+  Trash2,
+  PlusCircle,
+} from 'lucide-react';
 
 interface Ingredient {
   id: string;
@@ -186,7 +205,7 @@ export default function ProductsPage() {
   }
 
   if (isLoading) {
-    return <div className="p-6 text-[#70787d]">Yükleniyor...</div>;
+    return <div className="p-6 text-muted-foreground">Yükleniyor...</div>;
   }
 
   return (
@@ -194,51 +213,50 @@ export default function ProductsPage() {
       {/* Page Header & Global Actions */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <nav className="flex items-center gap-2 text-xs text-[#70787d] mb-2">
+          <nav className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
             <span>Panel</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span className="text-[#004253] font-bold">Ürünler</span>
+            <ChevronRight className="size-4" />
+            <span className="text-primary font-bold">Ürünler</span>
           </nav>
-          <h1 className="text-4xl font-extrabold tracking-tight text-[#004253] font-headline">Ürünler</h1>
-          <p className="text-[#40484c] mt-1">Restoran menüsü ve ara ürün envanterini buradan yönetin.</p>
+          <h1 className="text-4xl font-extrabold tracking-tight text-primary font-headline">Ürünler</h1>
+          <p className="text-muted-foreground mt-1">Restoran menüsü ve ara ürün envanterini buradan yönetin.</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button
-            className="px-5 py-2.5 rounded-xl bg-[#f2f4f5] text-[#40484c] font-semibold text-sm hover:bg-[#e6e8e9] transition-colors flex items-center gap-2"
+          <Button
+            variant="secondary"
             onClick={() => router.push('/dashboard/products/categories')}
           >
-            <span className="material-symbols-outlined text-lg">category</span>
+            <Tag className="size-5" />
             Kategoriler
-          </button>
-          <button
-            className="px-5 py-2.5 rounded-xl bg-[#d4e6e9] text-[#57676a] font-semibold text-sm hover:brightness-95 transition-all flex items-center gap-2"
+          </Button>
+          <Button
+            variant="outline"
             onClick={() => {
               setSelectedRawMaterialId('');
               setDirectSalePrice('');
               setDirectSaleDialogOpen(true);
             }}
           >
-            <span className="material-symbols-outlined text-lg">reorder</span>
+            <GripVertical className="size-4" />
             Stok Kaleminden Ürün Oluştur
-          </button>
-          <button
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-br from-[#004253] to-[#005b71] text-white font-bold text-sm shadow-lg shadow-[#004253]/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2"
+          </Button>
+          <Button
             onClick={() => router.push('/dashboard/products/new')}
           >
-            <span className="material-symbols-outlined text-lg">add</span>
+            <Plus className="size-5" />
             Yeni Ürün
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Search */}
       <div className="relative w-72">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#70787d] text-xl">search</span>
-        <input
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <Input
           placeholder="Ara (ad, kod, kategori)..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-10 pr-4 py-2 bg-[#f2f4f5] border-none rounded-full w-72 focus:ring-2 focus:ring-[#004253]/20 text-sm outline-none"
+          className="pl-10 rounded-full bg-muted border-none focus-visible:ring-primary/20"
         />
       </div>
 
@@ -248,95 +266,105 @@ export default function ProductsPage() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="w-2 h-8 bg-[#004253] rounded-full"></span>
-              <h2 className="text-2xl font-bold tracking-tight text-[#191c1d] font-headline">Menü Ürünleri</h2>
-              <span className="text-sm text-[#70787d]">({menuProducts.length})</span>
+              <span className="w-2 h-8 bg-primary rounded-full"></span>
+              <h2 className="text-2xl font-bold tracking-tight text-foreground font-headline">Menü Ürünleri</h2>
+              <span className="text-sm text-muted-foreground">({menuProducts.length})</span>
             </div>
-            <button className="text-sm font-semibold text-[#004253] hover:underline">Tümünü Gör</button>
+            <button className="text-sm font-semibold text-primary hover:underline">Tümünü Gör</button>
           </div>
-          <div className="overflow-hidden bg-[#f2f4f5] rounded-xl">
-            <table className="w-full text-left border-separate border-spacing-y-1">
-              <thead>
-                <tr className="bg-[#e6e8e9] text-[#70787d] text-[11px] font-bold uppercase tracking-widest">
-                  <th className="px-6 py-4 rounded-tl-xl">Ürün Adı</th>
-                  <th className="px-4 py-4">Kod</th>
-                  <th className="px-4 py-4">Kategori</th>
-                  <th className="px-4 py-4 text-right">Satış Fiyatı</th>
-                  <th className="px-4 py-4 text-right">Maliyet</th>
-                  <th className="px-4 py-4 text-center">Kar Marjı</th>
-                  <th className="px-4 py-4">Tip</th>
-                  <th className="px-6 py-4 text-center rounded-tr-xl">İşlemler</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
+          <div className="overflow-hidden bg-muted rounded-xl">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted text-muted-foreground text-[11px] font-bold uppercase tracking-widest hover:bg-muted">
+                  <TableHead className="px-6 py-4">Ürün Adı</TableHead>
+                  <TableHead className="px-4 py-4">Kod</TableHead>
+                  <TableHead className="px-4 py-4">Kategori</TableHead>
+                  <TableHead className="px-4 py-4 text-right">Satış Fiyatı</TableHead>
+                  <TableHead className="px-4 py-4 text-right">Maliyet</TableHead>
+                  <TableHead className="px-4 py-4 text-center">Kar Marjı</TableHead>
+                  <TableHead className="px-4 py-4">Tip</TableHead>
+                  <TableHead className="px-6 py-4 text-center">İşlemler</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="text-sm">
                 {menuProducts.map((product, idx) => {
                   const productType = getProductType(product);
                   const margin = product.profitMargin != null && Number(product.price) > 0 ? Number(product.profitMargin) : null;
 
                   return (
-                    <tr key={product.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-[#f2f4f5]'} hover:bg-slate-50 transition-colors group`}>
-                      <td className="px-6 py-4 font-semibold text-[#004253]">
+                    <TableRow key={product.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-muted'} hover:bg-slate-50 transition-colors group`}>
+                      <TableCell className="px-6 py-4 font-semibold text-primary">
                         <div className="flex items-center gap-3">
                           {product.image ? (
-                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 shrink-0">
+                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted shrink-0">
                               <img alt={product.name} className="w-full h-full object-cover" src={product.image} />
                             </div>
                           ) : (
-                            <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-[#005b71] font-extrabold text-sm shrink-0">
+                            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-primary font-extrabold text-sm shrink-0">
                               {getInitials(product.name)}
                             </div>
                           )}
                           {product.name}
                         </div>
-                      </td>
-                      <td className="px-4 py-4 font-mono text-[#bfc8cc]">{product.code || '-'}</td>
-                      <td className="px-4 py-4">
+                      </TableCell>
+                      <TableCell className="px-4 py-4 font-mono text-border">{product.code || '-'}</TableCell>
+                      <TableCell className="px-4 py-4">
                         {product.category?.name ? (
-                          <span className="px-3 py-1 bg-[#d4e6e9] text-[#57676a] rounded-full text-[11px] font-bold">{product.category.name}</span>
+                          <Badge variant="secondary">{product.category.name}</Badge>
                         ) : '-'}
-                      </td>
-                      <td className="px-4 py-4 text-right font-bold text-[#191c1d]">
+                      </TableCell>
+                      <TableCell className="px-4 py-4 text-right font-bold text-foreground">
                         {Number(product.price) > 0
                           ? `${formatCurrency(Number(product.price))} TL`
-                          : <span className="text-[#70787d]">-</span>}
-                      </td>
-                      <td className="px-4 py-4 text-right text-[#70787d]">
+                          : <span className="text-muted-foreground">-</span>}
+                      </TableCell>
+                      <TableCell className="px-4 py-4 text-right text-muted-foreground">
                         {product.calculatedCost != null && Number(product.calculatedCost) > 0
                           ? `${formatCurrency(Number(product.calculatedCost))} TL`
                           : '-'}
-                      </td>
-                      <td className="px-4 py-4 text-center">
+                      </TableCell>
+                      <TableCell className="px-4 py-4 text-center">
                         {margin != null ? (
-                          <span className="px-2 py-1 bg-[#7df4ff]/30 text-[#004f54] rounded-lg text-xs font-extrabold">
+                          <span className="px-2 py-1 bg-secondary/30 text-primary rounded-lg text-xs font-extrabold">
                             %{formatPercent(margin)}
                           </span>
                         ) : '-'}
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className="px-3 py-1 bg-[#e6e8e9] text-[#191c1d] rounded-full text-[10px] font-medium uppercase tracking-tight">{productType.label}</span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
+                      </TableCell>
+                      <TableCell className="px-4 py-4">
+                        <span className="px-3 py-1 bg-muted text-foreground rounded-full text-[10px] font-medium uppercase tracking-tight">{productType.label}</span>
+                      </TableCell>
+                      <TableCell className="px-6 py-4 text-center">
                         <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-2 hover:bg-[#004253]/10 text-[#004253] rounded-lg transition-colors" onClick={() => router.push(`/dashboard/products/${product.id}`)}>
-                            <span className="material-symbols-outlined text-lg">edit</span>
-                          </button>
-                          <button className="p-2 hover:bg-[#ffdad6] text-[#ba1a1a] rounded-lg transition-colors" onClick={() => { if (confirm('Bu ürünü silmek istediğinize emin misiniz?')) deleteMutation.mutate(product.id); }}>
-                            <span className="material-symbols-outlined text-lg">delete</span>
-                          </button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="hover:bg-primary/10 text-primary"
+                            onClick={() => router.push(`/dashboard/products/${product.id}`)}
+                          >
+                            <Pencil className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="hover:bg-destructive/10 text-destructive"
+                            onClick={() => { if (confirm('Bu ürünü silmek istediğinize emin misiniz?')) deleteMutation.mutate(product.id); }}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
                 {menuProducts.length === 0 && (
-                  <tr>
-                    <td colSpan={8} className="text-center text-[#70787d] py-8">
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                       Henüz menü ürünü bulunamadı
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </section>
 
@@ -344,9 +372,9 @@ export default function ProductsPage() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="w-2 h-8 bg-[#516164] rounded-full"></span>
-              <h2 className="text-2xl font-bold tracking-tight text-[#191c1d] font-headline">Ara Ürünler</h2>
-              <span className="text-sm text-[#70787d]">({intermediateProducts.length})</span>
+              <span className="w-2 h-8 bg-muted-foreground/40 rounded-full"></span>
+              <h2 className="text-2xl font-bold tracking-tight text-foreground font-headline">Ara Ürünler</h2>
+              <span className="text-sm text-muted-foreground">({intermediateProducts.length})</span>
             </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -358,22 +386,22 @@ export default function ProductsPage() {
               return (
                 <div
                   key={product.id}
-                  className="bg-white p-5 rounded-xl shadow-xs hover:shadow-md transition-shadow flex items-center justify-between group border-l-4 border-transparent hover:border-[#004253] cursor-pointer"
+                  className="bg-white p-5 rounded-xl shadow-xs hover:shadow-md transition-shadow flex items-center justify-between group border-l-4 border-transparent hover:border-primary cursor-pointer"
                   onClick={() => router.push(`/dashboard/products/${product.id}`)}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-slate-100 rounded-xl flex items-center justify-center text-[#005b71] font-extrabold text-xl shrink-0">
+                    <div className="w-14 h-14 bg-muted rounded-xl flex items-center justify-center text-primary font-extrabold text-xl shrink-0">
                       {getInitials(product.name)}
                     </div>
                     <div>
-                      <h4 className="font-bold text-[#191c1d]">{product.name}</h4>
-                      <p className="text-xs text-[#70787d] font-mono">{product.code || '-'}</p>
+                      <h4 className="font-bold text-foreground">{product.name}</h4>
+                      <p className="text-xs text-muted-foreground font-mono">{product.code || '-'}</p>
                       <div className="flex gap-2 mt-1 flex-wrap">
                         {product.category?.name && (
-                          <span className="text-[10px] bg-[#e6e8e9] px-2 py-0.5 rounded text-[#40484c] font-medium">{product.category.name}</span>
+                          <span className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground font-medium">{product.category.name}</span>
                         )}
                         {costValue != null && (
-                          <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${isHighCost ? 'bg-[#ffdad6]/40 text-[#ba1a1a]' : 'bg-[#7df4ff]/20 text-[#004f54]'}`}>
+                          <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${isHighCost ? 'bg-destructive/10 text-destructive' : 'bg-secondary/20 text-primary'}`}>
                             Maliyet: {formatCurrency(costValue)} TL
                           </span>
                         )}
@@ -382,29 +410,33 @@ export default function ProductsPage() {
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-[10px] font-bold text-[#70787d] uppercase tracking-wider">İçerik</p>
-                      <p className="text-lg font-black text-[#004253] font-headline">{ingredientCount}</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">İçerik</p>
+                      <p className="text-lg font-black text-primary font-headline">{ingredientCount}</p>
                     </div>
-                    <button
-                      className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-[#004253]/10 transition-colors"
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-primary/10"
                       onClick={(e) => {
                         e.stopPropagation();
                         router.push(`/dashboard/products/${product.id}`);
                       }}
                       title="Düzenle"
                     >
-                      <span className="material-symbols-outlined text-lg text-[#004253]">edit</span>
-                    </button>
-                    <button
-                      className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-[#ffdad6] transition-colors"
+                      <Pencil className="size-4 text-primary" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-destructive/10"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (confirm('Bu ürünü silmek istediğinize emin misiniz?')) deleteMutation.mutate(product.id);
                       }}
                       title="Sil"
                     >
-                      <span className="material-symbols-outlined text-lg text-[#ba1a1a]">delete</span>
-                    </button>
+                      <Trash2 className="size-4 text-destructive" />
+                    </Button>
                   </div>
                 </div>
               );
@@ -412,23 +444,23 @@ export default function ProductsPage() {
 
             {/* Hızlı Ara Ürün Ekle */}
             <button
-              className="border-2 border-dashed border-[#bfc8cc]/50 rounded-xl p-5 flex flex-col items-center justify-center gap-2 hover:bg-[#eceeef] hover:border-[#004253] transition-all group min-h-[96px]"
+              className="border-2 border-dashed border-border/50 rounded-xl p-5 flex flex-col items-center justify-center gap-2 hover:bg-muted hover:border-primary transition-all group min-h-[96px]"
               onClick={() => router.push('/dashboard/products/new')}
             >
-              <span className="material-symbols-outlined text-[#70787d] group-hover:text-[#004253] transition-colors text-3xl">add_circle</span>
-              <span className="text-sm font-bold text-[#70787d] group-hover:text-[#004253] transition-colors">Hızlı Ara Ürün Ekle</span>
+              <PlusCircle className="size-5 text-muted-foreground group-hover:text-primary transition-colors" />
+              <span className="text-sm font-bold text-muted-foreground group-hover:text-primary transition-colors">Hızlı Ara Ürün Ekle</span>
             </button>
           </div>
 
           {intermediateProducts.length === 0 && (
-            <p className="text-center text-[#70787d] py-4">Henüz ara ürün bulunamadı</p>
+            <p className="text-center text-muted-foreground py-4">Henüz ara ürün bulunamadı</p>
           )}
         </section>
       </div>
 
       {/* Pagination */}
       <div className="flex items-center justify-between px-2 pt-4">
-        <p className="text-xs text-[#70787d] font-medium">Toplam {products.length} ürün</p>
+        <p className="text-xs text-muted-foreground font-medium">Toplam {products.length} ürün</p>
       </div>
 
       {/* Stok Kaleminden Direkt Satış Ürünü Oluşturma Dialogu */}

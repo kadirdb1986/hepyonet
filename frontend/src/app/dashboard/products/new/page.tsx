@@ -83,7 +83,7 @@ export default function NewProductPage() {
           <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
             <div>
               <Label>
-                Ürün Adı <span className="text-red-500">*</span>
+                Ürün Adı <span className="text-destructive">*</span>
               </Label>
               <Input
                 value={form.name}
@@ -141,7 +141,7 @@ export default function NewProductPage() {
                   type="checkbox"
                   checked={form.isMenuItem}
                   onChange={(e) => setForm({ ...form, isMenuItem: e.target.checked })}
-                  className="rounded border-gray-300"
+                  className="rounded border-input"
                 />
                 <span className="text-sm font-medium">Menüde Göster</span>
               </label>
@@ -156,7 +156,7 @@ export default function NewProductPage() {
             {form.isMenuItem ? (
               <div>
                 <Label>
-                  Satış Fiyatı (TL) <span className="text-red-500">*</span>
+                  Satış Fiyatı (TL) <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   type="text"
