@@ -175,17 +175,17 @@ export default function RevenuesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">Aylık Toplam Ciro</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Aylik Toplam Ciro</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{formatCurrency(totalRevenue)}</div>
-            <p className="text-xs text-gray-500 mt-1">{daysWithRevenue} gün ciro girişi</p>
+            <p className="text-xs text-muted-foreground mt-1">{daysWithRevenue} gun ciro girisi</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">Günlük Ortalama</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Gunluk Ortalama</CardTitle>
             <TrendingUp className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
@@ -208,7 +208,7 @@ export default function RevenuesPage() {
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip formatter={(value) => [formatCurrency(Number(value)), 'Ciro']} />
-                <Bar dataKey="amount" fill="#16a34a" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="amount" fill="var(--chart-2)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -221,7 +221,7 @@ export default function RevenuesPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-gray-500 text-center py-8">Yükleniyor...</p>
+            <p className="text-muted-foreground text-center py-8">Yukleniyor...</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -236,7 +236,7 @@ export default function RevenuesPage() {
                   {monthDays.map((day) => (
                     <tr
                       key={day.day}
-                      className={`border-b last:border-0 ${day.dayName === 'Paz' || day.dayName === 'Cmt' ? 'bg-gray-50' : ''} ${!day.hasData && editingDay !== day.day ? 'text-gray-400' : ''}`}
+                      className={`border-b last:border-0 ${day.dayName === 'Paz' || day.dayName === 'Cmt' ? 'bg-muted' : ''} ${!day.hasData && editingDay !== day.day ? 'text-muted-foreground' : ''}`}
                     >
                       <td className="py-2 px-3 font-medium">{day.dayName}</td>
                       <td className="py-2 px-3">

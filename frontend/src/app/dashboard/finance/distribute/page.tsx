@@ -144,7 +144,7 @@ export default function DistributePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Gider Dağıtımı</h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-muted-foreground text-sm mt-1">
             Giderleri aylara dağıtarak daha doğru finansal raporlama yapın
           </p>
         </div>
@@ -182,17 +182,17 @@ export default function DistributePage() {
           </DialogHeader>
           <div className="space-y-4">
             {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">
+              <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
                 {error}
               </div>
             )}
 
             {selectedExpenseId && (
-              <div className="p-3 bg-gray-50 rounded-md text-sm">
+              <div className="p-3 bg-muted rounded-md text-sm">
                 <p className="font-medium">
                   {expenses.find((e: any) => e.id === selectedExpenseId)?.title}
                 </p>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   {formatCurrency(
                     Number(
                       expenses.find((e: any) => e.id === selectedExpenseId)
@@ -239,7 +239,7 @@ export default function DistributePage() {
                   value={distributionMonths}
                   onChange={(e) => setDistributionMonths(e.target.value)}
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   Ödeme tarihinden itibaren kaç aya dağıtılacağını belirtin (2-24
                   ay)
                 </p>
@@ -292,7 +292,7 @@ export default function DistributePage() {
 
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <p className="text-gray-500">Yükleniyor...</p>
+          <p className="text-muted-foreground">Yükleniyor...</p>
         </div>
       ) : (
         <>
@@ -307,7 +307,7 @@ export default function DistributePage() {
             </CardHeader>
             <CardContent>
               {undistributedExpenses.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
+                <p className="text-muted-foreground text-center py-8">
                   Dağıtılacak gider yok
                 </p>
               ) : (
@@ -336,7 +336,7 @@ export default function DistributePage() {
                       {undistributedExpenses.map((expense: any) => (
                         <tr
                           key={expense.id}
-                          className="border-b last:border-0 hover:bg-gray-50"
+                          className="border-b last:border-0 hover:bg-muted"
                         >
                           <td className="py-2 px-3">{expense.title}</td>
                           <td className="py-2 px-3">
@@ -383,7 +383,7 @@ export default function DistributePage() {
             </CardHeader>
             <CardContent>
               {distributedExpenses.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
+                <p className="text-muted-foreground text-center py-8">
                   Dağıtılmış gider yok
                 </p>
               ) : (
@@ -452,7 +452,7 @@ export default function DistributePage() {
                                         <td className="py-2 px-3 text-right font-medium">
                                           {formatCurrency(Number(dist.amount))}
                                         </td>
-                                        <td className="py-2 px-3 text-right text-gray-600">
+                                        <td className="py-2 px-3 text-right text-muted-foreground">
                                           %{ratio.toFixed(1)}
                                         </td>
                                       </tr>

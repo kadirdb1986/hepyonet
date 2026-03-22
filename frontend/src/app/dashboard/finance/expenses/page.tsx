@@ -290,7 +290,7 @@ export default function ExpensesPage() {
                 </p>
               )}
               {categories.map((cat) => (
-                <div key={cat.id} className="flex items-center gap-2 py-1.5 px-2 rounded hover:bg-gray-50">
+                <div key={cat.id} className="flex items-center gap-2 py-1.5 px-2 rounded hover:bg-muted">
                   {editingCatId === cat.id ? (
                     <>
                       <Input
@@ -360,7 +360,7 @@ export default function ExpensesPage() {
             <DialogTitle>Yeni Gider</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleCreate} className="space-y-4">
-            {error && <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">{error}</div>}
+            {error && <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">{error}</div>}
             <div className="space-y-2">
               <Label htmlFor="title">Başlık</Label>
               <Input id="title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
@@ -405,7 +405,7 @@ export default function ExpensesPage() {
             <DialogTitle>Gider Düzenle</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleUpdate} className="space-y-4">
-            {error && <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">{error}</div>}
+            {error && <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">{error}</div>}
             <div className="space-y-2">
               <Label htmlFor="edit-title">Başlık</Label>
               <Input id="edit-title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
@@ -473,9 +473,9 @@ export default function ExpensesPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-gray-500 text-center py-8">Yükleniyor...</p>
+            <p className="text-muted-foreground text-center py-8">Yükleniyor...</p>
           ) : expenses.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">Henüz gider kaydı yok</p>
+            <p className="text-muted-foreground text-center py-8">Henüz gider kaydı yok</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -491,7 +491,7 @@ export default function ExpensesPage() {
                 </thead>
                 <tbody>
                   {expenses.map((expense: any) => (
-                    <tr key={expense.id} className="border-b last:border-0 hover:bg-gray-50">
+                    <tr key={expense.id} className="border-b last:border-0 hover:bg-muted">
                       <td className="py-2 px-3">{expense.title}</td>
                       <td className="py-2 px-3">
                         <Badge variant="outline">{expense.category}</Badge>

@@ -5,8 +5,30 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Upload,
+  Plus,
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  Filter,
+  Search,
+  Receipt,
+  Monitor,
+  FileText,
+} from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
-const COLORS = ['#004253', '#005b71', '#ba1a1a', '#bfc8cc'];
+const CHART_COLORS = [
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
+];
 
 const CATEGORY_LABELS: Record<string, string> = {
   SALARY: 'Personel',
@@ -41,40 +63,6 @@ function getDayName(day: number, month: string): string {
 function formatDateFull(day: number, month: string): string {
   const [y, m] = month.split('-');
   return `${day} ${MONTH_NAMES[parseInt(m, 10) - 1]} ${y}`;
-}
-
-/** SVG donut chart - matches Stitch design exactly */
-function DonutChart({ data, colors, total }: { data: { name: string; value: number }[]; colors: string[]; total: number }) {
-  const radius = 15.9;
-  const circumference = 2 * Math.PI * radius; // ~99.9
-
-  let offset = 0;
-  const segments = data.map((d, i) => {
-    const pct = total > 0 ? (d.value / total) * 100 : 0;
-    const dashArray = `${pct}, ${100 - pct}`;
-    const dashOffset = -offset;
-    offset += pct;
-    return (
-      <circle
-        key={d.name}
-        cx="18"
-        cy="18"
-        r={radius}
-        fill="transparent"
-        stroke={colors[i % colors.length]}
-        strokeWidth="4"
-        strokeDasharray={dashArray}
-        strokeDashoffset={dashOffset}
-      />
-    );
-  });
-
-  return (
-    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-      <circle cx="18" cy="18" r={radius} fill="transparent" stroke="#e1e3e4" strokeWidth="4" />
-      {segments}
-    </svg>
-  );
 }
 
 export default function FinanceOverviewPage() {
@@ -219,63 +207,63 @@ export default function FinanceOverviewPage() {
       {/* Page header */}
       <section className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <p className="text-[#004253] font-bold tracking-widest text-[11px] uppercase mb-2">Finansal Yönetim</p>
-          <h1 className="text-4xl font-extrabold text-[#191c1d] tracking-tight mb-2">Finans Özeti</h1>
-          <p className="text-[#70787d] max-w-xl">Restoranınızın nakit akışını, günlük cirolarını ve gider dağılımlarını tek bir merkezden takip edin.</p>
+          <p className="text-primary font-bold tracking-widest text-[11px] uppercase mb-2">Finansal Yonetim</p>
+          <h1 className="text-4xl font-extrabold text-foreground tracking-tight mb-2">Finans Ozeti</h1>
+          <p className="text-muted-foreground max-w-xl">Restoraninizin nakit akisini, gunluk cirolarini ve gider dagilimlarini tek bir merkezden takip edin.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {/* Month picker pill */}
-          <div className="bg-[#f2f4f5] px-4 py-2 rounded-xl flex items-center gap-3">
-            <span className="material-symbols-outlined text-[#70787d]">calendar_today</span>
+          <div className="bg-muted px-4 py-2 rounded-xl flex items-center gap-3">
+            <Calendar className="size-5 text-muted-foreground" />
             <Button variant="ghost" size="icon" onClick={prevMonth} className="h-8 w-8">
-              <span className="material-symbols-outlined text-sm">chevron_left</span>
+              <ChevronLeft className="size-4" />
             </Button>
-            <span className="font-semibold text-[#40484c] min-w-[100px] text-center">{formatMonth(selectedMonth)}</span>
+            <span className="font-semibold text-foreground min-w-[100px] text-center">{formatMonth(selectedMonth)}</span>
             <Button variant="ghost" size="icon" onClick={nextMonth} className="h-8 w-8">
-              <span className="material-symbols-outlined text-sm">chevron_right</span>
+              <ChevronRight className="size-4" />
             </Button>
           </div>
 
-          {/* Dışa Aktar button */}
-          <button className="flex items-center gap-2 bg-white text-[#004253] px-5 py-2.5 rounded-xl font-bold shadow-xs hover:bg-slate-50 transition-all text-sm">
-            <span className="material-symbols-outlined text-lg">upload</span>
-            Dışa Aktar
+          {/* Disa Aktar button */}
+          <button className="flex items-center gap-2 bg-card text-primary px-5 py-2.5 rounded-xl font-bold shadow-xs hover:bg-muted transition-all text-sm">
+            <Upload className="size-5" />
+            Disa Aktar
           </button>
 
-          {/* Yeni İşlem button */}
-          <button className="flex items-center gap-2 bg-gradient-to-br from-[#004253] to-[#005b71] text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-[#004253]/20 hover:scale-[1.02] transition-all text-sm">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
-            Yeni İşlem
+          {/* Yeni Islem button */}
+          <button className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 rounded-xl font-bold shadow-lg hover:opacity-90 transition-all text-sm">
+            <Plus className="size-5" />
+            Yeni Islem
           </button>
         </div>
       </section>
 
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <p className="text-[#70787d]">Yükleniyor...</p>
+          <p className="text-muted-foreground">Yukleniyor...</p>
         </div>
       ) : !summary ? (
         <div className="flex items-center justify-center h-64">
-          <p className="text-[#70787d]">Bu ay için veri bulunamadı</p>
+          <p className="text-muted-foreground">Bu ay icin veri bulunamadi</p>
         </div>
       ) : (
         <>
           {/* Summary Grid - exact Stitch layout */}
           <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             {/* Card: Toplam Ciro */}
-            <div className="bg-white p-6 rounded-xl shadow-xs border border-[#bfc8cc]/5">
+            <div className="bg-card p-6 rounded-xl shadow-xs border border-border/5">
               <div className="flex justify-between items-start mb-4">
-                <div className="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center text-[#004253]">
-                  <span className="material-symbols-outlined">trending_up</span>
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                  <TrendingUp className="size-5" />
                 </div>
                 {revenuePctChange !== 0 && (
-                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${revenuePctChange > 0 ? 'text-[#004448] bg-[#7df4ff]' : 'text-[#93000a] bg-[#ffdad6]'}`}>
+                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${revenuePctChange > 0 ? 'text-primary bg-primary/10' : 'text-destructive bg-destructive/10'}`}>
                     {revenuePctChange > 0 ? '+' : ''}{revenuePctChange}%
                   </span>
                 )}
               </div>
-              <p className="text-[#70787d] text-sm font-medium mb-1">Toplam Ciro</p>
-              <h3 className="text-3xl font-black text-[#191c1d]">{formatCurrency(summary.totalRevenue)}</h3>
+              <p className="text-muted-foreground text-sm font-medium mb-1">Toplam Ciro</p>
+              <h3 className="text-3xl font-black text-foreground">{formatCurrency(summary.totalRevenue)}</h3>
               {last7Days.length > 0 && (
                 <div className="mt-4 h-12 w-full flex items-end gap-1">
                   {(() => {
@@ -284,14 +272,13 @@ export default function FinanceOverviewPage() {
                       const pct = Math.max(5, (d.revenue / max) * 100);
                       const isLast = i === last7Days.length - 1;
                       const isSecondLast = i === last7Days.length - 2;
-                      const alpha = isLast ? 1 : isSecondLast ? 0.4 : 0.2;
                       return (
                         <div key={i} className="relative flex-1 h-full flex flex-col justify-end group">
                           <div
-                            className="w-full rounded-t-sm cursor-pointer transition-all group-hover:opacity-80"
-                            style={{ height: `${pct}%`, backgroundColor: `rgba(0, 66, 83, ${alpha})` }}
+                            className={`w-full rounded-t-sm cursor-pointer transition-all group-hover:opacity-80 ${isLast ? 'bg-primary' : isSecondLast ? 'bg-primary/40' : 'bg-primary/20'}`}
+                            style={{ height: `${pct}%` }}
                           />
-                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#191c1d] text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
                             {d.day} {formatMonth(selectedMonth).split(' ')[0]}: {formatCurrency(d.revenue)}
                           </div>
                         </div>
@@ -303,19 +290,19 @@ export default function FinanceOverviewPage() {
             </div>
 
             {/* Card: Toplam Gider */}
-            <div className="bg-white p-6 rounded-xl shadow-xs border border-[#bfc8cc]/5">
+            <div className="bg-card p-6 rounded-xl shadow-xs border border-border/5">
               <div className="flex justify-between items-start mb-4">
-                <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center text-[#ba1a1a]">
-                  <span className="material-symbols-outlined">trending_down</span>
+                <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center text-destructive">
+                  <TrendingDown className="size-5" />
                 </div>
                 {expensePctChange !== 0 && (
-                  <span className="text-xs font-bold text-[#93000a] px-2 py-1 bg-[#ffdad6] rounded-full">
+                  <span className="text-xs font-bold text-destructive px-2 py-1 bg-destructive/10 rounded-full">
                     {expensePctChange > 0 ? '+' : ''}{expensePctChange}%
                   </span>
                 )}
               </div>
-              <p className="text-[#70787d] text-sm font-medium mb-1">Toplam Gider</p>
-              <h3 className="text-3xl font-black text-[#191c1d]">{formatCurrency(summary.totalExpenses)}</h3>
+              <p className="text-muted-foreground text-sm font-medium mb-1">Toplam Gider</p>
+              <h3 className="text-3xl font-black text-foreground">{formatCurrency(summary.totalExpenses)}</h3>
               {last7Days.length > 0 && (
                 <div className="mt-4 h-12 w-full flex items-end gap-1">
                   {(() => {
@@ -327,9 +314,11 @@ export default function FinanceOverviewPage() {
                         <div key={i} className="relative flex-1 h-full flex flex-col justify-end group">
                           <div
                             className="w-full rounded-t-sm cursor-pointer transition-all group-hover:opacity-80"
-                            style={{ height: `${pct}%`, backgroundColor: `rgba(186, 26, 26, ${intensity / 100})` }}
-                          />
-                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#191c1d] text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+                            style={{ height: `${pct}%`, opacity: intensity / 100 }}
+                          >
+                            <div className="w-full h-full bg-destructive rounded-t-sm" />
+                          </div>
+                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
                             {d.day} {formatMonth(selectedMonth).split(' ')[0]}: {formatCurrency(d.expense)}
                           </div>
                         </div>
@@ -341,73 +330,73 @@ export default function FinanceOverviewPage() {
             </div>
 
             {/* Card: Net Gelir */}
-            <div className="bg-white p-6 rounded-xl shadow-xs border border-[#bfc8cc]/5 ring-2 ring-[#004253]/5">
+            <div className="bg-card p-6 rounded-xl shadow-xs border border-border/5 ring-2 ring-primary/5">
               <div className="flex justify-between items-start mb-4">
-                <div className="w-10 h-10 rounded-lg bg-[#005b71] flex items-center justify-center text-white">
-                  <span className="material-symbols-outlined">account_balance_wallet</span>
+                <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+                  <Wallet className="size-5" />
                 </div>
                 {summary.netIncome >= 0 && (
-                  <span className="text-xs font-bold text-white px-2 py-1 bg-[#004253] rounded-full">Kârlı</span>
+                  <span className="text-xs font-bold text-primary-foreground px-2 py-1 bg-primary rounded-full">Karli</span>
                 )}
               </div>
-              <p className="text-[#004253] text-sm font-medium mb-1">Net Gelir</p>
-              <h3 className="text-3xl font-black text-[#004253]">{formatCurrency(summary.netIncome)}</h3>
+              <p className="text-primary text-sm font-medium mb-1">Net Gelir</p>
+              <h3 className="text-3xl font-black text-primary">{formatCurrency(summary.netIncome)}</h3>
               <div className="mt-4 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-[#004253] animate-pulse" />
-                <p className="text-[11px] font-bold text-[#bfc8cc] uppercase tracking-wider">Ay Sonu Projeksiyonu</p>
+                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Ay Sonu Projeksiyonu</p>
               </div>
             </div>
           </section>
 
           {/* Main Charts Area - Bento Layout */}
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-            {/* Left: Günlük Ciro Analizi - Custom bar chart matching Stitch */}
-            <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-xs border border-[#bfc8cc]/5">
+            {/* Left: Gunluk Ciro Analizi - Custom bar chart matching Stitch */}
+            <div className="lg:col-span-2 bg-card p-8 rounded-2xl shadow-xs border border-border/5">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-xl font-bold text-[#191c1d]">Günlük Ciro Analizi</h3>
-                  <p className="text-sm text-[#70787d]">{formatMonth(selectedMonth)} ayı {chartTab === 'daily' ? 'günlük' : 'haftalık'} performans grafiği</p>
+                  <h3 className="text-xl font-bold text-foreground">Gunluk Ciro Analizi</h3>
+                  <p className="text-sm text-muted-foreground">{formatMonth(selectedMonth)} ayi {chartTab === 'daily' ? 'gunluk' : 'haftalik'} performans grafigi</p>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setChartTab('daily')}
                     className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${
                       chartTab === 'daily'
-                        ? 'bg-[#f2f4f5] text-[#004253]'
-                        : 'text-[#70787d] hover:bg-slate-50'
+                        ? 'bg-muted text-primary'
+                        : 'text-muted-foreground hover:bg-muted'
                     }`}
                   >
-                    Günlük
+                    Gunluk
                   </button>
                   <button
                     onClick={() => setChartTab('weekly')}
                     className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${
                       chartTab === 'weekly'
-                        ? 'bg-[#f2f4f5] text-[#004253]'
-                        : 'text-[#70787d] hover:bg-slate-50'
+                        ? 'bg-muted text-primary'
+                        : 'text-muted-foreground hover:bg-muted'
                     }`}
                   >
-                    Haftalık
+                    Haftalik
                   </button>
                 </div>
               </div>
               {chartTab === 'daily' ? (
-                /* Günlük: thin-bar chart */
+                /* Gunluk: thin-bar chart */
                 dailyRevenueData.length === 0 ? (
-                  <p className="text-[#70787d] text-sm text-center py-8">Bu ay için ciro verisi yok</p>
+                  <p className="text-muted-foreground text-sm text-center py-8">Bu ay icin ciro verisi yok</p>
                 ) : (
                   <div className="aspect-[16/7] relative w-full flex items-end justify-between px-4 pb-8">
                     {/* Grid Lines */}
-                    <div className="absolute inset-0 flex flex-col justify-between pointer-events-none border-b border-[#bfc8cc]/20">
-                      <div className="w-full h-px bg-[#bfc8cc]/10"></div>
-                      <div className="w-full h-px bg-[#bfc8cc]/10"></div>
-                      <div className="w-full h-px bg-[#bfc8cc]/10"></div>
-                      <div className="w-full h-px bg-[#bfc8cc]/10"></div>
+                    <div className="absolute inset-0 flex flex-col justify-between pointer-events-none border-b border-border/20">
+                      <div className="w-full h-px bg-border/10"></div>
+                      <div className="w-full h-px bg-border/10"></div>
+                      <div className="w-full h-px bg-border/10"></div>
+                      <div className="w-full h-px bg-border/10"></div>
                     </div>
                     {/* Area gradient background */}
                     <div className="absolute bottom-10 left-0 w-full h-32 opacity-10 pointer-events-none">
                       <div
-                        className="w-full h-full bg-gradient-to-t from-[#004253] to-transparent"
+                        className="w-full h-full bg-gradient-to-t from-primary to-transparent"
                         style={{
                           clipPath: `polygon(${dailyRevenueData.map((d: any, i: number) => {
                             const x = (i / (dailyRevenueData.length - 1)) * 100;
@@ -424,13 +413,13 @@ export default function FinanceOverviewPage() {
                       return (
                         <div key={d.day} className="relative group cursor-pointer h-full w-4 flex flex-col justify-end">
                           <div
-                            className={`${isHighest ? 'w-2 bg-[#004253] shadow-md shadow-[#004253]/20' : 'w-1 bg-[#004253]/20 group-hover:bg-[#004253]'} rounded-full mx-auto transition-all`}
+                            className={`${isHighest ? 'w-2 bg-primary shadow-md shadow-primary/20' : 'w-1 bg-primary/20 group-hover:bg-primary'} rounded-full mx-auto transition-all`}
                             style={{ height: `${heightPct}%` }}
                           ></div>
-                          <span className={`absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] ${isHighest ? 'font-bold text-[#004253]' : 'text-[#70787d]'}`}>
+                          <span className={`absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] ${isHighest ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
                             {String(d.day).padStart(2, '0')}
                           </span>
-                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#191c1d] text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10">
                             {formatCurrency(d.amount)}
                           </div>
                         </div>
@@ -439,31 +428,31 @@ export default function FinanceOverviewPage() {
                   </div>
                 )
               ) : (
-                /* Haftalık: kalın bar chart */
+                /* Haftalik: kalin bar chart */
                 weeklyRevenueData.length === 0 ? (
-                  <p className="text-[#70787d] text-sm text-center py-8">Bu ay için ciro verisi yok</p>
+                  <p className="text-muted-foreground text-sm text-center py-8">Bu ay icin ciro verisi yok</p>
                 ) : (
                   <div className="aspect-[16/7] relative w-full flex items-end justify-around px-4 pb-8">
                     {/* Grid Lines */}
-                    <div className="absolute inset-0 flex flex-col justify-between pointer-events-none border-b border-[#bfc8cc]/20">
-                      <div className="w-full h-px bg-[#bfc8cc]/10"></div>
-                      <div className="w-full h-px bg-[#bfc8cc]/10"></div>
-                      <div className="w-full h-px bg-[#bfc8cc]/10"></div>
-                      <div className="w-full h-px bg-[#bfc8cc]/10"></div>
+                    <div className="absolute inset-0 flex flex-col justify-between pointer-events-none border-b border-border/20">
+                      <div className="w-full h-px bg-border/10"></div>
+                      <div className="w-full h-px bg-border/10"></div>
+                      <div className="w-full h-px bg-border/10"></div>
+                      <div className="w-full h-px bg-border/10"></div>
                     </div>
-                    {weeklyRevenueData.map((w, i) => {
+                    {weeklyRevenueData.map((w) => {
                       const heightPct = Math.max(5, (w.amount / maxWeeklyRevenue) * 90);
                       const isHighest = w.amount === maxWeeklyRevenue;
                       return (
                         <div key={w.label} className="relative group cursor-pointer h-full flex flex-col justify-end items-center" style={{ width: `${80 / weeklyRevenueData.length}%` }}>
                           <div
-                            className={`w-full max-w-16 rounded-t-lg mx-auto transition-all ${isHighest ? 'bg-[#004253] shadow-md shadow-[#004253]/20' : 'bg-[#004253]/20 group-hover:bg-[#004253]/40'}`}
+                            className={`w-full max-w-16 rounded-t-lg mx-auto transition-all ${isHighest ? 'bg-primary shadow-md shadow-primary/20' : 'bg-primary/20 group-hover:bg-primary/40'}`}
                             style={{ height: `${heightPct}%` }}
                           ></div>
-                          <span className={`absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] whitespace-nowrap ${isHighest ? 'font-bold text-[#004253]' : 'text-[#70787d]'}`}>
+                          <span className={`absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] whitespace-nowrap ${isHighest ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
                             {w.label}
                           </span>
-                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#191c1d] text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10">
                             {formatCurrency(w.amount)}
                           </div>
                         </div>
@@ -474,22 +463,41 @@ export default function FinanceOverviewPage() {
               )}
             </div>
 
-            {/* Right: Gider Kategorileri - SVG Donut matching Stitch */}
-            <div className="bg-white p-8 rounded-2xl shadow-xs border border-[#bfc8cc]/5">
-              <h3 className="text-xl font-bold text-[#191c1d] mb-1">Gider Kategorileri</h3>
-              <p className="text-sm text-[#70787d] mb-8">Dağılım Analizi</p>
+            {/* Right: Gider Kategorileri - recharts PieChart donut */}
+            <div className="bg-card p-8 rounded-2xl shadow-xs border border-border/5">
+              <h3 className="text-xl font-bold text-foreground mb-1">Gider Kategorileri</h3>
+              <p className="text-sm text-muted-foreground mb-8">Dagilim Analizi</p>
               {categoryData.length === 0 ? (
-                <p className="text-[#70787d] text-sm text-center py-8">
-                  Bu ay için gider verisi yok
+                <p className="text-muted-foreground text-sm text-center py-8">
+                  Bu ay icin gider verisi yok
                 </p>
               ) : (
                 <>
                   <div className="flex justify-center mb-8">
                     <div className="relative w-40 h-40 flex items-center justify-center">
-                      <DonutChart data={categoryData} colors={COLORS} total={categoryTotal} />
-                      <div className="absolute text-center">
-                        <p className="text-[10px] font-bold text-[#70787d] uppercase">Toplam</p>
-                        <p className="text-lg font-black text-[#191c1d]">{formatCompact(categoryTotal)}</p>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={categoryData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={45}
+                            outerRadius={70}
+                            dataKey="value"
+                            strokeWidth={0}
+                          >
+                            {categoryData.map((_entry, index) => (
+                              <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            formatter={(value) => [formatCurrency(Number(value)), '']}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div className="absolute text-center pointer-events-none">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase">Toplam</p>
+                        <p className="text-lg font-black text-foreground">{formatCompact(categoryTotal)}</p>
                       </div>
                     </div>
                   </div>
@@ -499,9 +507,9 @@ export default function FinanceOverviewPage() {
                         <div className="flex items-center gap-2">
                           <div
                             className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                            style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
                           />
-                          <span className="text-sm font-medium text-[#40484c]">{cat.name}</span>
+                          <span className="text-sm font-medium text-foreground">{cat.name}</span>
                         </div>
                         <span className="text-sm font-bold">
                           {categoryTotal > 0 ? `${Math.round((cat.value / categoryTotal) * 100)}%` : '0%'}
@@ -516,19 +524,19 @@ export default function FinanceOverviewPage() {
 
           {/* Data Table Section */}
           {filteredBreakdown.length > 0 && (
-            <section className="bg-white rounded-2xl shadow-xs border border-[#bfc8cc]/5 overflow-hidden">
-              <div className="p-8 border-b border-[#bfc8cc]/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <section className="bg-card rounded-2xl shadow-xs border border-border/5 overflow-hidden">
+              <div className="p-8 border-b border-border/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-xl font-bold text-[#191c1d]">Gün Gün Gelir / Gider</h3>
-                  <p className="text-sm text-[#70787d]">Son 30 günlük detaylı işlem listesi</p>
+                  <h3 className="text-xl font-bold text-foreground">Gun Gun Gelir / Gider</h3>
+                  <p className="text-sm text-muted-foreground">Son 30 gunluk detayli islem listesi</p>
                 </div>
                 <div className="flex gap-2">
-                  <button className="flex items-center gap-2 px-4 py-2 border border-[#bfc8cc]/30 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors">
-                    <span className="material-symbols-outlined text-sm">filter_list</span>
+                  <button className="flex items-center gap-2 px-4 py-2 border border-border/30 rounded-lg text-sm font-bold hover:bg-muted transition-colors">
+                    <Filter className="size-4" />
                     Filtrele
                   </button>
-                  <button className="flex items-center gap-2 px-4 py-2 border border-[#bfc8cc]/30 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors">
-                    <span className="material-symbols-outlined text-sm">search</span>
+                  <button className="flex items-center gap-2 px-4 py-2 border border-border/30 rounded-lg text-sm font-bold hover:bg-muted transition-colors">
+                    <Search className="size-4" />
                     Bul
                   </button>
                 </div>
@@ -536,57 +544,57 @@ export default function FinanceOverviewPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-[#f2f4f5]">
-                      <th className="px-8 py-4 text-[10px] font-black uppercase text-[#70787d] tracking-wider">Tarih</th>
-                      <th className="px-8 py-4 text-[10px] font-black uppercase text-[#70787d] tracking-wider">Ciro</th>
-                      <th className="px-8 py-4 text-[10px] font-black uppercase text-[#70787d] tracking-wider">Gider</th>
-                      <th className="px-8 py-4 text-[10px] font-black uppercase text-[#70787d] tracking-wider">Net Durum</th>
-                      <th className="px-8 py-4 text-[10px] font-black uppercase text-[#70787d] tracking-wider">Detay</th>
+                    <tr className="bg-muted">
+                      <th className="px-8 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Tarih</th>
+                      <th className="px-8 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Ciro</th>
+                      <th className="px-8 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Gider</th>
+                      <th className="px-8 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Net Durum</th>
+                      <th className="px-8 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Detay</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#bfc8cc]/10">
+                  <tbody className="divide-y divide-border/10">
                     {filteredBreakdown.map((d: any) => (
-                      <tr key={d.day} className="hover:bg-slate-50 transition-colors">
+                      <tr key={d.day} className="hover:bg-muted transition-colors">
                         <td className="px-8 py-5">
                           <div className="flex flex-col">
-                            <span className="text-sm font-bold text-[#191c1d]">{formatDateFull(d.day, selectedMonth)}</span>
-                            <span className="text-[10px] text-[#70787d] uppercase font-bold">{getDayName(d.day, selectedMonth)}</span>
+                            <span className="text-sm font-bold text-foreground">{formatDateFull(d.day, selectedMonth)}</span>
+                            <span className="text-[10px] text-muted-foreground uppercase font-bold">{getDayName(d.day, selectedMonth)}</span>
                           </div>
                         </td>
                         <td className="px-8 py-5">
-                          <span className="text-sm font-bold text-teal-700">
+                          <span className="text-sm font-bold text-primary">
                             {d.revenue > 0 ? formatCurrency(d.revenue) : '\u2014'}
                           </span>
                         </td>
                         <td className="px-8 py-5">
-                          <span className="text-sm font-medium text-[#ba1a1a]">
+                          <span className="text-sm font-medium text-destructive">
                             {d.expense > 0 ? formatCurrency(d.expense) : '\u2014'}
                           </span>
                         </td>
                         <td className="px-8 py-5">
                           <div className="flex items-center gap-2">
-                            <div className={`w-1.5 h-1.5 rounded-full ${d.net >= 0 ? 'bg-teal-500' : 'bg-[#ba1a1a]'}`} />
-                            <span className="text-sm font-bold text-[#191c1d]">
+                            <div className={`w-1.5 h-1.5 rounded-full ${d.net >= 0 ? 'bg-primary' : 'bg-destructive'}`} />
+                            <span className="text-sm font-bold text-foreground">
                               {formatCurrency(d.net)}
                             </span>
                           </div>
                         </td>
                         <td className="px-8 py-5">
-                          <button className="text-[#004253] hover:underline text-sm font-bold">İncele</button>
+                          <button className="text-primary hover:underline text-sm font-bold">Incele</button>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                   {/* Totals row */}
                   <tfoot>
-                    <tr className="bg-[#f2f4f5] border-t-2 border-[#bfc8cc]/20">
-                      <td className="px-8 py-5 text-sm font-black text-[#191c1d]">Toplam</td>
-                      <td className="px-8 py-5 text-sm font-bold text-teal-700">{formatCurrency(summary.totalRevenue)}</td>
-                      <td className="px-8 py-5 text-sm font-medium text-[#ba1a1a]">{formatCurrency(summary.totalExpenses)}</td>
+                    <tr className="bg-muted border-t-2 border-border/20">
+                      <td className="px-8 py-5 text-sm font-black text-foreground">Toplam</td>
+                      <td className="px-8 py-5 text-sm font-bold text-primary">{formatCurrency(summary.totalRevenue)}</td>
+                      <td className="px-8 py-5 text-sm font-medium text-destructive">{formatCurrency(summary.totalExpenses)}</td>
                       <td className="px-8 py-5">
                         <div className="flex items-center gap-2">
-                          <div className={`w-1.5 h-1.5 rounded-full ${summary.netIncome >= 0 ? 'bg-teal-500' : 'bg-[#ba1a1a]'}`} />
-                          <span className="text-sm font-bold text-[#191c1d]">{formatCurrency(summary.netIncome)}</span>
+                          <div className={`w-1.5 h-1.5 rounded-full ${summary.netIncome >= 0 ? 'bg-primary' : 'bg-destructive'}`} />
+                          <span className="text-sm font-bold text-foreground">{formatCurrency(summary.netIncome)}</span>
                         </div>
                       </td>
                       <td className="px-8 py-5" />
@@ -599,20 +607,20 @@ export default function FinanceOverviewPage() {
 
           {/* Quick Action Floating Section */}
           <div className="mt-12 flex justify-center">
-            <div className="bg-[#e1e3e4] px-8 py-4 rounded-full flex items-center gap-8 shadow-xl">
+            <div className="bg-muted px-8 py-4 rounded-full flex items-center gap-8 shadow-xl">
               <Link href="/dashboard/finance/expenses" className="flex flex-col items-center gap-1 group">
-                <span className="material-symbols-outlined text-[#70787d] group-hover:text-[#004253] transition-colors">receipt_long</span>
-                <span className="text-[10px] font-bold uppercase tracking-tighter text-[#70787d] group-hover:text-[#004253]">Giderler</span>
+                <Receipt className="size-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                <span className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground group-hover:text-primary">Giderler</span>
               </Link>
-              <div className="w-px h-8 bg-[#bfc8cc]/40" />
+              <div className="w-px h-8 bg-border/40" />
               <Link href="/dashboard/finance/revenues" className="flex flex-col items-center gap-1 group">
-                <span className="material-symbols-outlined text-[#70787d] group-hover:text-[#004253] transition-colors">point_of_sale</span>
-                <span className="text-[10px] font-bold uppercase tracking-tighter text-[#70787d] group-hover:text-[#004253]">Cirolar</span>
+                <Monitor className="size-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                <span className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground group-hover:text-primary">Cirolar</span>
               </Link>
-              <div className="w-px h-8 bg-[#bfc8cc]/40" />
+              <div className="w-px h-8 bg-border/40" />
               <Link href="/dashboard/finance/expenses" className="flex flex-col items-center gap-1 group">
-                <span className="material-symbols-outlined text-[#70787d] group-hover:text-[#004253] transition-colors">request_quote</span>
-                <span className="text-[10px] font-bold uppercase tracking-tighter text-[#70787d] group-hover:text-[#004253]">Vergi</span>
+                <FileText className="size-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                <span className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground group-hover:text-primary">Vergi</span>
               </Link>
             </div>
           </div>
