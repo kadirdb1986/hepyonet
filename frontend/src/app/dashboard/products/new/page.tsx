@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { handleNumericInput, displayNumericValue, parseNumericValue } from '@/lib/utils';
@@ -104,16 +106,20 @@ export default function NewProductPage() {
               </div>
               <div>
                 <Label>Kategori</Label>
-                <select
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  value={form.categoryId}
-                  onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+                <Select
+                  value={form.categoryId || "none"}
+                  onValueChange={(value) => setForm({ ...form, categoryId: value === "none" ? "" : value })}
                 >
-                  <option value="">Kategorisiz</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Kategorisiz" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Kategorisiz</SelectItem>
+                    {categories.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -137,11 +143,9 @@ export default function NewProductPage() {
 
             <div>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={form.isMenuItem}
-                  onChange={(e) => setForm({ ...form, isMenuItem: e.target.checked })}
-                  className="rounded border-input"
+                  onCheckedChange={(checked) => setForm({ ...form, isMenuItem: checked === true })}
                 />
                 <span className="text-sm font-medium">Menüde Göster</span>
               </label>
