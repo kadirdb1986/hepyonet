@@ -117,7 +117,7 @@ export default function QRMenuPage() {
                 <img src={qrDataUrl} alt="QR Menu Code" className="w-64 h-64" />
               </div>
             ) : (
-              <div className="w-64 h-64 bg-gray-100 rounded-xl flex items-center justify-center">
+              <div className="w-64 h-64 bg-muted rounded-xl flex items-center justify-center">
                 <p className="text-muted-foreground">Oluşturuluyor...</p>
               </div>
             )}
@@ -159,7 +159,7 @@ export default function QRMenuPage() {
               </a>
             </div>
             <div className="border rounded-lg overflow-hidden">
-              <div className="bg-gray-100 px-4 py-2 border-b">
+              <div className="bg-muted px-4 py-2 border-b">
                 <p className="text-sm text-muted-foreground font-mono truncate">{menuUrl}</p>
               </div>
               <div className="relative" style={{ paddingBottom: '150%' }}>

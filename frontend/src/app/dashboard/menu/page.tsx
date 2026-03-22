@@ -141,7 +141,7 @@ export default function MenuManagementPage() {
       {orderedItems.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <UtensilsCrossed className="h-12 w-12 text-gray-300 mb-4" />
+            <UtensilsCrossed className="h-12 w-12 text-muted-foreground/50 mb-4" />
             <p className="text-muted-foreground text-center">{t('emptyState')}</p>
             <Link href="/dashboard/products">
               <Button variant="outline" className="mt-4">
@@ -186,8 +186,8 @@ export default function MenuManagementPage() {
                             className="h-10 w-10 rounded-md object-cover"
                           />
                         ) : (
-                          <div className="h-10 w-10 rounded-md bg-gray-100 flex items-center justify-center">
-                            <UtensilsCrossed className="h-5 w-5 text-gray-400" />
+                          <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center">
+                            <UtensilsCrossed className="h-5 w-5 text-muted-foreground" />
                           </div>
                         )}
                         <div>
