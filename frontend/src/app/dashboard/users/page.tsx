@@ -1,6 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
+import { MoreHorizontal, Plus, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import api from '@/lib/api';
+import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,23 +18,19 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, Plus, Trash2, UserCheck, UserX } from 'lucide-react';
-import { toast } from 'sonner';
-import api from '@/lib/api';
-import { useAuth } from '@/hooks/use-auth';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const ROLES = ['ADMIN', 'ACCOUNTANT', 'HR', 'STOCK_MANAGER', 'MENU_MANAGER', 'WAITER'] as const;
 const ROLE_LABELS: Record<string, string> = {
@@ -139,12 +140,131 @@ export default function UsersPage() {
     try {
       await api.post('/restaurants/current/transfer-ownership', { targetUserId: userId });
       toast.success('Sahiplik devredildi.');
-      // Refresh auth to get updated membership
       window.location.reload();
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Sahiplik devredilirken hata oluştu.');
     }
   };
+
+  const columns: ColumnDef<Member>[] = [
+    {
+      id: 'name',
+      accessorKey: 'name',
+      meta: { label: 'Ad Soyad' },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Ad Soyad" />
+      ),
+      cell: ({ row }) => (
+        <span className={`font-medium${!row.original.isActive ? ' opacity-50' : ''}`}>
+          {row.original.name}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'email',
+      meta: { label: 'E-posta' },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="E-posta" />
+      ),
+      cell: ({ row }) => (
+        <span className={!row.original.isActive ? 'opacity-50' : ''}>
+          {row.original.email}
+        </span>
+      ),
+    },
+    {
+      id: 'role',
+      accessorKey: 'role',
+      meta: { label: 'Rol' },
+      header: 'Rol',
+      cell: ({ row }) => {
+        const m = row.original;
+        const inactive = !m.isActive;
+        if (m.role === 'OWNER' || m.userId === user?.id) {
+          return (
+            <span className={inactive ? 'opacity-50' : ''}>
+              <Badge variant={m.role === 'OWNER' ? 'default' : 'secondary'}>
+                {ROLE_LABELS[m.role]}
+              </Badge>
+            </span>
+          );
+        }
+        return (
+          <span className={inactive ? 'opacity-50' : ''}>
+            <Select
+              value={m.role}
+              onValueChange={(value) => handleRoleChange(m.userId, value)}
+            >
+              <SelectTrigger className="h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ROLES.map((r) => (
+                  <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </span>
+        );
+      },
+    },
+    {
+      id: 'status',
+      meta: { label: 'Durum' },
+      header: 'Durum',
+      cell: ({ row }) => (
+        <Badge variant={row.original.isActive ? 'default' : 'secondary'}>
+          {row.original.isActive ? 'Aktif' : 'Pasif'}
+        </Badge>
+      ),
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        const m = row.original;
+        const canAct = m.role !== 'OWNER' && m.userId !== user?.id;
+        if (!canAct) return null;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <span className="sr-only">Menüyü aç</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {m.isActive ? (
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => handleDeactivate(m.userId, m.name)}
+                >
+                  Pasife Al
+                </DropdownMenuItem>
+              ) : (
+                <>
+                  <DropdownMenuItem onClick={() => handleReactivate(m.userId)}>
+                    Aktife Al
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="text-destructive"
+                    onClick={() => handleRemove(m.userId, m.name)}
+                  >
+                    Sil
+                  </DropdownMenuItem>
+                </>
+              )}
+              {isOwner && m.isActive && (
+                <DropdownMenuItem onClick={() => handleTransferOwnership(m.userId, m.name)}>
+                  Sahipliği Devret
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   if (loading) {
     return (
@@ -163,90 +283,19 @@ export default function UsersPage() {
         </Button>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Ad Soyad</TableHead>
-              <TableHead>E-posta</TableHead>
-              <TableHead>Rol</TableHead>
-              <TableHead>Durum</TableHead>
-              <TableHead>İşlemler</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {members.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                  Henüz kullanıcı yok.
-                </TableCell>
-              </TableRow>
-            ) : (
-              members.map((m) => (
-                <TableRow key={m.id} className={!m.isActive ? 'opacity-50' : ''}>
-                  <TableCell className="font-medium">{m.name}</TableCell>
-                  <TableCell>{m.email}</TableCell>
-                  <TableCell>
-                    {m.role === 'OWNER' || m.userId === user?.id ? (
-                      <Badge variant={m.role === 'OWNER' ? 'default' : 'secondary'}>
-                        {ROLE_LABELS[m.role]}
-                      </Badge>
-                    ) : (
-                      <Select
-                        value={m.role}
-                        onValueChange={(value) => handleRoleChange(m.userId, value)}
-                      >
-                        <SelectTrigger className="h-8">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {ROLES.map((r) => (
-                            <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={m.isActive ? 'default' : 'secondary'}>
-                      {m.isActive ? 'Aktif' : 'Pasif'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      {m.role !== 'OWNER' && m.userId !== user?.id && m.isActive && (
-                        <Button variant="ghost" size="icon" onClick={() => handleDeactivate(m.userId, m.name)} title="Pasife al">
-                          <UserX className="h-4 w-4 text-destructive" />
-                        </Button>
-                      )}
-                      {m.role !== 'OWNER' && m.userId !== user?.id && !m.isActive && (
-                        <>
-                          <Button variant="ghost" size="icon" onClick={() => handleReactivate(m.userId)} title="Aktif et">
-                            <UserCheck className="h-4 w-4 text-green-500" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleRemove(m.userId, m.name)} title="Kalıcı sil">
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </>
-                      )}
-                      {isOwner && m.role !== 'OWNER' && m.userId !== user?.id && m.isActive && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-xs"
-                          onClick={() => handleTransferOwnership(m.userId, m.name)}
-                        >
-                          Sahiplik Devret
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Kullanıcı Listesi</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            columns={columns}
+            data={members}
+            showToolbar={false}
+            emptyMessage="Henüz kullanıcı yok."
+          />
+        </CardContent>
+      </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
@@ -259,15 +308,16 @@ export default function UsersPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>E-posta</Label>
-              <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="kullanici@ornek.com" />
-
+              <Input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="kullanici@ornek.com"
+              />
             </div>
             <div className="space-y-2">
               <Label>Rol</Label>
-              <Select
-                value={newRole}
-                onValueChange={(value) => setNewRole(value)}
-              >
+              <Select value={newRole} onValueChange={(value) => setNewRole(value)}>
                 <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
