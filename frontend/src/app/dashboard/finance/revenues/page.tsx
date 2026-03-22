@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TrendingUp, ChevronLeft, ChevronRight, Check, X } from 'lucide-react';
@@ -223,68 +224,66 @@ export default function RevenuesPage() {
           {isLoading ? (
             <p className="text-muted-foreground text-center py-8">Yukleniyor...</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2 px-3 font-medium w-[50px]">Gün</th>
-                    <th className="text-left py-2 px-3 font-medium">Tarih</th>
-                    <th className="text-right py-2 px-3 font-medium">Tutar</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {monthDays.map((day) => (
-                    <tr
-                      key={day.day}
-                      className={`border-b last:border-0 ${day.dayName === 'Paz' || day.dayName === 'Cmt' ? 'bg-muted' : ''} ${!day.hasData && editingDay !== day.day ? 'text-muted-foreground' : ''}`}
-                    >
-                      <td className="py-2 px-3 font-medium">{day.dayName}</td>
-                      <td className="py-2 px-3">
-                        {day.day} {formatMonth(selectedMonth)}
-                      </td>
-                      <td className="py-2 px-3 text-right">
-                        {editingDay === day.day ? (
-                          <div className="flex items-center justify-end gap-1">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              value={editAmount}
-                              onChange={(e) => setEditAmount(e.target.value)}
-                              className="w-32 h-8 text-right"
-                              autoFocus
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') confirmEdit();
-                                if (e.key === 'Escape') cancelEdit();
-                              }}
-                            />
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={confirmEdit} disabled={saveMutation.isPending}>
-                              <Check className="h-4 w-4 text-green-600" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={cancelEdit}>
-                              <X className="h-4 w-4 text-red-500" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <span
-                            className={`cursor-pointer hover:underline ${day.hasData ? 'font-medium' : ''}`}
-                            onClick={() => startEdit(day)}
-                          >
-                            {day.hasData ? formatCurrency(day.amount) : '—'}
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="border-t-2">
-                    <td colSpan={2} className="py-2 px-3 font-bold">Toplam</td>
-                    <td className="py-2 px-3 text-right font-bold text-green-600">{formatCurrency(totalRevenue)}</td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">Gün</TableHead>
+                  <TableHead>Tarih</TableHead>
+                  <TableHead className="text-right">Tutar</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {monthDays.map((day) => (
+                  <TableRow
+                    key={day.day}
+                    className={`${day.dayName === 'Paz' || day.dayName === 'Cmt' ? 'bg-muted' : ''} ${!day.hasData && editingDay !== day.day ? 'text-muted-foreground' : ''}`}
+                  >
+                    <TableCell className="font-medium">{day.dayName}</TableCell>
+                    <TableCell>
+                      {day.day} {formatMonth(selectedMonth)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {editingDay === day.day ? (
+                        <div className="flex items-center justify-end gap-1">
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={editAmount}
+                            onChange={(e) => setEditAmount(e.target.value)}
+                            className="w-32 h-8 text-right"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') confirmEdit();
+                              if (e.key === 'Escape') cancelEdit();
+                            }}
+                          />
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={confirmEdit} disabled={saveMutation.isPending}>
+                            <Check className="h-4 w-4 text-green-600" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={cancelEdit}>
+                            <X className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <span
+                          className={`cursor-pointer hover:underline ${day.hasData ? 'font-medium' : ''}`}
+                          onClick={() => startEdit(day)}
+                        >
+                          {day.hasData ? formatCurrency(day.amount) : '—'}
+                        </span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={2} className="font-bold">Toplam</TableCell>
+                  <TableCell className="text-right font-bold text-green-600">{formatCurrency(totalRevenue)}</TableCell>
+                </TableRow>
+              </TableFooter>
+            </Table>
           )}
         </CardContent>
       </Card>
