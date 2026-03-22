@@ -6,6 +6,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   Calendar,
   ChevronLeft,
@@ -526,67 +527,62 @@ export default function FinanceOverviewPage() {
                   </Button>
                 </div>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-muted">
-                      <th className="px-8 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Tarih</th>
-                      <th className="px-8 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Ciro</th>
-                      <th className="px-8 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Gider</th>
-                      <th className="px-8 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Net Durum</th>
-                      <th className="px-8 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Detay</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/10">
-                    {filteredBreakdown.map((d: any) => (
-                      <tr key={d.day} className="hover:bg-muted transition-colors">
-                        <td className="px-8 py-5">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-bold text-foreground">{formatDateFull(d.day, selectedMonth)}</span>
-                            <span className="text-[10px] text-muted-foreground uppercase font-bold">{getDayName(d.day, selectedMonth)}</span>
-                          </div>
-                        </td>
-                        <td className="px-8 py-5">
-                          <span className="text-sm font-bold text-primary">
-                            {d.revenue > 0 ? formatCurrency(d.revenue) : '\u2014'}
-                          </span>
-                        </td>
-                        <td className="px-8 py-5">
-                          <span className="text-sm font-medium text-destructive">
-                            {d.expense > 0 ? formatCurrency(d.expense) : '\u2014'}
-                          </span>
-                        </td>
-                        <td className="px-8 py-5">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-1.5 h-1.5 rounded-full ${d.net >= 0 ? 'bg-primary' : 'bg-destructive'}`} />
-                            <span className="text-sm font-bold text-foreground">
-                              {formatCurrency(d.net)}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-8 py-5">
-                          <Button variant="link" className="p-0 h-auto text-sm font-bold">Incele</Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  {/* Totals row */}
-                  <tfoot>
-                    <tr className="bg-muted border-t-2 border-border/20">
-                      <td className="px-8 py-5 text-sm font-black text-foreground">Toplam</td>
-                      <td className="px-8 py-5 text-sm font-bold text-primary">{formatCurrency(summary.totalRevenue)}</td>
-                      <td className="px-8 py-5 text-sm font-medium text-destructive">{formatCurrency(summary.totalExpenses)}</td>
-                      <td className="px-8 py-5">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-1.5 h-1.5 rounded-full ${summary.netIncome >= 0 ? 'bg-primary' : 'bg-destructive'}`} />
-                          <span className="text-sm font-bold text-foreground">{formatCurrency(summary.netIncome)}</span>
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted">
+                    <TableHead className="px-8 py-4 text-[10px] font-black uppercase tracking-wider">Tarih</TableHead>
+                    <TableHead className="px-8 py-4 text-[10px] font-black uppercase tracking-wider">Ciro</TableHead>
+                    <TableHead className="px-8 py-4 text-[10px] font-black uppercase tracking-wider">Gider</TableHead>
+                    <TableHead className="px-8 py-4 text-[10px] font-black uppercase tracking-wider">Net Durum</TableHead>
+                    <TableHead className="px-8 py-4 text-[10px] font-black uppercase tracking-wider">Detay</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredBreakdown.map((d: any) => (
+                    <TableRow key={d.day} className="hover:bg-muted transition-colors">
+                      <TableCell className="px-8 py-5">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-foreground">{formatDateFull(d.day, selectedMonth)}</span>
+                          <span className="text-[10px] text-muted-foreground uppercase font-bold">{getDayName(d.day, selectedMonth)}</span>
                         </div>
-                      </td>
-                      <td className="px-8 py-5" />
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+                      </TableCell>
+                      <TableCell className="px-8 py-5">
+                        <span className="text-sm font-bold text-primary">
+                          {d.revenue > 0 ? formatCurrency(d.revenue) : '\u2014'}
+                        </span>
+                      </TableCell>
+                      <TableCell className="px-8 py-5">
+                        <span className="text-sm font-medium text-destructive">
+                          {d.expense > 0 ? formatCurrency(d.expense) : '\u2014'}
+                        </span>
+                      </TableCell>
+                      <TableCell className="px-8 py-5">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-1.5 h-1.5 rounded-full ${d.net >= 0 ? 'bg-primary' : 'bg-destructive'}`} />
+                          <span className="text-sm font-bold text-foreground">{formatCurrency(d.net)}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="px-8 py-5">
+                        <Button variant="link" className="p-0 h-auto text-sm font-bold">İncele</Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                <TableFooter>
+                  <TableRow className="bg-muted border-t-2 border-border/20">
+                    <TableCell className="px-8 py-5 text-sm font-black text-foreground">Toplam</TableCell>
+                    <TableCell className="px-8 py-5 text-sm font-bold text-primary">{formatCurrency(summary.totalRevenue)}</TableCell>
+                    <TableCell className="px-8 py-5 text-sm font-medium text-destructive">{formatCurrency(summary.totalExpenses)}</TableCell>
+                    <TableCell className="px-8 py-5">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-1.5 h-1.5 rounded-full ${summary.netIncome >= 0 ? 'bg-primary' : 'bg-destructive'}`} />
+                        <span className="text-sm font-bold text-foreground">{formatCurrency(summary.netIncome)}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-8 py-5" />
+                  </TableRow>
+                </TableFooter>
+              </Table>
             </section>
           )}
 
