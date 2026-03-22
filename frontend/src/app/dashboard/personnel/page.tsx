@@ -3,20 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Eye, UserX, UserCheck, Trash2, Settings } from 'lucide-react';
+import { Plus, Settings, MoreHorizontal } from 'lucide-react';
+import { ColumnDef, FilterFn, Row } from '@tanstack/react-table';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -25,6 +17,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table';
 
 interface Personnel {
   id: string;
@@ -40,7 +39,6 @@ interface Personnel {
 }
 
 export default function PersonnelListPage() {
-  const [search, setSearch] = useState('');
   const [deactivateId, setDeactivateId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
@@ -86,16 +84,6 @@ export default function PersonnelListPage() {
     }
   };
 
-  const filtered = personnel.filter((p) => {
-    const fullName = `${p.name} ${p.surname}`.toLowerCase();
-    const q = search.toLowerCase();
-    return (
-      fullName.includes(q) ||
-      (p.position && p.position.toLowerCase().includes(q)) ||
-      (p.phone && p.phone.includes(q))
-    );
-  });
-
   const formatCurrency = (value: string | number) => {
     return new Intl.NumberFormat('tr-TR', {
       style: 'currency',
@@ -118,13 +106,120 @@ export default function PersonnelListPage() {
     return new Date(dateStr).toLocaleDateString('tr-TR');
   };
 
-  if (isLoading) {
+  const globalFilterFn: FilterFn<Personnel> = (row: Row<Personnel>, _columnId: string, filterValue: string) => {
+    const p = row.original;
+    const q = filterValue.toLowerCase();
+    const fullName = `${p.name} ${p.surname}`.toLowerCase();
     return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Yükleniyor...</p>
-      </div>
+      fullName.includes(q) ||
+      (p.position || '').toLowerCase().includes(q) ||
+      (p.phone || '').includes(q)
     );
-  }
+  };
+
+  const columns: ColumnDef<Personnel>[] = [
+    {
+      id: 'fullName',
+      accessorFn: (row) => `${row.name} ${row.surname}`,
+      meta: { label: 'Ad Soyad' },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Ad Soyad" />
+      ),
+      cell: ({ row }) => (
+        <span className="font-medium">
+          {row.original.name} {row.original.surname}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'position',
+      meta: { label: 'Pozisyon' },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Pozisyon" />
+      ),
+      cell: ({ row }) => row.original.positionConfig?.name || '—',
+    },
+    {
+      accessorKey: 'phone',
+      meta: { label: 'Telefon' },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Telefon" />
+      ),
+      cell: ({ row }) => row.original.phone ? formatPhone(row.original.phone) : '—',
+    },
+    {
+      accessorKey: 'startDate',
+      meta: { label: 'Başlangıç' },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Başlangıç" />
+      ),
+      cell: ({ row }) => formatDate(row.original.startDate),
+    },
+    {
+      accessorKey: 'salary',
+      meta: { label: 'Maaş' },
+      header: ({ column }) => (
+        <div className="text-right">
+          <DataTableColumnHeader column={column} title="Maaş" />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-right">{formatCurrency(row.original.salary)}</div>
+      ),
+    },
+    {
+      id: 'status',
+      meta: { label: 'Durum' },
+      header: 'Durum',
+      cell: ({ row }) => (
+        <Badge variant={row.original.isActive ? 'default' : 'secondary'}>
+          {row.original.isActive ? 'Aktif' : 'Pasif'}
+        </Badge>
+      ),
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        const p = row.original;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <span className="sr-only">Menüyü aç</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/personnel/${p.id}`}>Görüntüle</Link>
+              </DropdownMenuItem>
+              {p.isActive ? (
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => setDeactivateId(p.id)}
+                >
+                  Pasife Al
+                </DropdownMenuItem>
+              ) : (
+                <>
+                  <DropdownMenuItem onClick={() => activateMutation.mutate(p.id)}>
+                    Aktife Al
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="text-destructive"
+                    onClick={() => handleDelete(p.id, `${p.name} ${p.surname}`)}
+                  >
+                    Sil
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   return (
     <div>
@@ -148,91 +243,17 @@ export default function PersonnelListPage() {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Personel Listesi</CardTitle>
-            <Input
-              placeholder="Ara (ad, pozisyon, telefon)..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="max-w-xs"
-            />
-          </div>
+          <CardTitle className="text-lg">Personel Listesi</CardTitle>
         </CardHeader>
         <CardContent>
-          {filtered.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              {search ? 'Aramanızla eşleşen personel bulunamadı.' : 'Henüz personel kaydı yok.'}
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Ad Soyad</TableHead>
-                    <TableHead>Pozisyon</TableHead>
-                    <TableHead>Telefon</TableHead>
-                    <TableHead>Başlangıç Tarihi</TableHead>
-                    <TableHead>Maaş</TableHead>
-                    <TableHead>Durum</TableHead>
-                    <TableHead>İşlemler</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.map((p) => (
-                    <TableRow key={p.id}>
-                      <TableCell className="font-medium">
-                        {p.name} {p.surname}
-                      </TableCell>
-                      <TableCell>{p.positionConfig?.name || '\u2014'}</TableCell>
-                      <TableCell>{p.phone ? formatPhone(p.phone) : '\u2014'}</TableCell>
-                      <TableCell>{formatDate(p.startDate)}</TableCell>
-                      <TableCell>{formatCurrency(p.salary)}</TableCell>
-                      <TableCell>
-                        <Badge variant={p.isActive ? 'default' : 'secondary'}>
-                          {p.isActive ? 'Aktif' : 'Pasif'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Link href={`/dashboard/personnel/${p.id}`}>
-                            <Button variant="ghost" size="sm">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </Link>
-                          {p.isActive ? (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setDeactivateId(p.id)}
-                            >
-                              <UserX className="h-4 w-4 text-destructive" />
-                            </Button>
-                          ) : (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => activateMutation.mutate(p.id)}
-                              >
-                                <UserCheck className="h-4 w-4 text-green-500" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDelete(p.id, `${p.name} ${p.surname}`)}
-                              >
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+          <DataTable
+            columns={columns}
+            data={personnel}
+            searchPlaceholder="İsim, pozisyon veya telefon ara..."
+            isLoading={isLoading}
+            globalFilterFn={globalFilterFn}
+            emptyMessage="Henüz personel eklenmemiş."
+          />
         </CardContent>
       </Card>
 
