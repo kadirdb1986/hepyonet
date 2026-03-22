@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Calendar, Plus, TrendingUp, Receipt, Wallet, Users } from 'lucide-react';
 import api from '@/lib/api';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('tr-TR', {
@@ -116,15 +119,15 @@ export default function DashboardPage() {
     const formatted = `${isPositive ? '+' : ''}${percent.toFixed(1)}%`;
 
     return (
-      <span
-        className={`text-xs font-bold px-2 py-1 rounded-full ${
+      <Badge
+        className={
           displayPositive
-            ? 'text-[#005d63] bg-[#7df4ff]'
-            : 'text-[#ba1a1a] bg-[#ffdad6]'
-        }`}
+            ? 'text-primary bg-secondary'
+            : 'text-destructive bg-destructive/10'
+        }
       >
         {formatted}
-      </span>
+      </Badge>
     );
   }
 
@@ -133,116 +136,127 @@ export default function DashboardPage() {
       {/* Welcome Section */}
       <div className="mb-10 flex justify-between items-end">
         <div>
-          <h2 className="font-headline text-3xl font-extrabold tracking-tight text-[#004253] mb-1">
+          <h2 className="font-headline text-3xl font-extrabold tracking-tight text-primary mb-1">
             Hoş geldiniz, {user?.name}
           </h2>
-          <p className="text-[#70787d] font-medium">İşte bugün restoranınızdaki son durum özeti.</p>
+          <p className="text-muted-foreground font-medium">İşte bugün restoranınızdaki son durum özeti.</p>
         </div>
         <div className="flex gap-3">
-          <button className="bg-[#f2f4f5] text-[#004253] px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-[#e6e8e9] transition-all">
-            <span className="material-symbols-outlined text-xl">calendar_today</span>
+          <Button variant="secondary" className="px-5 py-2.5 rounded-xl font-bold">
+            <Calendar className="size-5" />
             <span>Bugün</span>
-          </button>
-          <button className="bg-[#004253] text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-[#004253]/20 hover:scale-[1.02] transition-transform">
-            <span className="material-symbols-outlined text-xl">add</span>
+          </Button>
+          <Button className="px-6 py-2.5 rounded-xl font-bold shadow-lg">
+            <Plus className="size-5" />
             <span>Yeni Sipariş</span>
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Bento Grid Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {/* Aylık Ciro */}
-        <div className="bg-white p-6 rounded-xl shadow-xs ring-1 ring-[#bfc8cc]/10 flex flex-col justify-between group hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 bg-[#005b71]/10 rounded-xl flex items-center justify-center text-[#004253]">
-              <span className="material-symbols-outlined text-2xl">trending_up</span>
+        <Card className="flex flex-col justify-between group hover:shadow-md transition-shadow">
+          <CardContent className="p-6 flex flex-col justify-between h-full">
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                <TrendingUp className="size-5" />
+              </div>
+              {!loading && renderBadge(data?.revenueChangePercent ?? null)}
             </div>
-            {!loading && renderBadge(data?.revenueChangePercent ?? null)}
-          </div>
-          <div>
-            <p className="text-[#70787d] text-xs font-bold uppercase tracking-wider mb-1">
-              {data?.currentMonthName ?? ''} Ayı Cirosu
-            </p>
-            {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            ) : (
-              <h3 className="font-headline text-2xl font-black text-[#191c1d]">{formatCurrency(data?.monthlyRevenue ?? 0)}</h3>
-            )}
-          </div>
-        </div>
+            <div>
+              <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-1">
+                {data?.currentMonthName ?? ''} Ayı Cirosu
+              </p>
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              ) : (
+                <h3 className="font-headline text-2xl font-black text-foreground">{formatCurrency(data?.monthlyRevenue ?? 0)}</h3>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Aylık Giderler */}
-        <div className="bg-white p-6 rounded-xl shadow-xs ring-1 ring-[#bfc8cc]/10 flex flex-col justify-between group hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 bg-[#ffdad6]/20 rounded-xl flex items-center justify-center text-[#ba1a1a]">
-              <span className="material-symbols-outlined text-2xl">payments</span>
+        <Card className="flex flex-col justify-between group hover:shadow-md transition-shadow">
+          <CardContent className="p-6 flex flex-col justify-between h-full">
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-12 h-12 bg-destructive/10 rounded-xl flex items-center justify-center text-destructive">
+                <Receipt className="size-5" />
+              </div>
+              {!loading && renderBadge(data?.expenseChangePercent ?? null, true)}
             </div>
-            {!loading && renderBadge(data?.expenseChangePercent ?? null, true)}
-          </div>
-          <div>
-            <p className="text-[#70787d] text-xs font-bold uppercase tracking-wider mb-1">
-              {data?.currentMonthName ?? ''} Ayı Gideri
-            </p>
-            {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            ) : (
-              <h3 className="font-headline text-2xl font-black text-[#191c1d]">{formatCurrency(data?.monthlyExpense ?? 0)}</h3>
-            )}
-          </div>
-        </div>
+            <div>
+              <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-1">
+                {data?.currentMonthName ?? ''} Ayı Gideri
+              </p>
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              ) : (
+                <h3 className="font-headline text-2xl font-black text-foreground">{formatCurrency(data?.monthlyExpense ?? 0)}</h3>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Brüt Kar */}
-        <div className="bg-[#004253] p-6 rounded-xl shadow-xl shadow-[#004253]/10 flex flex-col justify-between text-white relative overflow-hidden group">
+        <Card className="bg-primary flex flex-col justify-between text-primary-foreground relative overflow-hidden group shadow-xl">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
-          <div className="flex justify-between items-start mb-4 relative z-10">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-white">
-              <span className="material-symbols-outlined text-2xl">account_balance_wallet</span>
+          <CardContent className="p-6 flex flex-col justify-between h-full">
+            <div className="flex justify-between items-start mb-4 relative z-10">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-primary-foreground">
+                <Wallet className="size-5" />
+              </div>
+              {!loading && data?.profitChangePercent != null && (
+                <Badge
+                  className={
+                    data.profitChangePercent >= 0
+                      ? 'text-primary-foreground bg-white/20'
+                      : 'text-destructive-foreground bg-destructive/30'
+                  }
+                >
+                  {data.profitChangePercent >= 0 ? '+' : ''}{data.profitChangePercent.toFixed(1)}%
+                </Badge>
+              )}
             </div>
-            {!loading && data?.profitChangePercent != null && (
-              <span
-                className={`text-xs font-bold px-2 py-1 rounded-full ${
-                  data.profitChangePercent >= 0
-                    ? 'text-white bg-white/20'
-                    : 'text-[#ffdad6] bg-[#ba1a1a]/30'
-                }`}
-              >
-                {data.profitChangePercent >= 0 ? '+' : ''}{data.profitChangePercent.toFixed(1)}%
-              </span>
-            )}
-          </div>
-          <div className="relative z-10">
-            <p className="text-white/70 text-xs font-bold uppercase tracking-wider mb-1">Brüt Kar</p>
-            {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin text-white/50" />
-            ) : (
-              <h3 className="font-headline text-2xl font-black">{formatCurrency(data?.grossProfit ?? 0)}</h3>
-            )}
-          </div>
-        </div>
+            <div className="relative z-10">
+              <p className="text-primary-foreground/70 text-xs font-bold uppercase tracking-wider mb-1">Brüt Kar</p>
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-primary-foreground/50" />
+              ) : (
+                <h3 className="font-headline text-2xl font-black">{formatCurrency(data?.grossProfit ?? 0)}</h3>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Personel Sayısı */}
-        <div className="bg-white p-6 rounded-xl shadow-xs ring-1 ring-[#bfc8cc]/10 flex flex-col justify-between group hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 bg-[#d4e6e9] rounded-xl flex items-center justify-center text-[#516164]">
-              <span className="material-symbols-outlined text-2xl">group</span>
+        <Card className="flex flex-col justify-between group hover:shadow-md transition-shadow">
+          <CardContent className="p-6 flex flex-col justify-between h-full">
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-12 h-12 bg-secondary rounded-xl flex items-center justify-center text-muted-foreground">
+                <Users className="size-5" />
+              </div>
             </div>
-          </div>
-          <div>
-            <p className="text-[#70787d] text-xs font-bold uppercase tracking-wider mb-1">Personel Sayısı</p>
-            {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            ) : (
-              <h3 className="font-headline text-2xl font-black text-[#191c1d]">{data?.personnelCount ?? 0} Aktif</h3>
-            )}
-          </div>
-        </div>
+            <div>
+              <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-1">Personel Sayısı</p>
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              ) : (
+                <h3 className="font-headline text-2xl font-black text-foreground">{data?.personnelCount ?? 0} Aktif</h3>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Contextual FAB */}
-      <button className="fixed bottom-8 right-8 w-14 h-14 bg-[#004253] text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-50">
-        <span className="material-symbols-outlined text-3xl">add</span>
-      </button>
+      <Button
+        size="icon"
+        className="fixed bottom-8 right-8 w-14 h-14 rounded-full shadow-2xl hover:scale-110 transition-transform z-50"
+      >
+        <Plus className="size-5" />
+      </Button>
     </div>
   );
 }
