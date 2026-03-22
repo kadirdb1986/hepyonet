@@ -3,20 +3,13 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ColumnDef, FilterFn, Row } from '@tanstack/react-table';
 import api from '@/lib/api';
 import { handleNumericInput, displayNumericValue, parseNumericValue } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -27,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table';
 
 interface RawMaterial {
   id: string;
@@ -116,9 +110,122 @@ export default function StockMovementsPage() {
     createMutation.mutate(form);
   }
 
-  if (isLoading) {
-    return <div className="p-6">{tc('loading')}</div>;
-  }
+  const globalFilterFn: FilterFn<StockMovement> = (
+    row: Row<StockMovement>,
+    _columnId: string,
+    filterValue: string
+  ) => {
+    const m = row.original;
+    const q = filterValue.toLowerCase();
+    return (
+      (m.rawMaterial?.name || '').toLowerCase().includes(q) ||
+      (m.supplier || '').toLowerCase().includes(q) ||
+      (m.invoiceNo || '').toLowerCase().includes(q)
+    );
+  };
+
+  const columns: ColumnDef<StockMovement>[] = [
+    {
+      accessorKey: 'date',
+      meta: { label: t('date') },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t('date')} />
+      ),
+      cell: ({ row }) =>
+        new Date(row.original.date).toLocaleDateString('tr-TR'),
+    },
+    {
+      id: 'name',
+      accessorFn: (row) => row.rawMaterial?.name ?? '',
+      meta: { label: t('name') },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t('name')} />
+      ),
+      cell: ({ row }) => (
+        <span className="font-medium">{row.original.rawMaterial?.name}</span>
+      ),
+    },
+    {
+      accessorKey: 'type',
+      meta: { label: t('movementType') },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t('movementType')} />
+      ),
+      cell: ({ row }) =>
+        row.original.type === 'IN' ? (
+          <Badge className="bg-green-100 text-green-800">
+            <ArrowDownCircle className="mr-1 h-3 w-3" />
+            {t('in')}
+          </Badge>
+        ) : (
+          <Badge className="bg-destructive/10 text-destructive">
+            <ArrowUpCircle className="mr-1 h-3 w-3" />
+            {t('out')}
+          </Badge>
+        ),
+    },
+    {
+      accessorKey: 'quantity',
+      meta: { label: t('quantity') },
+      header: ({ column }) => (
+        <div className="text-right">
+          <DataTableColumnHeader column={column} title={t('quantity')} />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-right">
+          {Number(row.original.quantity).toFixed(2)} {row.original.rawMaterial?.unit}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'unitPrice',
+      meta: { label: t('unitPrice') },
+      header: ({ column }) => (
+        <div className="text-right">
+          <DataTableColumnHeader column={column} title={t('unitPrice')} />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-right">
+          {Number(row.original.unitPrice).toFixed(2)} TL
+        </div>
+      ),
+    },
+    {
+      id: 'totalValue',
+      meta: { label: t('totalValue') },
+      header: ({ column }) => (
+        <div className="text-right">
+          <DataTableColumnHeader column={column} title={t('totalValue')} />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-right">
+          {(
+            Number(row.original.quantity) * Number(row.original.unitPrice)
+          ).toFixed(2)}{' '}
+          TL
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'supplier',
+      meta: { label: t('supplier') },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t('supplier')} />
+      ),
+      cell: ({ row }) => row.original.supplier || '-',
+    },
+    {
+      accessorKey: 'invoiceNo',
+      meta: { label: t('invoiceNo') },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t('invoiceNo')} />
+      ),
+      cell: ({ row }) => row.original.invoiceNo || '-',
+    },
+  ];
 
   return (
     <div className="p-6 space-y-6">
@@ -224,63 +331,14 @@ export default function StockMovementsPage() {
           <CardTitle>{t('movements')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('date')}</TableHead>
-                <TableHead>{t('name')}</TableHead>
-                <TableHead className="text-center">{t('movementType')}</TableHead>
-                <TableHead className="text-right">{t('quantity')}</TableHead>
-                <TableHead className="text-right">{t('unitPrice')}</TableHead>
-                <TableHead className="text-right">{t('totalValue')}</TableHead>
-                <TableHead>{t('supplier')}</TableHead>
-                <TableHead>{t('invoiceNo')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {movements.map((movement) => (
-                <TableRow key={movement.id}>
-                  <TableCell>
-                    {new Date(movement.date).toLocaleDateString('tr-TR')}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {movement.rawMaterial.name}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {movement.type === 'IN' ? (
-                      <Badge className="bg-green-100 text-green-800">
-                        <ArrowDownCircle className="mr-1 h-3 w-3" />
-                        {t('in')}
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-destructive/10 text-destructive">
-                        <ArrowUpCircle className="mr-1 h-3 w-3" />
-                        {t('out')}
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {Number(movement.quantity).toFixed(2)} {movement.rawMaterial.unit}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {Number(movement.unitPrice).toFixed(2)} TL
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {(Number(movement.quantity) * Number(movement.unitPrice)).toFixed(2)} TL
-                  </TableCell>
-                  <TableCell>{movement.supplier || '-'}</TableCell>
-                  <TableCell>{movement.invoiceNo || '-'}</TableCell>
-                </TableRow>
-              ))}
-              {movements.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                    Henüz stok hareketi bulunmuyor
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={movements}
+            searchPlaceholder="Malzeme adı, tedarikçi veya fatura no ara..."
+            isLoading={isLoading}
+            globalFilterFn={globalFilterFn}
+            emptyMessage="Henüz stok hareketi bulunmuyor."
+          />
         </CardContent>
       </Card>
     </div>
