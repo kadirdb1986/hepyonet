@@ -174,19 +174,6 @@ export default function LoginPage() {
           </div>
         </div>
       </main>
-
-      {/* Floating Widget (Desktop only) */}
-      <div className="fixed bottom-12 right-12 hidden xl:block z-0 pointer-events-none">
-        <div className="glass-panel p-6 rounded-2xl shadow-xl border border-white/20 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full profit-glow flex items-center justify-center text-white">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>trending_up</span>
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-tighter text-secondary">Canlı Performans</p>
-            <p className="text-lg font-headline font-bold text-on-surface">%12.4 Artış</p>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
