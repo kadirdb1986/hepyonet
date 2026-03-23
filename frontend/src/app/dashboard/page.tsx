@@ -126,7 +126,7 @@ function BarChart({ data }: { data: DailyBreakdown[] }) {
           <div key={item.date} className="flex-1 flex flex-col items-center gap-2 group">
             <div className="relative w-full" style={{ height: `${barHeight}px` }}>
               {isHighest && (
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
                   {formatCurrency(item.revenue)}
                 </div>
               )}
@@ -166,7 +166,7 @@ function WeeklyBarChart({ data }: { data: { label: string; revenue: number }[] }
           <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
             <div className="relative w-full" style={{ height: `${barHeight}px` }}>
               {isHighest && (
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
                   {formatCurrency(item.revenue)}
                 </div>
               )}
