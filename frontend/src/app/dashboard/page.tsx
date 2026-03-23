@@ -47,29 +47,32 @@ interface KpiCardProps {
   title: string
   value: string
   icon: string
-  bgClass: string
+  iconBgClass: string
+  cardBgClass?: string
   badge: React.ReactNode
   isLoading?: boolean
 }
 
-function KpiCard({ title, value, icon, bgClass, badge, isLoading }: KpiCardProps) {
+function KpiCard({ title, value, icon, iconBgClass, cardBgClass, badge, isLoading }: KpiCardProps) {
   return (
     <div
       className={cn(
         "p-6 rounded-xl border-0 ring-1 ring-black/[0.03] transition-all hover:translate-y-[-4px]",
-        bgClass,
+        cardBgClass || "bg-surface-container-lowest",
       )}
     >
       <div className="flex items-start justify-between mb-4">
-        <span className="material-symbols-outlined text-on-surface-variant text-2xl">{icon}</span>
+        <div className={cn("p-2 rounded-lg", iconBgClass)}>
+          <span className="material-symbols-outlined text-xl">{icon}</span>
+        </div>
         {badge}
       </div>
+      <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-wider mb-1">{title}</p>
       {isLoading ? (
-        <div className="h-8 w-3/4 bg-black/[0.06] rounded-md animate-pulse mb-1" />
+        <div className="h-8 w-3/4 bg-black/[0.06] rounded-md animate-pulse" />
       ) : (
-        <p className="font-headline text-2xl font-bold text-on-surface leading-tight">{value}</p>
+        <p className="font-headline text-2xl font-bold text-on-surface">{value}</p>
       )}
-      <p className="text-xs font-medium text-on-surface-variant mt-1">{title}</p>
     </div>
   )
 }
@@ -101,28 +104,36 @@ function ChangeBadge({ change, variant = "secondary-container" }: ChangeBadgePro
 
 function BarChart({ data }: { data: DailyBreakdown[] }) {
   const maxRevenue = Math.max(...data.map((d) => d.revenue), 1)
-  const today = format(new Date(), "yyyy-MM-dd")
+  const maxRevenueDay = data.reduce((max, d) => (d.revenue > max.revenue ? d : max), data[0])
 
   return (
-    <div className="flex items-end gap-2 h-56 w-full">
+    <div className="h-64 flex items-end justify-between gap-4 px-2">
       {data.map((item) => {
         const dayIndex = getDay(new Date(item.date))
         const dayName = TR_DAY_NAMES[dayIndex]
-        const isToday = item.date === today
+        const isHighest = item.date === maxRevenueDay?.date && item.revenue > 0
         const barHeight = Math.max((item.revenue / maxRevenue) * 224, 4)
 
         return (
           <div key={item.date} className="flex-1 flex flex-col items-center gap-3 group">
+            {isHighest && (
+              <div className="bg-on-surface text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap">
+                {formatCurrency(item.revenue)}
+              </div>
+            )}
             <div
               className={cn(
                 "w-full rounded-t-sm transition-colors",
-                isToday
+                isHighest
                   ? "bg-primary"
                   : "bg-surface-container-high group-hover:bg-primary-container/20",
               )}
               style={{ height: `${barHeight}px` }}
             />
-            <span className="text-[10px] font-bold text-on-surface-variant">{dayName}</span>
+            <span className={cn(
+              "text-[10px] font-bold",
+              isHighest ? "text-on-surface" : "text-on-surface-variant"
+            )}>{dayName}</span>
           </div>
         )
       })}
@@ -206,7 +217,7 @@ export default function DashboardPage() {
           title="Aylık Ciro"
           value={formatCurrency(currentSummary?.totalRevenue ?? 0)}
           icon="payments"
-          bgClass="bg-primary-fixed"
+          iconBgClass="bg-primary-fixed text-on-primary-fixed"
           isLoading={summaryLoading}
           badge={<ChangeBadge change={revenueChange} variant="secondary-container" />}
         />
@@ -216,7 +227,7 @@ export default function DashboardPage() {
           title="Aylık Gider"
           value={formatCurrency(currentSummary?.totalExpenses ?? 0)}
           icon="receipt_long"
-          bgClass="bg-surface-container-highest"
+          iconBgClass="bg-surface-container-highest text-on-surface"
           isLoading={summaryLoading}
           badge={<ChangeBadge change={expenseChange} variant="error-container" />}
         />
@@ -226,25 +237,26 @@ export default function DashboardPage() {
           title="Brüt Kar"
           value={formatCurrency(currentSummary?.netIncome ?? 0)}
           icon="account_balance_wallet"
-          bgClass="bg-slate-100"
+          iconBgClass="bg-slate-200 text-slate-700"
+          cardBgClass="bg-slate-100"
           isLoading={summaryLoading}
           badge={<ChangeBadge change={netChange} variant="secondary" />}
         />
 
         {/* Personel */}
         <KpiCard
-          title="Aktif Personel"
-          value={activeStaff ? String(activeStaff) : "—"}
+          title="Personel Sayısı"
+          value={activeStaff ? `${activeStaff} Aktif` : "—"}
           icon="badge"
-          bgClass="bg-tertiary-fixed"
+          iconBgClass="bg-tertiary-fixed text-on-tertiary-fixed"
           isLoading={!personnel}
           badge={
             activeStaff > 0 && totalStaff > 0 && activeStaff === totalStaff ? (
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">
                 Kadro Tam
               </span>
             ) : activeStaff > 0 ? (
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-tertiary-container text-on-tertiary-container">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">
                 {activeStaff}/{totalStaff}
               </span>
             ) : null
