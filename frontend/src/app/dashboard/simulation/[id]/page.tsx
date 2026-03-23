@@ -19,30 +19,37 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface SimRevenue {
+interface SimProduct {
   id: string
-  name: string
-  amount: number
-  unitPrice?: number
-  quantity?: number
+  productId?: string
+  productName: string
+  quantity: number | string
+  salePrice: number | string
+  costPrice: number | string
 }
 
 interface SimExpense {
   id: string
   name: string
-  amount: number
+  amount: number | string
   type?: string
+}
+
+interface SimDayWeight {
+  id: string
+  day: number
+  weight: number
 }
 
 interface SimulationDetail {
   id: string
   name: string
   month?: string
-  revenues: SimRevenue[]
+  kdvRate?: number | string
+  incomeTaxRate?: number | string
+  products: SimProduct[]
   expenses: SimExpense[]
-  totalRevenue?: number
-  totalExpense?: number
-  netProfit?: number
+  dayWeights: SimDayWeight[]
 }
 
 interface Product {
@@ -252,32 +259,42 @@ export default function SimulationDetailPage() {
   useEffect(() => {
     if (simulation && !initialized) {
       setTitle(simulation.name)
+      if (simulation.kdvRate != null) setKdvRate(Number(simulation.kdvRate))
+      if (simulation.incomeTaxRate != null) setIncomeTaxRate(Number(simulation.incomeTaxRate))
       setRevenues(
-        (simulation.revenues || []).map((r) => ({
-          id: r.id,
-          name: r.name,
-          quantity: r.quantity ?? r.amount ?? 0,
-          unitPrice: r.unitPrice ?? 0,
+        (simulation.products || []).map((p) => ({
+          id: p.id,
+          name: p.productName,
+          quantity: Number(p.quantity) || 0,
+          unitPrice: Number(p.salePrice) || 0,
         })),
       )
       setFoodCosts(
-        (simulation.revenues || []).map((r) => ({
-          id: r.id,
-          name: r.name,
-          unitCost: productCostMap[r.name] ?? 0,
-          quantity: r.quantity ?? r.amount ?? 0,
+        (simulation.products || []).map((p) => ({
+          id: p.id,
+          name: p.productName,
+          unitCost: Number(p.costPrice) || 0,
+          quantity: Number(p.quantity) || 0,
         })),
       )
       setExpenses(
         (simulation.expenses || [])
-          .filter((e) => e.type !== "food_cost")
+          .filter((e) => e.type !== "FOOD_COST")
           .map((e) => ({
             id: e.id,
             name: e.name,
-            amount: e.amount,
+            amount: Number(e.amount) || 0,
             type: e.type,
           })),
       )
+      // Day weights from backend
+      if (simulation.dayWeights?.length) {
+        const weights = [...DEFAULT_WEIGHTS]
+        simulation.dayWeights.forEach((dw) => {
+          if (dw.day >= 0 && dw.day < 7) weights[dw.day] = Number(dw.weight)
+        })
+        setDayWeights(weights)
+      }
       setInitialized(true)
     }
   }, [simulation, initialized, productCostMap])
