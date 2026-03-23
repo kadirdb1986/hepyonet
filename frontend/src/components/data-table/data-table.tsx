@@ -124,14 +124,14 @@ export function DataTable<TData, TValue>({
           <button
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant disabled:opacity-30"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-low transition-colors text-on-surface-variant disabled:opacity-30"
           >
             <span className="material-symbols-outlined text-xl">first_page</span>
           </button>
           <button
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant disabled:opacity-30"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-low transition-colors text-on-surface-variant disabled:opacity-30"
           >
             <span className="material-symbols-outlined text-xl">chevron_left</span>
           </button>
@@ -146,7 +146,7 @@ export function DataTable<TData, TValue>({
               <button
                 key={page}
                 onClick={() => table.setPageIndex(page)}
-                className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-semibold transition-colors ${
+                className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
                   page === pageIndex
                     ? "bg-primary text-on-primary font-bold"
                     : "hover:bg-surface-container-low text-on-surface"
@@ -159,14 +159,14 @@ export function DataTable<TData, TValue>({
           <button
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant disabled:opacity-30"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-low transition-colors text-on-surface-variant disabled:opacity-30"
           >
             <span className="material-symbols-outlined text-xl">chevron_right</span>
           </button>
           <button
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant disabled:opacity-30"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-low transition-colors text-on-surface-variant disabled:opacity-30"
           >
             <span className="material-symbols-outlined text-xl">last_page</span>
           </button>
