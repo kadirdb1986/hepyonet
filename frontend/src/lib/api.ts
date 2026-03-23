@@ -18,8 +18,32 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+// Prisma Decimal fields come as strings ("82.50"). This transformer
+// recursively converts numeric-looking strings to actual numbers so every
+// page can do arithmetic without manual Number() calls.
+const NUMERIC_RE = /^-?\d+(\.\d+)?$/
+
+function parseDecimals(data: unknown): unknown {
+  if (data === null || data === undefined) return data
+  if (typeof data === "string" && NUMERIC_RE.test(data) && data.length < 20) {
+    return Number(data)
+  }
+  if (Array.isArray(data)) return data.map(parseDecimals)
+  if (typeof data === "object") {
+    const out: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+      out[k] = parseDecimals(v)
+    }
+    return out
+  }
+  return data
+}
+
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    response.data = parseDecimals(response.data)
+    return response
+  },
   async (error) => {
     const originalRequest = error.config
     if (error.response?.status === 401 && !originalRequest._retry && typeof window !== "undefined") {
