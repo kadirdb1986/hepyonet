@@ -14,6 +14,7 @@ const mainMenuItems = [
     children: [
       { label: "Cirolar", href: "/dashboard/finance/revenues" },
       { label: "Giderler", href: "/dashboard/finance/expenses" },
+      { label: "Dağıtım", href: "/dashboard/finance/distribute" },
     ],
   },
   { label: "Stok", icon: "inventory_2", href: "/dashboard/inventory" },
