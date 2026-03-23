@@ -1,13 +1,13 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
 import { format, subMonths, getDay, endOfMonth } from "date-fns"
 import { tr } from "date-fns/locale"
 import api from "@/lib/api"
 import { useAuth } from "@/hooks/use-auth"
-import { formatCurrency } from "@/lib/utils"
-import { cn } from "@/lib/utils"
+import { formatCurrency, cn } from "@/lib/utils"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -115,12 +115,12 @@ function BarChart({ data }: { data: DailyBreakdown[] }) {
   const maxRevenueDay = data.reduce((max, d) => (d.revenue > max.revenue ? d : max), data[0])
 
   return (
-    <div className="h-64 flex items-end justify-between gap-4 px-2">
+    <div className="h-64 flex items-end justify-between gap-4 px-2 pt-10">
       {data.map((item) => {
         const dayIndex = getDay(new Date(item.date))
         const dayName = TR_DAY_NAMES[dayIndex]
         const isHighest = item.date === maxRevenueDay?.date && item.revenue > 0
-        const barHeight = Math.max((item.revenue / maxRevenue) * 224, 4)
+        const barHeight = Math.max((item.revenue / maxRevenue) * 180, 4)
 
         return (
           <div key={item.date} className="flex-1 flex flex-col items-center gap-3 group">
@@ -143,6 +143,46 @@ function BarChart({ data }: { data: DailyBreakdown[] }) {
               "text-[10px] font-bold",
               isHighest ? "text-on-surface" : "text-on-surface-variant"
             )}>{dayName}</span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ─── Weekly Bar Chart ─────────────────────────────────────────────────────────
+
+function WeeklyBarChart({ data }: { data: { label: string; revenue: number }[] }) {
+  const maxRevenue = Math.max(...data.map((d) => d.revenue), 1)
+  const maxItem = data.reduce((max, d) => (d.revenue > max.revenue ? d : max), data[0])
+
+  return (
+    <div className="h-64 flex items-end justify-between gap-6 px-2 pt-10">
+      {data.map((item, idx) => {
+        const isHighest = item === maxItem && item.revenue > 0
+        const barHeight = Math.max((item.revenue / maxRevenue) * 180, 4)
+
+        return (
+          <div key={idx} className="flex-1 flex flex-col items-center gap-3 group">
+            <div className="relative w-full" style={{ height: `${barHeight}px` }}>
+              {isHighest && (
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
+                  {formatCurrency(item.revenue)}
+                </div>
+              )}
+              <div
+                className={cn(
+                  "w-full h-full rounded-t-sm transition-colors",
+                  isHighest
+                    ? "bg-primary"
+                    : "bg-surface-container-high group-hover:bg-primary-container/20",
+                )}
+              />
+            </div>
+            <span className={cn(
+              "text-[10px] font-bold",
+              isHighest ? "text-on-surface" : "text-on-surface-variant"
+            )}>{item.label}</span>
           </div>
         )
       })}
@@ -217,9 +257,31 @@ export default function DashboardPage() {
   const dailyData: DailyBreakdown[] = (() => {
     const raw = currentSummary?.dailyBreakdown ?? []
     const todayDay = new Date().getDate()
-    // Filter to days up to today, then take last 7
     const upToToday = raw.filter((d) => d.day <= todayDay)
     return upToToday.slice(-7)
+  })()
+
+  // Weekly data: group dailyBreakdown by week
+  const weeklyData = (() => {
+    const raw = currentSummary?.dailyBreakdown ?? []
+    if (!raw.length) return []
+    const weeks: { label: string; revenue: number; date: string; day: number; expense: number; net: number }[] = []
+    for (let i = 0; i < raw.length; i += 7) {
+      const chunk = raw.slice(i, i + 7)
+      const weekRevenue = chunk.reduce((sum, d) => sum + d.revenue, 0)
+      const weekExpense = chunk.reduce((sum, d) => sum + d.expense, 0)
+      const startDay = chunk[0].day
+      const endDay = chunk[chunk.length - 1].day
+      weeks.push({
+        label: `${startDay}-${endDay}`,
+        revenue: weekRevenue,
+        expense: weekExpense,
+        net: weekRevenue - weekExpense,
+        date: chunk[0].date,
+        day: startDay,
+      })
+    }
+    return weeks
   })()
 
   return (
@@ -295,7 +357,7 @@ export default function DashboardPage() {
             <div>
               <h2 className="font-headline text-lg font-bold text-on-surface">Gelir Trendi</h2>
               <p className="text-xs text-on-surface-variant mt-0.5">
-                {format(new Date(), "MMMM yyyy", { locale: tr })} — günlük dağılım
+                {format(new Date(), "MMMM yyyy", { locale: tr })} — {chartTab === "daily" ? "günlük" : "haftalık"} dağılım
               </p>
             </div>
             {/* Tab Toggle */}
@@ -338,8 +400,10 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-          ) : (
+          ) : chartTab === "daily" ? (
             <BarChart data={dailyData} />
+          ) : (
+            <WeeklyBarChart data={weeklyData} />
           )}
 
           {/* Y-axis hint */}
@@ -369,7 +433,7 @@ export default function DashboardPage() {
           <div className="flex-1 bg-surface-container-low p-6 rounded-xl">
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-headline text-base font-bold text-on-surface">Son Giderler</h3>
-              <button className="text-xs font-bold text-primary hover:underline">Tümü</button>
+              <Link href="/dashboard/finance/expenses" className="text-xs font-bold text-primary hover:underline">Tümü</Link>
             </div>
             {summaryLoading ? (
               <div className="space-y-4">

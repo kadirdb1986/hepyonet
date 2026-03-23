@@ -229,7 +229,7 @@ export default function PersonnelListPage() {
         </div>
         <Link
           href="/dashboard/personnel/new"
-          className="bg-primary text-on-primary px-6 py-3 rounded-md font-bold flex items-center gap-2 shadow-xl hover:translate-y-[-2px] active:scale-95 transition-all"
+          className="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-xl hover:translate-y-[-2px] active:scale-95 transition-all"
         >
           <span className="material-symbols-outlined">person_add</span>
           Yeni Personel Ekle

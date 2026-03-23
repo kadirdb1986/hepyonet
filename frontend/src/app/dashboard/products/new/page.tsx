@@ -287,7 +287,7 @@ export default function NewProductPage() {
             <button
               type="submit"
               disabled={createMutation.isPending}
-              className="bg-primary text-on-primary font-bold rounded-md px-6 py-3 flex items-center gap-2 shadow-xl hover:translate-y-[-2px] active:scale-95 transition-all disabled:opacity-50"
+              className="bg-primary text-on-primary font-bold rounded-xl px-6 py-3 flex items-center gap-2 shadow-xl hover:translate-y-[-2px] active:scale-95 transition-all disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-xl">check_circle</span>
               {createMutation.isPending ? "Kaydediliyor..." : "Urunu Olustur"}

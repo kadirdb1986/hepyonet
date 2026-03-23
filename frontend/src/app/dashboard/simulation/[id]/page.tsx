@@ -509,7 +509,7 @@ export default function SimulationDetailPage() {
           <button
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending}
-            className="bg-primary text-on-primary px-5 py-2.5 rounded-md font-bold flex items-center gap-2 shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all disabled:opacity-50"
+            className="bg-primary text-on-primary px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all disabled:opacity-50"
           >
             <span className="material-symbols-outlined text-xl">save</span>
             {saveMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
@@ -1005,7 +1005,7 @@ export default function SimulationDetailPage() {
               <button
                 type="submit"
                 disabled={duplicateMutation.isPending || !dupName.trim()}
-                className="bg-primary text-on-primary font-bold rounded-md px-4 py-2 text-sm disabled:opacity-50"
+                className="bg-primary text-on-primary font-bold rounded-xl px-4 py-2 text-sm disabled:opacity-50"
               >
                 {duplicateMutation.isPending ? "Cogaltiliyor..." : "Cogalt"}
               </button>

@@ -405,7 +405,7 @@ export default function RevenuesPage() {
             <button
               onClick={handleSave}
               disabled={createMutation.isPending || updateMutation.isPending}
-              className="bg-primary text-on-primary font-bold rounded-md px-4 py-2 text-sm disabled:opacity-50"
+              className="bg-primary text-on-primary font-bold rounded-xl px-4 py-2 text-sm disabled:opacity-50"
             >
               {createMutation.isPending || updateMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
             </button>

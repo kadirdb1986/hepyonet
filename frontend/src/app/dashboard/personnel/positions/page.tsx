@@ -137,7 +137,7 @@ export default function PositionsPage() {
           <button
             type="submit"
             disabled={!newPositionName.trim() || createMutation.isPending}
-            className="bg-primary text-on-primary px-6 py-3 rounded-md font-bold flex items-center gap-2 shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all disabled:opacity-50 shrink-0"
+            className="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all disabled:opacity-50 shrink-0"
           >
             <span className="material-symbols-outlined text-xl">add</span>
             {createMutation.isPending ? "Ekleniyor..." : "Ekle"}

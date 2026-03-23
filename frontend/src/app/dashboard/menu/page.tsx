@@ -167,7 +167,7 @@ export default function MenuPage() {
             <button
               onClick={saveOrder}
               disabled={orderMutation.isPending}
-              className="bg-primary text-on-primary px-5 py-2.5 rounded-md font-bold flex items-center gap-2 shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all disabled:opacity-50"
+              className="bg-primary text-on-primary px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-xl">save</span>
               {orderMutation.isPending ? "Kaydediliyor..." : "Siralamayi Kaydet"}
@@ -187,7 +187,7 @@ export default function MenuPage() {
           </p>
           <Link
             href="/dashboard/products"
-            className="bg-primary text-on-primary px-5 py-2.5 rounded-md font-bold flex items-center gap-2 shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all mt-2"
+            className="bg-primary text-on-primary px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all mt-2"
           >
             <span className="material-symbols-outlined text-xl">inventory</span>
             Urunlere Git

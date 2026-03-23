@@ -341,7 +341,7 @@ export default function ProductDetailPage() {
         </div>
         <button
           onClick={() => setIsEditing(!isEditing)}
-          className="bg-primary text-on-primary px-6 py-3 rounded-md font-bold flex items-center gap-2 shadow-xl hover:translate-y-[-2px] active:scale-95 transition-all"
+          className="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-xl hover:translate-y-[-2px] active:scale-95 transition-all"
         >
           <span className="material-symbols-outlined">{isEditing ? "close" : "edit"}</span>
           {isEditing ? "Duzenlemeyi Iptal Et" : "Urunu Duzenle"}
@@ -483,7 +483,7 @@ export default function ProductDetailPage() {
               <button
                 type="submit"
                 disabled={updateMutation.isPending}
-                className="bg-primary text-on-primary font-bold rounded-md px-6 py-3 flex items-center gap-2 disabled:opacity-50"
+                className="bg-primary text-on-primary font-bold rounded-xl px-6 py-3 flex items-center gap-2 disabled:opacity-50"
               >
                 <span className="material-symbols-outlined text-xl">save</span>
                 {updateMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
@@ -574,7 +574,7 @@ export default function ProductDetailPage() {
               ingredientForm.reset()
               setAddIngredientOpen(true)
             }}
-            className="bg-primary text-on-primary px-4 py-2 rounded-md font-bold flex items-center gap-2 text-sm shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all"
+            className="bg-primary text-on-primary px-4 py-2 rounded-xl font-bold flex items-center gap-2 text-sm shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all"
           >
             <span className="material-symbols-outlined text-lg">add</span>
             Malzeme Ekle
@@ -968,7 +968,7 @@ export default function ProductDetailPage() {
               <button
                 type="submit"
                 disabled={addIngredientMutation.isPending}
-                className="bg-primary text-on-primary font-bold rounded-md px-4 py-2 text-sm disabled:opacity-50"
+                className="bg-primary text-on-primary font-bold rounded-xl px-4 py-2 text-sm disabled:opacity-50"
               >
                 {addIngredientMutation.isPending ? "Ekleniyor..." : "Ekle"}
               </button>

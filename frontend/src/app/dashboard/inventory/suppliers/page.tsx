@@ -444,7 +444,7 @@ export default function SuppliersPage() {
             <button
               type="submit"
               disabled={createMutation.isPending}
-              className="bg-primary text-on-primary px-6 py-3 rounded-md font-bold flex items-center gap-2 shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all disabled:opacity-50"
+              className="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-xl">add</span>
               {createMutation.isPending ? "Ekleniyor..." : "Ekle"}

@@ -405,7 +405,7 @@ export default function InventoryPage() {
               <button
                 type="submit"
                 disabled={isPending}
-                className="bg-primary text-on-primary font-bold rounded-md px-4 py-2 text-sm disabled:opacity-50"
+                className="bg-primary text-on-primary font-bold rounded-xl px-4 py-2 text-sm disabled:opacity-50"
               >
                 {isPending ? "Kaydediliyor..." : "Kaydet"}
               </button>
@@ -605,7 +605,7 @@ export default function InventoryPage() {
           </button>
           <button
             onClick={() => setAddDialogOpen(true)}
-            className="bg-primary text-on-primary px-5 py-2.5 rounded-md font-bold flex items-center gap-2 shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all"
+            className="bg-primary text-on-primary px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all"
           >
             <span className="material-symbols-outlined text-xl">add</span>
             Stok Kalemi Ekle
@@ -765,7 +765,7 @@ export default function InventoryPage() {
                 }
               }}
               disabled={!newTypeName.trim() || createTypeMutation.isPending}
-              className="bg-primary text-on-primary font-bold rounded-md px-4 py-2.5 text-sm disabled:opacity-50"
+              className="bg-primary text-on-primary font-bold rounded-xl px-4 py-2.5 text-sm disabled:opacity-50"
             >
               Ekle
             </button>

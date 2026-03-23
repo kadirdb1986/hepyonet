@@ -396,7 +396,7 @@ export default function ProductsPage() {
           </button>
           <Link
             href="/dashboard/products/new"
-            className="bg-primary text-on-primary px-5 py-2.5 rounded-md font-bold flex items-center gap-2 shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all"
+            className="bg-primary text-on-primary px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all"
           >
             <span className="material-symbols-outlined text-xl">add</span>
             Yeni Urun
@@ -595,7 +595,7 @@ export default function ProductsPage() {
               <button
                 type="submit"
                 disabled={quickCreateMutation.isPending}
-                className="bg-primary text-on-primary font-bold rounded-md px-4 py-2 text-sm disabled:opacity-50"
+                className="bg-primary text-on-primary font-bold rounded-xl px-4 py-2 text-sm disabled:opacity-50"
               >
                 {quickCreateMutation.isPending ? "Olusturuluyor..." : "Olustur"}
               </button>
