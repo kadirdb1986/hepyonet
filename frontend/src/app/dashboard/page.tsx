@@ -11,17 +11,20 @@ import { cn } from "@/lib/utils"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface DailyRevenue {
+interface DailyBreakdown {
+  day: number
   date: string
   revenue: number
+  expense: number
+  net: number
 }
 
 interface FinanceSummary {
   totalRevenue: number
   totalExpenses: number
   netIncome: number
-  dailyBreakdown: DailyRevenue[]
-  categoryBreakdown: { category: string; amount: number }[]
+  dailyBreakdown: DailyBreakdown[]
+  categoryBreakdown: Record<string, number>
 }
 
 interface PersonnelItem {
@@ -96,11 +99,7 @@ function ChangeBadge({ change, variant = "secondary-container" }: ChangeBadgePro
 
 // ─── Bar Chart ────────────────────────────────────────────────────────────────
 
-interface BarChartProps {
-  data: DailyRevenue[]
-}
-
-function BarChart({ data }: BarChartProps) {
+function BarChart({ data }: { data: DailyBreakdown[] }) {
   const maxRevenue = Math.max(...data.map((d) => d.revenue), 1)
   const today = format(new Date(), "yyyy-MM-dd")
 
@@ -181,21 +180,13 @@ export default function DashboardPage() {
   const activeStaff = personnel?.filter((p) => p.isActive).length ?? 0
   const totalStaff = personnel?.length ?? 0
 
-  // Chart data: last 7 daily entries or build 7-slot array
-  const dailyData: DailyRevenue[] = (() => {
+  // Chart data: last 7 days that have passed in the current month
+  const dailyData: DailyBreakdown[] = (() => {
     const raw = currentSummary?.dailyBreakdown ?? []
-    if (raw.length >= 7) return raw.slice(-7)
-    // Pad from start with zero entries
-    const today = new Date()
-    const padded: DailyRevenue[] = []
-    for (let i = 6; i >= 0; i--) {
-      const d = subMonths(today, 0)
-      d.setDate(today.getDate() - i)
-      const dateStr = format(d, "yyyy-MM-dd")
-      const found = raw.find((r) => r.date === dateStr)
-      padded.push({ date: dateStr, revenue: found?.revenue ?? 0 })
-    }
-    return padded
+    const todayDay = new Date().getDate()
+    // Filter to days up to today, then take last 7
+    const upToToday = raw.filter((d) => d.day <= todayDay)
+    return upToToday.slice(-7)
   })()
 
   return (
@@ -357,15 +348,15 @@ export default function DashboardPage() {
                   </div>
                 ))}
               </div>
-            ) : currentSummary?.categoryBreakdown?.length ? (
+            ) : currentSummary?.categoryBreakdown && Object.keys(currentSummary.categoryBreakdown).length > 0 ? (
               <div className="space-y-3">
-                {currentSummary.categoryBreakdown.slice(0, 4).map((item) => (
-                  <div key={item.category} className="flex items-center justify-between">
+                {Object.entries(currentSummary.categoryBreakdown).slice(0, 4).map(([category, amount]) => (
+                  <div key={category} className="flex items-center justify-between">
                     <span className="text-sm text-on-surface-variant truncate max-w-[60%]">
-                      {item.category}
+                      {category}
                     </span>
                     <span className="text-sm font-semibold text-on-surface">
-                      {formatCurrency(item.amount)}
+                      {formatCurrency(Number(amount))}
                     </span>
                   </div>
                 ))}
