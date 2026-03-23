@@ -87,7 +87,7 @@ export default function PersonnelListPage() {
       header: "Ad Soyad",
       cell: ({ row }) => {
         const p = row.original
-        const initials = `${p.name.charAt(0)}${p.surname.charAt(0)}`.toUpperCase()
+        const initials = `${(p.name ?? "?").charAt(0)}${(p.surname ?? "?").charAt(0)}`.toUpperCase()
         return (
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold text-sm shrink-0">

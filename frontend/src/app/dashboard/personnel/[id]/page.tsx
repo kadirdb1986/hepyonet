@@ -275,7 +275,7 @@ export default function PersonnelDetailPage() {
     )
   }
 
-  const initials = `${personnel.name.charAt(0)}${personnel.surname.charAt(0)}`.toUpperCase()
+  const initials = `${(personnel.name ?? "?").charAt(0)}${(personnel.surname ?? "?").charAt(0)}`.toUpperCase()
   const workedPercent =
     workDays && workDays.workDays > 0
       ? Math.round((workDays.workedDays / workDays.workDays) * 100)

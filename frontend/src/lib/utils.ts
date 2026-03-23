@@ -5,7 +5,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatCurrency(amount: number): string {
+export function formatCurrency(amount: number | null | undefined): string {
+  if (amount == null) return "—"
   return new Intl.NumberFormat("tr-TR", {
     style: "currency",
     currency: "TRY",
@@ -46,20 +47,26 @@ export function formatPhone(phone: string): string {
   return phone
 }
 
-export function formatDate(date: string | Date): string {
+export function formatDate(date: string | Date | null | undefined): string {
+  if (!date) return "—"
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return "—"
   return new Intl.DateTimeFormat("tr-TR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-  }).format(new Date(date))
+  }).format(d)
 }
 
-export function formatDateLong(date: string | Date): string {
+export function formatDateLong(date: string | Date | null | undefined): string {
+  if (!date) return "—"
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return "—"
   return new Intl.DateTimeFormat("tr-TR", {
     day: "numeric",
     month: "long",
     year: "numeric",
-  }).format(new Date(date))
+  }).format(d)
 }
 
 export function handleNumericInput(value: string, setter: (v: string) => void) {
