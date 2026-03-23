@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@theme {
+  /* Stitch "The Culinary Architect" Color Tokens */
+  --color-primary: #000000;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #00174b;
+  --color-on-primary-container: #497cff;
+  --color-primary-fixed: #dbe1ff;
+  --color-primary-fixed-dim: #b4c5ff;
+
+  --color-secondary: #006e2d;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #7cf994;
+  --color-on-secondary-container: #007230;
+  --color-secondary-fixed: #7ffc97;
+  --color-secondary-fixed-dim: #62df7d;
+
+  --color-tertiary: #000000;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #2a1700;
+  --color-on-tertiary-container: #b87500;
+  --color-tertiary-fixed: #ffddb8;
+  --color-tertiary-fixed-dim: #ffb95f;
+
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  --color-surface: #f7f9fb;
+  --color-surface-dim: #d8dadc;
+  --color-surface-bright: #f7f9fb;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f4f6;
+  --color-surface-container: #eceef0;
+  --color-surface-container-high: #e6e8ea;
+  --color-surface-container-highest: #e0e3e5;
+  --color-surface-tint: #0053db;
+  --color-surface-variant: #e0e3e5;
+
+  --color-on-surface: #191c1e;
+  --color-on-surface-variant: #45464d;
+  --color-on-background: #191c1e;
+  --color-background: #f7f9fb;
+
+  --color-outline: #76777d;
+  --color-outline-variant: #c6c6cd;
+
+  --color-inverse-surface: #2d3133;
+  --color-inverse-on-surface: #eff1f3;
+  --color-inverse-primary: #b4c5ff;
+
+  --color-on-primary-fixed: #00174b;
+  --color-on-primary-fixed-variant: #003ea8;
+  --color-on-secondary-fixed: #002109;
+  --color-on-secondary-fixed-variant: #005320;
+  --color-on-tertiary-fixed: #2a1700;
+  --color-on-tertiary-fixed-variant: #653e00;
+
+  /* Font Families */
+  --font-headline: "Manrope", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-label: "Inter", sans-serif;
+
+  /* Border Radius (Stitch) */
+  --radius: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+  --radius-full: 0.75rem;
+}
+
+/* Material Symbols configuration */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Stitch Custom Utilities */
+.editorial-gradient {
+  background: linear-gradient(135deg, #f7f9fb 0%, #eceef0 100%);
+}
+
+.profit-glow {
+  background: linear-gradient(45deg, #006e2d 0%, #7cf994 100%);
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+}
+
+/* Stitch ambient shadow */
+.shadow-ambient {
+  box-shadow: 0 20px 40px rgba(25, 28, 30, 0.06);
+}
+
+/* Ghost border utility */
+.ghost-border {
+  border: 1px solid rgba(198, 198, 205, 0.15);
+}
+
+/* Base styles */
+body {
+  font-family: var(--font-body);
+  color: var(--color-on-surface);
+  background-color: var(--color-surface);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headline);
+}
