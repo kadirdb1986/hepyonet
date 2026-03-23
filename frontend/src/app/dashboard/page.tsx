@@ -115,15 +115,15 @@ function BarChart({ data }: { data: DailyBreakdown[] }) {
   const maxRevenueDay = data.reduce((max, d) => (d.revenue > max.revenue ? d : max), data[0])
 
   return (
-    <div className="h-48 flex items-end justify-between gap-4 px-2 pt-8">
+    <div className="flex items-end justify-between gap-4 px-2 pt-7">
       {data.map((item) => {
         const dayIndex = getDay(new Date(item.date))
         const dayName = TR_DAY_NAMES[dayIndex]
         const isHighest = item.date === maxRevenueDay?.date && item.revenue > 0
-        const barHeight = Math.max((item.revenue / maxRevenue) * 140, 4)
+        const barHeight = Math.max((item.revenue / maxRevenue) * 160, 4)
 
         return (
-          <div key={item.date} className="flex-1 flex flex-col items-center gap-3 group">
+          <div key={item.date} className="flex-1 flex flex-col items-center gap-2 group">
             <div className="relative w-full" style={{ height: `${barHeight}px` }}>
               {isHighest && (
                 <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
@@ -157,13 +157,13 @@ function WeeklyBarChart({ data }: { data: { label: string; revenue: number }[] }
   const maxItem = data.reduce((max, d) => (d.revenue > max.revenue ? d : max), data[0])
 
   return (
-    <div className="h-48 flex items-end justify-between gap-6 px-2 pt-8">
+    <div className="flex items-end justify-between gap-6 px-2 pt-7">
       {data.map((item, idx) => {
         const isHighest = item === maxItem && item.revenue > 0
-        const barHeight = Math.max((item.revenue / maxRevenue) * 140, 4)
+        const barHeight = Math.max((item.revenue / maxRevenue) * 160, 4)
 
         return (
-          <div key={idx} className="flex-1 flex flex-col items-center gap-3 group">
+          <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
             <div className="relative w-full" style={{ height: `${barHeight}px` }}>
               {isHighest && (
                 <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
@@ -351,7 +351,7 @@ export default function DashboardPage() {
       {/* Bento Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Revenue Chart — 8 cols */}
-        <div className="lg:col-span-8 bg-surface-container-lowest p-6 rounded-xl border-0 ring-1 ring-black/[0.03]">
+        <div className="lg:col-span-8 self-start bg-surface-container-lowest p-6 rounded-xl border-0 ring-1 ring-black/[0.03]">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -389,7 +389,7 @@ export default function DashboardPage() {
 
           {/* Chart */}
           {summaryLoading ? (
-            <div className="flex items-end gap-2 h-56">
+            <div className="flex items-end gap-2">
               {[80, 140, 60, 180, 100, 220, 120].map((h, i) => (
                 <div key={i} className="flex-1 flex flex-col items-center gap-3">
                   <div
