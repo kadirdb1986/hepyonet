@@ -39,9 +39,6 @@ interface Expense {
   paymentDate: string
   effectiveMonth?: string
   effectiveEndMonth?: string
-  distributionType?: string
-  distributionMonths?: number
-  monthlyDistributions?: { month: string; amount: number }[]
 }
 
 interface ExpenseCategory {

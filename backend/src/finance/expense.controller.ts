@@ -12,7 +12,7 @@ import {
 import { ExpenseService } from './expense.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
-import { DistributeExpenseDto } from './dto/distribute-expense.dto';
+
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { RestaurantGuard } from '../common/guards/restaurant.guard';
@@ -73,20 +73,4 @@ export class ExpenseController {
     return this.expenseService.remove(restaurantId, id);
   }
 
-  @Post(':id/distribute')
-  distribute(
-    @CurrentUser('restaurantId') restaurantId: string,
-    @Param('id') id: string,
-    @Body() dto: DistributeExpenseDto,
-  ) {
-    return this.expenseService.distribute(restaurantId, id, dto);
-  }
-
-  @Post(':id/undistribute')
-  undistribute(
-    @CurrentUser('restaurantId') restaurantId: string,
-    @Param('id') id: string,
-  ) {
-    return this.expenseService.undistribute(restaurantId, id);
-  }
 }
