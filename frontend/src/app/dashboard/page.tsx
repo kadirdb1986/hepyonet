@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { format, subMonths, getDay } from "date-fns"
+import { format, subMonths, getDay, endOfMonth } from "date-fns"
 import { tr } from "date-fns/locale"
 import api from "@/lib/api"
 import { useAuth } from "@/hooks/use-auth"
@@ -30,6 +30,14 @@ interface FinanceSummary {
 interface PersonnelItem {
   id: string
   isActive: boolean
+}
+
+interface RecentExpense {
+  id: string
+  title: string
+  amount: number
+  category: string
+  paymentDate: string
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -116,20 +124,21 @@ function BarChart({ data }: { data: DailyBreakdown[] }) {
 
         return (
           <div key={item.date} className="flex-1 flex flex-col items-center gap-3 group">
-            {isHighest && (
-              <div className="bg-on-surface text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap">
-                {formatCurrency(item.revenue)}
-              </div>
-            )}
-            <div
-              className={cn(
-                "w-full rounded-t-sm transition-colors",
-                isHighest
-                  ? "bg-primary"
-                  : "bg-surface-container-high group-hover:bg-primary-container/20",
+            <div className="relative w-full" style={{ height: `${barHeight}px` }}>
+              {isHighest && (
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
+                  {formatCurrency(item.revenue)}
+                </div>
               )}
-              style={{ height: `${barHeight}px` }}
-            />
+              <div
+                className={cn(
+                  "w-full h-full rounded-t-sm transition-colors",
+                  isHighest
+                    ? "bg-primary"
+                    : "bg-surface-container-high group-hover:bg-primary-container/20",
+                )}
+              />
+            </div>
             <span className={cn(
               "text-[10px] font-bold",
               isHighest ? "text-on-surface" : "text-on-surface-variant"
@@ -171,6 +180,19 @@ export default function DashboardPage() {
   const { data: personnel } = useQuery<PersonnelItem[]>({
     queryKey: ["personnel"],
     queryFn: () => api.get("/personnel").then((r) => r.data),
+  })
+
+  const { data: recentExpenses = [] } = useQuery<RecentExpense[]>({
+    queryKey: ["recent-expenses", currentMonth],
+    queryFn: () => {
+      const start = format(new Date(currentMonth + "-01"), "yyyy-MM-dd")
+      const end = format(endOfMonth(new Date(currentMonth + "-01")), "yyyy-MM-dd")
+      return api.get(`/expenses?startDate=${start}&endDate=${end}`).then((r) =>
+        (r.data || []).sort((a: RecentExpense, b: RecentExpense) =>
+          new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()
+        ).slice(0, 4)
+      )
+    },
   })
 
   const todayLong = format(new Date(), "d MMMM yyyy, EEEE", { locale: tr })
@@ -344,32 +366,38 @@ export default function DashboardPage() {
         {/* Side Panel — 4 cols */}
         <div className="lg:col-span-4 flex flex-col gap-4">
           {/* Son Giderler */}
-          <div className="flex-1 bg-surface-container-lowest p-6 rounded-xl border-0 ring-1 ring-black/[0.03]">
-            <div className="flex items-center justify-between mb-4">
+          <div className="flex-1 bg-surface-container-low p-6 rounded-xl">
+            <div className="flex items-center justify-between mb-6">
               <h3 className="font-headline text-base font-bold text-on-surface">Son Giderler</h3>
-              <span className="material-symbols-outlined text-on-surface-variant text-xl">
-                receipt_long
-              </span>
+              <button className="text-xs font-bold text-primary hover:underline">Tümü</button>
             </div>
             {summaryLoading ? (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <SkeletonBlock className="h-4 w-28" />
+                  <div key={i} className="flex items-center gap-4">
+                    <SkeletonBlock className="w-10 h-10 rounded-full" />
+                    <div className="flex-1 space-y-1">
+                      <SkeletonBlock className="h-4 w-28" />
+                      <SkeletonBlock className="h-3 w-16" />
+                    </div>
                     <SkeletonBlock className="h-4 w-16" />
                   </div>
                 ))}
               </div>
-            ) : currentSummary?.categoryBreakdown && Object.keys(currentSummary.categoryBreakdown).length > 0 ? (
-              <div className="space-y-3">
-                {Object.entries(currentSummary.categoryBreakdown).slice(0, 4).map(([category, amount]) => (
-                  <div key={category} className="flex items-center justify-between">
-                    <span className="text-sm text-on-surface-variant truncate max-w-[60%]">
-                      {category}
-                    </span>
-                    <span className="text-sm font-semibold text-on-surface">
-                      {formatCurrency(Number(amount))}
-                    </span>
+            ) : recentExpenses.length > 0 ? (
+              <div className="space-y-4">
+                {recentExpenses.map((expense) => (
+                  <div key={expense.id} className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-outline-variant/10 shadow-sm">
+                      <span className="material-symbols-outlined text-[18px] text-on-surface-variant">receipt</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-on-surface leading-tight">{expense.title}</p>
+                      <p className="text-[11px] text-on-surface-variant">
+                        {format(new Date(expense.paymentDate), "d MMM", { locale: tr })} · {expense.category}
+                      </p>
+                    </div>
+                    <span className="text-sm font-bold text-on-surface">-{formatCurrency(expense.amount)}</span>
                   </div>
                 ))}
               </div>
