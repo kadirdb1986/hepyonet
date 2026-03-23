@@ -115,18 +115,18 @@ function BarChart({ data }: { data: DailyBreakdown[] }) {
   const maxRevenueDay = data.reduce((max, d) => (d.revenue > max.revenue ? d : max), data[0])
 
   return (
-    <div className="h-64 flex items-end justify-between gap-4 px-2 pt-10">
+    <div className="h-48 flex items-end justify-between gap-4 px-2 pt-8">
       {data.map((item) => {
         const dayIndex = getDay(new Date(item.date))
         const dayName = TR_DAY_NAMES[dayIndex]
         const isHighest = item.date === maxRevenueDay?.date && item.revenue > 0
-        const barHeight = Math.max((item.revenue / maxRevenue) * 180, 4)
+        const barHeight = Math.max((item.revenue / maxRevenue) * 140, 4)
 
         return (
           <div key={item.date} className="flex-1 flex flex-col items-center gap-3 group">
             <div className="relative w-full" style={{ height: `${barHeight}px` }}>
               {isHighest && (
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
                   {formatCurrency(item.revenue)}
                 </div>
               )}
@@ -157,16 +157,16 @@ function WeeklyBarChart({ data }: { data: { label: string; revenue: number }[] }
   const maxItem = data.reduce((max, d) => (d.revenue > max.revenue ? d : max), data[0])
 
   return (
-    <div className="h-64 flex items-end justify-between gap-6 px-2 pt-10">
+    <div className="h-48 flex items-end justify-between gap-6 px-2 pt-8">
       {data.map((item, idx) => {
         const isHighest = item === maxItem && item.revenue > 0
-        const barHeight = Math.max((item.revenue / maxRevenue) * 180, 4)
+        const barHeight = Math.max((item.revenue / maxRevenue) * 140, 4)
 
         return (
           <div key={idx} className="flex-1 flex flex-col items-center gap-3 group">
             <div className="relative w-full" style={{ height: `${barHeight}px` }}>
               {isHighest && (
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
                   {formatCurrency(item.revenue)}
                 </div>
               )}
