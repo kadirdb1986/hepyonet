@@ -1,0 +1,60 @@
+{
+  "common": {
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "add": "Ekle",
+    "search": "Ara...",
+    "loading": "Yükleniyor...",
+    "noData": "Veri bulunamadı",
+    "confirm": "Onayla",
+    "back": "Geri",
+    "actions": "İşlemler",
+    "yes": "Evet",
+    "no": "Hayır",
+    "close": "Kapat",
+    "active": "Aktif",
+    "inactive": "Pasif",
+    "pending": "Bekliyor",
+    "approved": "Onaylı",
+    "rejected": "Reddedildi"
+  },
+  "auth": {
+    "login": "Giriş Yap",
+    "register": "Kayıt Ol",
+    "email": "E-posta",
+    "password": "Şifre",
+    "name": "Ad Soyad",
+    "restaurantName": "Restoran Adı",
+    "loginWithGoogle": "Google ile Giriş",
+    "forgotPassword": "Şifremi Unuttum",
+    "noAccount": "Hesabınız yok mu?",
+    "hasAccount": "Zaten hesabınız var mı?",
+    "loggingIn": "Giriş yapılıyor...",
+    "waitingApproval": "Restoran onayı bekleniyor."
+  },
+  "roles": {
+    "OWNER": "Sahip",
+    "ADMIN": "Yönetici",
+    "ACCOUNTANT": "Muhasebe",
+    "HR": "İnsan Kaynakları",
+    "STOCK_MANAGER": "Depocu",
+    "MENU_MANAGER": "Menü Yöneticisi",
+    "WAITER": "Garson"
+  },
+  "nav": {
+    "panel": "Panel",
+    "personnel": "Personel",
+    "finance": "Finans",
+    "revenues": "Cirolar",
+    "expenses": "Giderler",
+    "inventory": "Stok",
+    "products": "Ürünler",
+    "menu": "Menü",
+    "simulation": "Simülasyon",
+    "reports": "Raporlar",
+    "settings": "Ayarlar",
+    "users": "Kullanıcılar"
+  }
+}
