@@ -289,7 +289,7 @@ export default function DashboardPage() {
       {/* Welcome */}
       <div>
         <h1 className="font-headline text-3xl font-bold text-on-surface">
-          Merhaba, {user?.name?.split(" ")[0] ?? "Kullanıcı"} 👋
+          Merhaba, {user?.name?.split(" ")[0] ?? "Kullanıcı"}
         </h1>
         <p className="text-sm text-on-surface-variant mt-1 capitalize">{todayLong}</p>
       </div>
