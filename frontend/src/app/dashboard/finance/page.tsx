@@ -15,17 +15,12 @@ interface DailyBreakdown {
   expense: number
 }
 
-interface CategoryBreakdown {
-  category: string
-  amount: number
-}
-
 interface MonthlySummary {
   totalRevenue: number
   totalExpenses: number
   netIncome: number
   dailyBreakdown: DailyBreakdown[]
-  categoryBreakdown: CategoryBreakdown[]
+  categoryBreakdown: Record<string, number>
   dailyRevenues: { id: string; date: string; amount: number }[]
 }
 
@@ -118,7 +113,11 @@ export default function FinanceOverviewPage() {
 
   // ─── Donut ────────────────────────────────────────────────────────────
 
-  const categoryBreakdown = summary?.categoryBreakdown ?? []
+  const categoryBreakdownRaw = summary?.categoryBreakdown ?? {}
+  const categoryBreakdown = Object.entries(categoryBreakdownRaw).map(([category, amount]) => ({
+    category,
+    amount: Number(amount),
+  }))
   const totalExpenseForDonut = categoryBreakdown.reduce((a, c) => a + c.amount, 0) || 1
 
   // ─── Daily table (revenue, expense, net) ──────────────────────────────
