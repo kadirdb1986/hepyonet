@@ -51,29 +51,29 @@ HepYonet frontend'inin Stitch design system'ine ("The Culinary Architect") uygun
 ```
 --primary: #000000              (Black Label - premium)
 --on-primary: #ffffff
---primary-container: #dbe1ff
---on-primary-container: #00164e
+--primary-container: #00174b
+--on-primary-container: #497cff
 --primary-fixed: #dbe1ff
 --primary-fixed-dim: #b4c5ff
 
 --secondary: #006e2d            (Healthy margins green)
 --on-secondary: #ffffff
 --secondary-container: #7cf994  (Profit Glow gradient end)
---on-secondary-container: #002109
+--on-secondary-container: #007230
 --secondary-fixed: #7ffc97
 --secondary-fixed-dim: #62df7d
 
 --tertiary: #000000
 --on-tertiary: #ffffff
---tertiary-container: #ffddb8
---on-tertiary-container: #2a1700
+--tertiary-container: #2a1700
+--on-tertiary-container: #b87500
 --tertiary-fixed: #ffddb8       (Warm hospitality accents)
 --tertiary-fixed-dim: #ffb95f
 
 --error: #ba1a1a                (Kitchen-stoppage critical)
 --on-error: #ffffff
 --error-container: #ffdad6      (Soft warnings)
---on-error-container: #410002
+--on-error-container: #93000a
 
 --surface: #f7f9fb              (Base canvas)
 --surface-dim: #d8dadc
@@ -90,7 +90,7 @@ HepYonet frontend'inin Stitch design system'ine ("The Culinary Architect") uygun
 --outline: #76777d
 --outline-variant: #c6c6cd      (Ghost borders @ 15% opacity)
 
---inverse-surface: #2e3133
+--inverse-surface: #2d3133
 --inverse-on-surface: #eff1f3
 --inverse-primary: #b4c5ff
 ```
