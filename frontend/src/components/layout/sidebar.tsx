@@ -17,7 +17,15 @@ const mainMenuItems = [
       { label: "Dağıtım", href: "/dashboard/finance/distribute" },
     ],
   },
-  { label: "Stok", icon: "inventory_2", href: "/dashboard/inventory" },
+  {
+    label: "Stok",
+    icon: "inventory_2",
+    href: "/dashboard/inventory",
+    children: [
+      { label: "Tedarikçiler", href: "/dashboard/inventory/suppliers" },
+      { label: "Stok Hareketleri", href: "/dashboard/inventory/movements" },
+    ],
+  },
   { label: "Ürünler", icon: "inventory", href: "/dashboard/products" },
   { label: "Menü", icon: "restaurant_menu", href: "/dashboard/menu" },
   { label: "Simülasyon", icon: "analytics", href: "/dashboard/simulation" },
