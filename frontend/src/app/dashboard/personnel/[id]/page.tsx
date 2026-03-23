@@ -601,8 +601,8 @@ export default function PersonnelDetailPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/10">
-              {personnel.leaves.length > 0 ? (
-                personnel.leaves.map((leave) => (
+              {(personnel.leaves ?? []).length > 0 ? (
+                (personnel.leaves ?? []).map((leave) => (
                   <tr key={leave.id} className="hover:bg-surface-bright transition-colors">
                     <td className="px-6 py-4 text-sm text-on-surface">
                       {formatDate(leave.startDate)}
