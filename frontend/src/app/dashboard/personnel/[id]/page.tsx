@@ -277,8 +277,8 @@ export default function PersonnelDetailPage() {
 
   const initials = `${(personnel.name ?? "?").charAt(0)}${(personnel.surname ?? "?").charAt(0)}`.toUpperCase()
   const workedPercent =
-    workDays && workDays.workDays > 0
-      ? Math.round((workDays.workedDays / workDays.workDays) * 100)
+    workDays && (workDays.workDays ?? 0) > 0
+      ? Math.round(((workDays.workedDays ?? 0) / workDays.workDays) * 100)
       : 0
 
   const inputClass =
@@ -466,7 +466,7 @@ export default function PersonnelDetailPage() {
                     Kalan İzin
                   </p>
                   <p className="text-xl font-bold text-on-surface">
-                    {workDays ? workDays.workDays - workDays.workedDays : "—"}
+                    {workDays ? (workDays.workDays ?? 0) - (workDays.workedDays ?? 0) : "—"}
                   </p>
                 </div>
                 <div className="text-center">
