@@ -68,7 +68,7 @@ export default function NewPersonnelPage() {
       const payload = {
         name: data.name,
         surname: data.surname,
-        phone: data.phone ? `${phonePrefix}${data.phone.replace(/\D/g, "")}` : undefined,
+        phone: data.phone ? data.phone.replace(/\D/g, "") : undefined,
         tcNo: data.tcNo || undefined,
         positionId: data.positionId || undefined,
         startDate: new Date(data.startDate).toISOString(),

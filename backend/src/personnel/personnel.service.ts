@@ -6,6 +6,15 @@ import { CreateLeaveDto } from './dto/create-leave.dto';
 import { UpdateLeaveStatusDto } from './dto/update-leave-status.dto';
 import { Prisma } from '@prisma/client';
 
+function normalizePhone(phone?: string | null): string | null {
+  if (!phone) return null;
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length === 10) return `+90${digits}`;
+  if (digits.length === 11 && digits.startsWith('0')) return `+90${digits.slice(1)}`;
+  if (digits.length === 12 && digits.startsWith('90')) return `+${digits}`;
+  return phone;
+}
+
 @Injectable()
 export class PersonnelService {
   constructor(private prisma: PrismaService) {}
@@ -16,7 +25,7 @@ export class PersonnelService {
         restaurantId,
         name: dto.name,
         surname: dto.surname,
-        phone: dto.phone,
+        phone: normalizePhone(dto.phone),
         tcNo: dto.tcNo,
         positionId: dto.positionId || null,
         startDate: new Date(dto.startDate),
@@ -63,7 +72,7 @@ export class PersonnelService {
     const data: any = {};
     if (dto.name !== undefined) data.name = dto.name;
     if (dto.surname !== undefined) data.surname = dto.surname;
-    if (dto.phone !== undefined) data.phone = dto.phone;
+    if (dto.phone !== undefined) data.phone = normalizePhone(dto.phone);
     if (dto.tcNo !== undefined) data.tcNo = dto.tcNo;
     if (dto.startDate) data.startDate = new Date(dto.startDate);
     if (dto.salary !== undefined) data.salary = new Prisma.Decimal(dto.salary);
