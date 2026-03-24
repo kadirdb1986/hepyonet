@@ -4,12 +4,12 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useQuery, useMutation } from "@tanstack/react-query"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
 import api from "@/lib/api"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatPhoneInput } from "@/lib/utils"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -47,6 +47,7 @@ export default function NewPersonnelPage() {
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
   } = useForm<PersonnelForm>({
     resolver: zodResolver(personnelSchema),
@@ -157,10 +158,20 @@ export default function NewPersonnelPage() {
                   <span className="inline-flex items-center px-4 py-3 bg-surface-container-high rounded-l-lg text-on-surface-variant text-sm font-medium border-r border-surface-container">
                     {phonePrefix}
                   </span>
-                  <input
-                    {...register("phone")}
-                    placeholder="5XX XXX XX XX"
-                    className={`${inputClass} rounded-l-none`}
+                  <Controller
+                    name="phone"
+                    control={control}
+                    render={({ field }) => (
+                      <input
+                        className={`${inputClass} rounded-l-none`}
+                        placeholder="(5XX) XXX XX XX"
+                        value={formatPhoneInput(field.value ?? "")}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, "").slice(0, 10)
+                          field.onChange(digits)
+                        }}
+                      />
+                    )}
                   />
                 </div>
               </div>

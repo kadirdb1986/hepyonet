@@ -4,14 +4,14 @@ import { useState } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { format, subMonths, addMonths } from "date-fns"
 import { tr } from "date-fns/locale"
 import { toast } from "sonner"
 import api from "@/lib/api"
-import { formatCurrency, formatDate, formatPhone } from "@/lib/utils"
+import { formatCurrency, formatDate, formatPhone, formatPhoneInput } from "@/lib/utils"
 import {
   Dialog,
   DialogContent,
@@ -177,7 +177,7 @@ export default function PersonnelDetailPage() {
       ? {
           name: personnel.name,
           surname: personnel.surname,
-          phone: personnel.phone ? String(personnel.phone).replace("+90", "") : "",
+          phone: personnel.phone ? String(personnel.phone).replace(/\D/g, "").replace(/^90/, "") : "",
           tcNo: personnel.tcNo ?? "",
           positionId: personnel.positionConfig?.id ?? "",
           startDate: personnel.startDate ? personnel.startDate.slice(0, 10) : "",
@@ -191,7 +191,7 @@ export default function PersonnelDetailPage() {
       const payload = {
         name: data.name,
         surname: data.surname,
-        phone: data.phone ? data.phone.replace(/\D/g, "") : undefined,
+        phone: data.phone?.replace(/\D/g, "") || null,
         tcNo: data.tcNo || undefined,
         positionId: data.positionId || undefined,
         startDate: new Date(data.startDate).toISOString(),
@@ -364,9 +364,20 @@ export default function PersonnelDetailPage() {
                     <span className="inline-flex items-center px-4 py-3 bg-surface-container-high rounded-l-lg text-on-surface-variant text-sm font-medium border-r border-surface-container">
                       +90
                     </span>
-                    <input
-                      {...editForm.register("phone")}
-                      className={`${inputClass} rounded-l-none`}
+                    <Controller
+                      name="phone"
+                      control={editForm.control}
+                      render={({ field }) => (
+                        <input
+                          className={`${inputClass} rounded-l-none`}
+                          placeholder="(5XX) XXX XX XX"
+                          value={formatPhoneInput(field.value ?? "")}
+                          onChange={(e) => {
+                            const digits = e.target.value.replace(/\D/g, "").slice(0, 10)
+                            field.onChange(digits)
+                          }}
+                        />
+                      )}
                     />
                   </div>
                 </div>

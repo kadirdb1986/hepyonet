@@ -378,24 +378,15 @@ export default function InventoryPage() {
               <label className="text-sm font-semibold text-on-surface mb-1.5 block">
                 Tedarikci
               </label>
-              <Controller
-                name="supplierId"
-                control={control}
-                render={({ field }) => (
-                  <Select value={field.value || undefined} onValueChange={(v) => field.onChange(v ?? "")}>
-                    <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                      <SelectValue placeholder="Tedarikci secin" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {suppliers.map((s) => (
-                        <SelectItem key={s.id} value={s.id}>
-                          {s.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
+              <select
+                {...register("supplierId")}
+                className="w-full h-12 px-4 bg-surface-container-low border-0 focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest rounded-lg transition-all text-on-surface outline-none text-sm"
+              >
+                <option value="">Tedarikci secin</option>
+                {suppliers.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
             </div>
 
             <DialogFooter>
