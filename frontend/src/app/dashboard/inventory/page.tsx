@@ -156,9 +156,9 @@ export default function InventoryPage() {
   const updateMaterialMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) =>
       api.patch(`/raw-materials/${id}`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["raw-materials"] })
-      queryClient.invalidateQueries({ queryKey: ["raw-materials-low-stock"] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["raw-materials"] })
+      await queryClient.invalidateQueries({ queryKey: ["raw-materials-low-stock"] })
       toast.success("Stok kalemi basariyla guncellendi.")
       setEditDialogOpen(false)
       setEditingMaterial(null)
@@ -661,6 +661,7 @@ export default function InventoryPage() {
         data={filteredMaterials}
         searchKey="name"
         searchPlaceholder="Malzeme ara..."
+        pageSize={50}
       />
 
       {/* Add Material Dialog */}
