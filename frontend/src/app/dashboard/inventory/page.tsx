@@ -79,6 +79,182 @@ const UNIT_DISPLAY: Record<string, string> = {
   ADET: "adet",
 }
 
+// ─── Form Dialog ──────────────────────────────────────────────────────────────
+
+function MaterialFormDialog({
+  open,
+  onOpenChange,
+  defaultValues,
+  onSubmit,
+  isPending,
+  title,
+  materialTypes,
+  suppliers,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  defaultValues?: Partial<MaterialForm>
+  onSubmit: (data: MaterialForm) => void
+  isPending: boolean
+  title: string
+  materialTypes: MaterialType[]
+  suppliers: Supplier[]
+}) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<MaterialForm>({
+    resolver: zodResolver(materialSchema),
+    defaultValues: {
+      name: "",
+      typeId: "",
+      unit: "",
+      currentStock: "",
+      lastPurchasePrice: "",
+      minStockLevel: "",
+      supplierId: "",
+      ...defaultValues,
+    },
+  })
+
+  const inputClass =
+    "w-full px-4 py-3 bg-surface-container-low border-0 focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest rounded-lg transition-all text-on-surface outline-none"
+
+  const selectClass =
+    "w-full h-12 px-4 bg-surface-container-low border-0 focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest rounded-lg transition-all text-on-surface outline-none text-sm"
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Name */}
+          <div>
+            <label className="text-sm font-semibold text-on-surface mb-1.5 block">Ad</label>
+            <input
+              {...register("name")}
+              className={inputClass}
+              placeholder="Malzeme adı"
+            />
+            {errors.name && (
+              <p className="text-xs text-error mt-1">{errors.name.message}</p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* Type */}
+            <div>
+              <label className="text-sm font-semibold text-on-surface mb-1.5 block">Tip</label>
+              <select {...register("typeId")} className={selectClass}>
+                <option value="">Tip seçin</option>
+                {materialTypes.map((t) => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Unit */}
+            <div>
+              <label className="text-sm font-semibold text-on-surface mb-1.5 block">Birim</label>
+              <select {...register("unit")} className={selectClass}>
+                <option value="">Birim seçin</option>
+                {(["KG", "GR", "LT", "ML", "ADET"] as const).map((u) => (
+                  <option key={u} value={u}>{UNIT_DISPLAY[u]}</option>
+                ))}
+              </select>
+              {errors.unit && (
+                <p className="text-xs text-error mt-1">{errors.unit.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            {/* Current Stock */}
+            <div>
+              <label className="text-sm font-semibold text-on-surface mb-1.5 block">
+                Mevcut Stok
+              </label>
+              <input
+                {...register("currentStock")}
+                className={inputClass}
+                placeholder="0"
+                onChange={(e) => {
+                  const cleaned = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".")
+                  e.target.value = cleaned
+                  register("currentStock").onChange(e)
+                }}
+              />
+            </div>
+
+            {/* Last Purchase Price */}
+            <div>
+              <label className="text-sm font-semibold text-on-surface mb-1.5 block">
+                Son Alış Fiyatı
+              </label>
+              <input
+                {...register("lastPurchasePrice")}
+                className={inputClass}
+                placeholder="0"
+                onChange={(e) => {
+                  const cleaned = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".")
+                  e.target.value = cleaned
+                  register("lastPurchasePrice").onChange(e)
+                }}
+              />
+            </div>
+
+            {/* Min Stock Level */}
+            <div>
+              <label className="text-sm font-semibold text-on-surface mb-1.5 block">
+                Min Stok
+              </label>
+              <input
+                {...register("minStockLevel")}
+                className={inputClass}
+                placeholder="0"
+                onChange={(e) => {
+                  const cleaned = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".")
+                  e.target.value = cleaned
+                  register("minStockLevel").onChange(e)
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Supplier */}
+          <div>
+            <label className="text-sm font-semibold text-on-surface mb-1.5 block">
+              Tedarikçi
+            </label>
+            <select {...register("supplierId")} className={selectClass}>
+              <option value="">Tedarikçi seçin</option>
+              {suppliers.map((s) => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <DialogFooter>
+            <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
+              İptal
+            </DialogClose>
+            <button
+              type="submit"
+              disabled={isPending}
+              className="bg-primary text-on-primary font-bold rounded-xl px-4 py-2 text-sm disabled:opacity-50"
+            >
+              {isPending ? "Kaydediliyor..." : "Kaydet"}
+            </button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function InventoryPage() {
@@ -226,184 +402,6 @@ export default function InventoryPage() {
     },
     onError: () => toast.error("Malzeme tipi silinirken bir hata oluştu."),
   })
-
-  // ─── Form Dialog ──────────────────────────────────────────────────────
-
-  function MaterialFormDialog({
-    open,
-    onOpenChange,
-    defaultValues,
-    onSubmit,
-    isPending,
-    title,
-  }: {
-    open: boolean
-    onOpenChange: (open: boolean) => void
-    defaultValues?: Partial<MaterialForm>
-    onSubmit: (data: MaterialForm) => void
-    isPending: boolean
-    title: string
-  }) {
-    const {
-      register,
-      handleSubmit,
-      formState: { errors },
-    } = useForm<MaterialForm>({
-      resolver: zodResolver(materialSchema),
-      defaultValues: {
-        name: "",
-        typeId: "",
-        unit: "",
-        currentStock: "",
-        lastPurchasePrice: "",
-        minStockLevel: "",
-        supplierId: "",
-        ...defaultValues,
-      },
-    })
-
-    const inputClass =
-      "w-full px-4 py-3 bg-surface-container-low border-0 focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest rounded-lg transition-all text-on-surface outline-none"
-
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Name */}
-            <div>
-              <label className="text-sm font-semibold text-on-surface mb-1.5 block">Ad</label>
-              <input
-                {...register("name")}
-                className={inputClass}
-                placeholder="Malzeme adı"
-              />
-              {errors.name && (
-                <p className="text-xs text-error mt-1">{errors.name.message}</p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              {/* Type */}
-              <div>
-                <label className="text-sm font-semibold text-on-surface mb-1.5 block">Tip</label>
-                <select
-                  {...register("typeId")}
-                  className="w-full h-12 px-4 bg-surface-container-low border-0 focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest rounded-lg transition-all text-on-surface outline-none text-sm"
-                >
-                  <option value="">Tip seçin</option>
-                  {materialTypes.map((t) => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Unit */}
-              <div>
-                <label className="text-sm font-semibold text-on-surface mb-1.5 block">Birim</label>
-                <select
-                  {...register("unit")}
-                  className="w-full h-12 px-4 bg-surface-container-low border-0 focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest rounded-lg transition-all text-on-surface outline-none text-sm"
-                >
-                  <option value="">Birim seçin</option>
-                  {(["KG", "GR", "LT", "ML", "ADET"] as const).map((u) => (
-                    <option key={u} value={u}>{UNIT_DISPLAY[u]}</option>
-                  ))}
-                </select>
-                {errors.unit && (
-                  <p className="text-xs text-error mt-1">{errors.unit.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              {/* Current Stock */}
-              <div>
-                <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                  Mevcut Stok
-                </label>
-                <input
-                  {...register("currentStock")}
-                  className={inputClass}
-                  placeholder="0"
-                  onChange={(e) => {
-                    const cleaned = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".")
-                    e.target.value = cleaned
-                    register("currentStock").onChange(e)
-                  }}
-                />
-              </div>
-
-              {/* Last Purchase Price */}
-              <div>
-                <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                  Son Alış Fiyatı
-                </label>
-                <input
-                  {...register("lastPurchasePrice")}
-                  className={inputClass}
-                  placeholder="0"
-                  onChange={(e) => {
-                    const cleaned = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".")
-                    e.target.value = cleaned
-                    register("lastPurchasePrice").onChange(e)
-                  }}
-                />
-              </div>
-
-              {/* Min Stock Level */}
-              <div>
-                <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                  Min Stok
-                </label>
-                <input
-                  {...register("minStockLevel")}
-                  className={inputClass}
-                  placeholder="0"
-                  onChange={(e) => {
-                    const cleaned = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".")
-                    e.target.value = cleaned
-                    register("minStockLevel").onChange(e)
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Supplier */}
-            <div>
-              <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                Tedarikçi
-              </label>
-              <select
-                {...register("supplierId")}
-                className="w-full h-12 px-4 bg-surface-container-low border-0 focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest rounded-lg transition-all text-on-surface outline-none text-sm"
-              >
-                <option value="">Tedarikçi secin</option>
-                {suppliers.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <DialogFooter>
-              <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
-                İptal
-              </DialogClose>
-              <button
-                type="submit"
-                disabled={isPending}
-                className="bg-primary text-on-primary font-bold rounded-xl px-4 py-2 text-sm disabled:opacity-50"
-              >
-                {isPending ? "Kaydediliyor..." : "Kaydet"}
-              </button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    )
-  }
 
   // ─── Handlers ─────────────────────────────────────────────────────────
 
@@ -660,6 +658,8 @@ export default function InventoryPage() {
         onSubmit={handleAddMaterial}
         isPending={createMaterialMutation.isPending}
         title="Yeni Stok Kalemi Ekle"
+        materialTypes={materialTypes}
+        suppliers={suppliers}
       />
 
       {/* Edit Material Dialog */}
@@ -683,6 +683,8 @@ export default function InventoryPage() {
           onSubmit={handleEditMaterial}
           isPending={updateMaterialMutation.isPending}
           title="Stok Kalemini Düzenle"
+          materialTypes={materialTypes}
+          suppliers={suppliers}
         />
       )}
 
