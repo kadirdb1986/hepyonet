@@ -1,30 +1,12 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { ColumnDef } from "@tanstack/react-table"
-import { toast } from "sonner"
 import api from "@/lib/api"
 import { formatCurrency, formatDate, formatPhone } from "@/lib/utils"
 import { DataTable } from "@/components/data-table/data-table"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog"
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -47,36 +29,10 @@ interface Personnel {
 
 export default function PersonnelListPage() {
   const router = useRouter()
-  const queryClient = useQueryClient()
-  const [confirmDialog, setConfirmDialog] = useState<{
-    open: boolean
-    type: "deactivate" | "delete"
-    personnel: Personnel | null
-  }>({ open: false, type: "deactivate", personnel: null })
 
   const { data: personnel = [], isLoading } = useQuery<Personnel[]>({
     queryKey: ["personnel"],
     queryFn: () => api.get("/personnel").then((r) => r.data),
-  })
-
-  const deactivateMutation = useMutation({
-    mutationFn: (id: string) => api.delete(`/personnel/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["personnel"] })
-      toast.success("Personel pasife alındı.")
-      setConfirmDialog({ open: false, type: "deactivate", personnel: null })
-    },
-    onError: () => toast.error("İşlem sırasında bir hata oluştu."),
-  })
-
-  const permanentDeleteMutation = useMutation({
-    mutationFn: (id: string) => api.delete(`/personnel/${id}/permanent`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["personnel"] })
-      toast.success("Personel kalıcı olarak silindi.")
-      setConfirmDialog({ open: false, type: "delete", personnel: null })
-    },
-    onError: () => toast.error("İşlem sırasında bir hata oluştu."),
   })
 
   const activeCount = personnel.filter((p) => p.isActive).length
@@ -164,55 +120,6 @@ export default function PersonnelListPage() {
         )
       },
     },
-    {
-      id: "actions",
-      header: "İşlemler",
-      cell: ({ row }) => {
-        const p = row.original
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-low transition-colors">
-              <span className="material-symbols-outlined text-on-surface-variant text-xl">more_vert</span>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" sideOffset={4}>
-              <DropdownMenuItem onClick={() => router.push(`/dashboard/personnel/${p.id}`)}>
-                <span className="material-symbols-outlined text-[18px]">edit</span>
-                Düzenle
-              </DropdownMenuItem>
-              {p.isActive && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={() =>
-                      setConfirmDialog({ open: true, type: "deactivate", personnel: p })
-                    }
-                  >
-                    <span className="material-symbols-outlined text-[18px]">person_off</span>
-                    Pasife Al
-                  </DropdownMenuItem>
-                </>
-              )}
-              {!p.isActive && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={() =>
-                      setConfirmDialog({ open: true, type: "delete", personnel: p })
-                    }
-                  >
-                    <span className="material-symbols-outlined text-[18px]">delete_forever</span>
-                    Kalıcı Sil
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )
-      },
-      enableSorting: false,
-    },
   ]
 
   return (
@@ -251,53 +158,9 @@ export default function PersonnelListPage() {
         data={personnel}
         searchKey="name"
         searchPlaceholder="Ad, pozisyon veya telefon ile ara..."
+        onRowClick={(p) => router.push(`/dashboard/personnel/${p.id}`)}
       />
 
-      {/* Confirm Dialog */}
-      <Dialog
-        open={confirmDialog.open}
-        onOpenChange={(open) => {
-          if (!open) setConfirmDialog({ open: false, type: "deactivate", personnel: null })
-        }}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {confirmDialog.type === "deactivate" ? "Personeli Pasife Al" : "Kalıcı Silme"}
-            </DialogTitle>
-            <DialogDescription>
-              {confirmDialog.type === "deactivate"
-                ? `${confirmDialog.personnel?.name} ${confirmDialog.personnel?.surname} adlı personeli pasife almak istediğinize emin misiniz?`
-                : `${confirmDialog.personnel?.name} ${confirmDialog.personnel?.surname} adlı personeli kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose
-              className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm"
-            >
-              İptal
-            </DialogClose>
-            <button
-              onClick={() => {
-                if (!confirmDialog.personnel) return
-                if (confirmDialog.type === "deactivate") {
-                  deactivateMutation.mutate(confirmDialog.personnel.id)
-                } else {
-                  permanentDeleteMutation.mutate(confirmDialog.personnel.id)
-                }
-              }}
-              disabled={deactivateMutation.isPending || permanentDeleteMutation.isPending}
-              className="bg-error text-on-error font-bold rounded-md px-4 py-2 text-sm disabled:opacity-50"
-            >
-              {deactivateMutation.isPending || permanentDeleteMutation.isPending
-                ? "İşleniyor..."
-                : confirmDialog.type === "deactivate"
-                  ? "Pasife Al"
-                  : "Kalıcı Sil"}
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

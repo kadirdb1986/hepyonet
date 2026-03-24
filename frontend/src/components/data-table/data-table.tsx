@@ -19,6 +19,7 @@ interface DataTableProps<TData, TValue> {
   searchKey?: string
   pageSize?: number
   toolbar?: React.ReactNode
+  onRowClick?: (row: TData) => void
 }
 
 export function DataTable<TData, TValue>({
@@ -28,6 +29,7 @@ export function DataTable<TData, TValue>({
   searchKey,
   pageSize = 10,
   toolbar,
+  onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState("")
@@ -90,7 +92,11 @@ export function DataTable<TData, TValue>({
           <tbody className="divide-y divide-outline-variant/10">
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="hover:bg-surface-bright transition-colors group">
+                <tr
+                  key={row.id}
+                  className={`hover:bg-surface-bright transition-colors group${onRowClick ? " cursor-pointer" : ""}`}
+                  onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-6 py-4">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
