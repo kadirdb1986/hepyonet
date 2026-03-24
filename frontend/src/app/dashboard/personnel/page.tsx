@@ -227,13 +227,22 @@ export default function PersonnelListPage() {
             {isLoading ? "Yükleniyor..." : `${activeCount} aktif çalışan listeleniyor.`}
           </p>
         </div>
-        <Link
-          href="/dashboard/personnel/new"
-          className="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-xl hover:translate-y-[-2px] active:scale-95 transition-all"
-        >
-          <span className="material-symbols-outlined">person_add</span>
-          Yeni Personel Ekle
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/dashboard/personnel/positions"
+            className="bg-surface-container-highest text-on-surface px-5 py-3 rounded-xl font-bold flex items-center gap-2 hover:translate-y-[-2px] active:scale-95 transition-all"
+          >
+            <span className="material-symbols-outlined">work</span>
+            Pozisyonlar
+          </Link>
+          <Link
+            href="/dashboard/personnel/new"
+            className="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-xl hover:translate-y-[-2px] active:scale-95 transition-all"
+          >
+            <span className="material-symbols-outlined">person_add</span>
+            Yeni Personel Ekle
+          </Link>
+        </div>
       </div>
 
       {/* Data Table */}
