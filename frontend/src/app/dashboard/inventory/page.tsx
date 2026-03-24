@@ -32,7 +32,7 @@ import {
 interface RawMaterial {
   id: string
   name: string
-  type?: string
+  typeId?: string
   unit: "KG" | "GR" | "LT" | "ML" | "ADET"
   currentStock: number
   lastPurchasePrice: number
@@ -315,10 +315,10 @@ export default function InventoryPage() {
   }, [materialTypes])
 
   const getTypeName = (m: RawMaterial) =>
-    m.materialType?.name || typeNameById[m.type ?? ""] || m.type || null
+    m.materialType?.name || typeNameById[m.typeId ?? ""] || null
 
   const getTypeId = (m: RawMaterial) =>
-    m.materialType?.id || typeIdByName[m.type ?? ""] || m.type || null
+    m.materialType?.id || m.typeId || null
 
   // ─── Filtered data ──────────────────────────────────────────────────
 
@@ -328,8 +328,7 @@ export default function InventoryPage() {
     return rawMaterials.filter(
       (m) =>
         m.materialType?.id === typeFilter ||
-        m.type === typeFilter ||
-        m.type === filterTypeName
+        m.typeId === typeFilter
     )
   }, [rawMaterials, typeFilter, typeNameById])
 
@@ -410,7 +409,7 @@ export default function InventoryPage() {
       name: data.name,
       unit: data.unit,
     }
-    if (data.typeId) payload.type = data.typeId
+    if (data.typeId) payload.typeId = data.typeId
     if (data.currentStock) payload.currentStock = parseFloat(data.currentStock.replace(",", "."))
     if (data.lastPurchasePrice) payload.lastPurchasePrice = parseFloat(data.lastPurchasePrice.replace(",", "."))
     if (data.minStockLevel) payload.minStockLevel = parseFloat(data.minStockLevel.replace(",", "."))
@@ -424,7 +423,7 @@ export default function InventoryPage() {
       name: data.name,
       unit: data.unit,
     }
-    if (data.typeId) payload.type = data.typeId
+    if (data.typeId) payload.typeId = data.typeId
     if (data.currentStock) payload.currentStock = parseFloat(data.currentStock.replace(",", "."))
     if (data.lastPurchasePrice) payload.lastPurchasePrice = parseFloat(data.lastPurchasePrice.replace(",", "."))
     if (data.minStockLevel) payload.minStockLevel = parseFloat(data.minStockLevel.replace(",", "."))

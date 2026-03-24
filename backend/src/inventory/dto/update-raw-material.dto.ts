@@ -8,7 +8,7 @@ export class UpdateRawMaterialDto {
 
   @IsString()
   @IsOptional()
-  type?: string;
+  typeId?: string;
 
   @IsEnum(MaterialUnit)
   @IsOptional()

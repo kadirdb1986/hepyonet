@@ -53,14 +53,6 @@ export class MaterialTypeService {
       throw new BadRequestException('Bu isimde bir stok tipi zaten var');
     }
 
-    // Eski adla kayıtlı stok kalemlerinin tipini de güncelle
-    if (typeConfig.name !== trimmed) {
-      await this.prisma.rawMaterial.updateMany({
-        where: { restaurantId, type: typeConfig.name },
-        data: { type: trimmed },
-      });
-    }
-
     return this.prisma.materialTypeConfig.update({
       where: { id },
       data: { name: trimmed },
@@ -76,9 +68,8 @@ export class MaterialTypeService {
       throw new NotFoundException('Stok tipi bulunamadi');
     }
 
-    // Kullanımda olan tipi silmeye izin verme
     const usageCount = await this.prisma.rawMaterial.count({
-      where: { restaurantId, type: typeConfig.name },
+      where: { restaurantId, typeId: id },
     });
 
     if (usageCount > 0) {

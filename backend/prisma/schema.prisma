@@ -242,7 +242,8 @@ model MaterialTypeConfig {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
+  rawMaterials RawMaterial[]
 
   @@unique([restaurantId, name])
   @@map("material_types")
@@ -269,7 +270,7 @@ model RawMaterial {
   id                String       @id @default(uuid())
   restaurantId      String
   name              String
-  type              String       @default("Gida")
+  typeId            String?
   unit              MaterialUnit
   currentStock      Decimal      @db.Decimal(10, 3) @default(0)
   lastPurchasePrice Decimal      @db.Decimal(10, 2) @default(0)
@@ -279,6 +280,7 @@ model RawMaterial {
   updatedAt         DateTime     @updatedAt
 
   restaurant     Restaurant          @relation(fields: [restaurantId], references: [id])
+  materialType   MaterialTypeConfig? @relation(fields: [typeId], references: [id])
   supplier       Supplier?           @relation(fields: [supplierId], references: [id])
   stockMovements StockMovement[]
   ingredients    ProductIngredient[]

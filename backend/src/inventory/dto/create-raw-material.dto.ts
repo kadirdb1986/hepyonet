@@ -8,7 +8,7 @@ export class CreateRawMaterialDto {
 
   @IsString()
   @IsOptional()
-  type?: string;
+  typeId?: string;
 
   @IsEnum(MaterialUnit)
   unit: MaterialUnit;

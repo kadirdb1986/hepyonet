@@ -10,7 +10,7 @@ export class RawMaterialService {
   async findAll(restaurantId: string) {
     return this.prisma.rawMaterial.findMany({
       where: { restaurantId },
-      include: { supplier: true },
+      include: { supplier: true, materialType: true },
       orderBy: { name: 'asc' },
     });
   }
@@ -36,7 +36,7 @@ export class RawMaterialService {
       data: {
         restaurantId,
         name: dto.name,
-        type: dto.type || 'Gida',
+        typeId: dto.typeId || null,
         unit: dto.unit,
         currentStock: dto.currentStock ?? 0,
         lastPurchasePrice: dto.lastPurchasePrice ?? 0,
@@ -57,7 +57,7 @@ export class RawMaterialService {
       where: { id },
       data: {
         ...(dto.name !== undefined && { name: dto.name }),
-        ...(dto.type !== undefined && { type: dto.type }),
+        ...(dto.typeId !== undefined && { typeId: dto.typeId || null }),
         ...(dto.unit !== undefined && { unit: dto.unit }),
         ...(dto.currentStock !== undefined && { currentStock: dto.currentStock }),
         ...(dto.lastPurchasePrice !== undefined && { lastPurchasePrice: dto.lastPurchasePrice }),
