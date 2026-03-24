@@ -177,7 +177,7 @@ export default function PersonnelDetailPage() {
       ? {
           name: personnel.name,
           surname: personnel.surname,
-          phone: personnel.phone?.replace("+90", "") ?? "",
+          phone: personnel.phone ? String(personnel.phone).replace("+90", "") : "",
           tcNo: personnel.tcNo ?? "",
           positionId: personnel.position?.id ?? "",
           startDate: personnel.startDate ? personnel.startDate.slice(0, 10) : "",
