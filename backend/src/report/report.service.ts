@@ -132,6 +132,7 @@ export class ReportService {
 
     const directExpenses = await this.prisma.expense.findMany({
       where: { restaurantId, isDistributed: false, paymentDate: { gte: start, lte: end } },
+      include: { category: true },
     });
 
     let distributedExpenseItems: Array<{
@@ -141,11 +142,11 @@ export class ReportService {
     if (periodType === 'monthly') {
       const distributions = await this.prisma.expenseDistribution.findMany({
         where: { month: period, expense: { restaurantId } },
-        include: { expense: true },
+        include: { expense: { include: { category: true } } },
       });
       distributedExpenseItems = distributions.map((d) => ({
         id: d.expense.id, title: d.expense.title,
-        amount: this.decimalToNumber(d.amount), category: d.expense.category,
+        amount: this.decimalToNumber(d.amount), category: d.expense.category?.name || 'Diğer',
         paymentDate: d.expense.paymentDate, isDistributed: true,
       }));
     } else {
@@ -153,7 +154,7 @@ export class ReportService {
       for (const m of monthsInRange) {
         const distributions = await this.prisma.expenseDistribution.findMany({
           where: { month: m, expense: { restaurantId } },
-          include: { expense: true },
+          include: { expense: { include: { category: true } } },
         });
         const { start: monthStart, end: monthEnd } = this.getMonthDateRange(m);
         const daysInMonth = Math.floor((monthEnd.getTime() - monthStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -165,7 +166,7 @@ export class ReportService {
           distributedExpenseItems.push({
             id: d.expense.id, title: d.expense.title,
             amount: parseFloat((this.decimalToNumber(d.amount) * ratio).toFixed(2)),
-            category: d.expense.category, paymentDate: d.expense.paymentDate, isDistributed: true,
+            category: d.expense.category?.name || 'Diğer', paymentDate: d.expense.paymentDate, isDistributed: true,
           });
         }
       }
@@ -174,7 +175,7 @@ export class ReportService {
     const allExpenseItems = [
       ...directExpenses.map((e) => ({
         id: e.id, title: e.title, amount: this.decimalToNumber(e.amount),
-        category: e.category, paymentDate: e.paymentDate, isDistributed: false,
+        category: (e as any).category?.name || 'Diğer', paymentDate: e.paymentDate, isDistributed: false,
       })),
       ...distributedExpenseItems,
     ];

@@ -11,7 +11,7 @@ export class CreateExpenseDto {
 
   @IsString()
   @IsNotEmpty()
-  category: string;
+  categoryId: string;
 
   @IsDateString()
   paymentDate: string;

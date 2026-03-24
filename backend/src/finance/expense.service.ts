@@ -18,7 +18,7 @@ export class ExpenseService {
         restaurantId,
         title: dto.title,
         amount: dto.amount,
-        category: dto.category,
+        categoryId: dto.categoryId,
         paymentDate: new Date(dto.paymentDate),
         effectiveMonth: dto.effectiveMonth || null,
         effectiveEndMonth: dto.effectiveEndMonth || null,
@@ -81,7 +81,7 @@ export class ExpenseService {
     const where: any = { restaurantId };
 
     if (params?.category) {
-      where.category = params.category;
+      where.categoryId = params.category;
     }
 
     if (params?.startDate || params?.endDate) {
@@ -98,7 +98,7 @@ export class ExpenseService {
 
     return this.prisma.expense.findMany({
       where,
-      include: { distributions: true },
+      include: { distributions: true, category: true },
       orderBy: { paymentDate: 'desc' },
     });
   }
@@ -106,7 +106,7 @@ export class ExpenseService {
   async findOne(restaurantId: string, id: string) {
     const expense = await this.prisma.expense.findFirst({
       where: { id, restaurantId },
-      include: { distributions: true },
+      include: { distributions: true, category: true },
     });
 
     if (!expense) {
@@ -130,10 +130,10 @@ export class ExpenseService {
       data: {
         ...(dto.title !== undefined && { title: dto.title }),
         ...(dto.amount !== undefined && { amount: dto.amount }),
-        ...(dto.category !== undefined && { category: dto.category }),
+        ...(dto.categoryId !== undefined && { categoryId: dto.categoryId }),
         ...(dto.paymentDate !== undefined && { paymentDate: new Date(dto.paymentDate) }),
       },
-      include: { distributions: true },
+      include: { distributions: true, category: true },
     });
   }
 
@@ -195,7 +195,7 @@ export class ExpenseService {
         distributionType: 'NONE',
         distributionMonths: null,
       },
-      include: { distributions: true },
+      include: { distributions: true, category: true },
     });
   }
 

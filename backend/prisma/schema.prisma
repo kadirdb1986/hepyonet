@@ -165,7 +165,7 @@ model Expense {
   restaurantId       String
   title              String
   amount             Decimal          @db.Decimal(10, 2)
-  category           String
+  categoryId         String
   paymentDate        DateTime
   isDistributed      Boolean          @default(false)
   distributionType   DistributionType @default(NONE)
@@ -176,6 +176,7 @@ model Expense {
   updatedAt          DateTime         @updatedAt
 
   restaurant    Restaurant             @relation(fields: [restaurantId], references: [id])
+  category      ExpenseCategoryConfig  @relation(fields: [categoryId], references: [id])
   distributions ExpenseDistribution[]
 
   @@map("expenses")
@@ -200,6 +201,7 @@ model ExpenseCategoryConfig {
   updatedAt    DateTime @updatedAt
 
   restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  expenses   Expense[]
 
   @@unique([restaurantId, name])
   @@map("expense_categories")

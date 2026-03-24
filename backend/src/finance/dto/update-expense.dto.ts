@@ -12,7 +12,7 @@ export class UpdateExpenseDto {
 
   @IsString()
   @IsOptional()
-  category?: string;
+  categoryId?: string;
 
   @IsDateString()
   @IsOptional()

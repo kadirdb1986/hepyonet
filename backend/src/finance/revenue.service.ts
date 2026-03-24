@@ -128,6 +128,7 @@ export class RevenueService {
         isDistributed: false,
         paymentDate: { gte: from, lte: to },
       },
+      include: { category: true },
     });
 
     const distributedExpenses = await this.prisma.expenseDistribution.findMany({
@@ -137,7 +138,7 @@ export class RevenueService {
       },
       include: {
         expense: {
-          select: { id: true, title: true, category: true, amount: true },
+          select: { id: true, title: true, categoryId: true, category: { select: { name: true } }, amount: true },
         },
       },
     });
@@ -158,12 +159,12 @@ export class RevenueService {
     const categoryBreakdown: Record<string, number> = {};
 
     for (const expense of directExpenses) {
-      const cat = expense.category;
+      const cat = (expense as any).category?.name || 'Diğer';
       categoryBreakdown[cat] = (categoryBreakdown[cat] || 0) + Number(expense.amount);
     }
 
     for (const dist of distributedExpenses) {
-      const cat = dist.expense.category;
+      const cat = dist.expense.category?.name || 'Diğer';
       categoryBreakdown[cat] = (categoryBreakdown[cat] || 0) + Number(dist.amount);
     }
 
@@ -185,14 +186,14 @@ export class RevenueService {
         id: e.id,
         title: e.title,
         amount: Number(e.amount),
-        category: e.category,
+        category: (e as any).category?.name || 'Diğer',
         paymentDate: e.paymentDate,
       })),
       distributedExpenses: distributedExpenses.map((d) => ({
         id: d.id,
         expenseId: d.expense.id,
         title: d.expense.title,
-        category: d.expense.category,
+        category: d.expense.category?.name || 'Diğer',
         originalAmount: Number(d.expense.amount),
         distributedAmount: Number(d.amount),
         month: d.month,

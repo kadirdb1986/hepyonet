@@ -53,14 +53,6 @@ export class ExpenseCategoryService {
       throw new BadRequestException('Bu isimde bir kategori zaten var');
     }
 
-    // Eski adla kayıtlı giderlerin kategorisini de güncelle
-    if (cat.name !== trimmed) {
-      await this.prisma.expense.updateMany({
-        where: { restaurantId, category: cat.name },
-        data: { category: trimmed },
-      });
-    }
-
     return this.prisma.expenseCategoryConfig.update({
       where: { id },
       data: { name: trimmed },

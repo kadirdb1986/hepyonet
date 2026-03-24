@@ -35,7 +35,8 @@ interface Expense {
   id: string
   title: string
   amount: number
-  category: string
+  categoryId: string
+  category?: { id: string; name: string }
   paymentDate: string
   effectiveMonth?: string
   effectiveEndMonth?: string
@@ -388,7 +389,7 @@ export default function ExpensesPage() {
     const payload: Record<string, unknown> = {
       title: data.title,
       amount: parseFloat(data.amount.replace(",", ".")),
-      category: data.categoryId,
+      categoryId: data.categoryId,
       paymentDate: new Date(data.paymentDate).toISOString(),
     }
     if (data.periodType === "different" && data.effectiveMonth) {
@@ -406,7 +407,7 @@ export default function ExpensesPage() {
     const payload: Record<string, unknown> = {
       title: data.title,
       amount: parseFloat(data.amount.replace(",", ".")),
-      category: data.categoryId,
+      categoryId: data.categoryId,
       paymentDate: new Date(data.paymentDate).toISOString(),
     }
     if (data.periodType === "different" && data.effectiveMonth) {
@@ -443,11 +444,11 @@ export default function ExpensesPage() {
       ),
     },
     {
-      accessorKey: "category",
+      accessorKey: "categoryId",
       header: "Kategori",
       cell: ({ row }) => (
         <span className="inline-flex h-6 items-center px-2.5 rounded-full bg-primary/10 text-primary text-xs font-semibold">
-          {categoryMap[row.original.category] || row.original.category}
+          {row.original.category?.name || categoryMap[row.original.categoryId] || "-"}
         </span>
       ),
     },
@@ -616,7 +617,7 @@ export default function ExpensesPage() {
           defaultValues={{
             title: editingExpense.title,
             amount: String(editingExpense.amount),
-            categoryId: editingExpense.category,
+            categoryId: editingExpense.categoryId,
             paymentDate: format(new Date(editingExpense.paymentDate), "yyyy-MM-dd"),
             periodType:
               editingExpense.effectiveMonth && editingExpense.effectiveEndMonth
