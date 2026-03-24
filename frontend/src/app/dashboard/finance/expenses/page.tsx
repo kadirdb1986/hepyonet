@@ -13,6 +13,13 @@ import api from "@/lib/api"
 import { formatCurrency, cn } from "@/lib/utils"
 import { DataTable } from "@/components/data-table/data-table"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -21,13 +28,6 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -49,10 +49,10 @@ interface ExpenseCategory {
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
 const expenseSchema = z.object({
-  title: z.string().min(1, "Baslik zorunludur"),
+  title: z.string().min(1, "Başlık zorunludur"),
   amount: z.string().min(1, "Tutar zorunludur"),
   categoryId: z.string().min(1, "Kategori zorunludur"),
-  paymentDate: z.string().min(1, "Odeme tarihi zorunludur"),
+  paymentDate: z.string().min(1, "Ödeme tarihi zorunludur"),
   periodType: z.enum(["same", "different", "multi"]),
   effectiveMonth: z.string().optional(),
   effectiveEndMonth: z.string().optional(),
@@ -116,10 +116,10 @@ export default function ExpensesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] })
       queryClient.invalidateQueries({ queryKey: ["finance-summary"] })
-      toast.success("Gider basariyla eklendi.")
+      toast.success("Gider başarıyla eklendi.")
       setAddDialogOpen(false)
     },
-    onError: () => toast.error("Gider eklenirken bir hata olustu."),
+    onError: () => toast.error("Gider eklenirken bir hata oluştu."),
   })
 
   const updateExpenseMutation = useMutation({
@@ -128,11 +128,11 @@ export default function ExpensesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] })
       queryClient.invalidateQueries({ queryKey: ["finance-summary"] })
-      toast.success("Gider basariyla guncellendi.")
+      toast.success("Gider başarıyla güncellendi.")
       setEditDialogOpen(false)
       setEditingExpense(null)
     },
-    onError: () => toast.error("Gider guncellenirken bir hata olustu."),
+    onError: () => toast.error("Gider güncellenirken bir hata oluştu."),
   })
 
   const deleteExpenseMutation = useMutation({
@@ -143,7 +143,7 @@ export default function ExpensesPage() {
       toast.success("Gider silindi.")
       setDeleteDialog({ open: false, expense: null })
     },
-    onError: () => toast.error("Gider silinirken bir hata olustu."),
+    onError: () => toast.error("Gider silinirken bir hata oluştu."),
   })
 
   // Category mutations
@@ -154,7 +154,7 @@ export default function ExpensesPage() {
       toast.success("Kategori eklendi.")
       setNewCategoryName("")
     },
-    onError: () => toast.error("Kategori eklenirken bir hata olustu."),
+    onError: () => toast.error("Kategori eklenirken bir hata oluştu."),
   })
 
   const updateCategoryMutation = useMutation({
@@ -162,11 +162,11 @@ export default function ExpensesPage() {
       api.patch(`/expense-categories/${id}`, { name }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expense-categories"] })
-      toast.success("Kategori guncellendi.")
+      toast.success("Kategori güncellendi.")
       setEditingCategory(null)
       setEditingCategoryName("")
     },
-    onError: () => toast.error("Kategori guncellenirken bir hata olustu."),
+    onError: () => toast.error("Kategori güncellenirken bir hata oluştu."),
   })
 
   const deleteCategoryMutation = useMutation({
@@ -176,7 +176,7 @@ export default function ExpensesPage() {
       toast.success("Kategori silindi.")
       setDeleteCategoryDialog({ open: false, category: null })
     },
-    onError: () => toast.error("Kategori silinirken bir hata olustu."),
+    onError: () => toast.error("Kategori silinirken bir hata oluştu."),
   })
 
   // ─── Form ─────────────────────────────────────────────────────────────
@@ -227,11 +227,11 @@ export default function ExpensesPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Title */}
             <div>
-              <label className="text-sm font-semibold text-on-surface mb-1.5 block">Baslik</label>
+              <label className="text-sm font-semibold text-on-surface mb-1.5 block">Başlık</label>
               <input
                 {...register("title")}
                 className="w-full px-4 py-3 bg-surface-container-low border-0 focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest rounded-lg transition-all text-on-surface outline-none"
-                placeholder="Gider basligi"
+                placeholder="Gider başlığı"
               />
               {errors.title && (
                 <p className="text-xs text-error mt-1">{errors.title.message}</p>
@@ -249,7 +249,7 @@ export default function ExpensesPage() {
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={(v) => field.onChange(v ?? "")}>
                     <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                      <SelectValue placeholder="Kategori secin" />
+                      <SelectValue placeholder="Kategori seçin" />
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map((cat) => (
@@ -287,7 +287,7 @@ export default function ExpensesPage() {
             {/* Payment Date */}
             <div>
               <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                Odeme Tarihi
+                Ödeme Tarihi
               </label>
               <input
                 type="date"
@@ -302,13 +302,13 @@ export default function ExpensesPage() {
             {/* Period Type */}
             <div>
               <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                Donem Tipi
+                Dönem Tipi
               </label>
               <div className="flex gap-2">
                 {[
-                  { value: "same", label: "Ayni Ay" },
-                  { value: "different", label: "Farkli Ay" },
-                  { value: "multi", label: "Coklu Ay" },
+                  { value: "same", label: "Aynı Ay" },
+                  { value: "different", label: "Farklı Ay" },
+                  { value: "multi", label: "Çoklu Ay" },
                 ].map((opt) => (
                   <label key={opt.value} className="flex-1">
                     <input
@@ -329,7 +329,7 @@ export default function ExpensesPage() {
             {periodType === "different" && (
               <div>
                 <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                  Etki Ayi
+                  Etki Ayı
                 </label>
                 <input
                   type="month"
@@ -343,7 +343,7 @@ export default function ExpensesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                    Baslangic Ayi
+                    Başlangıç Ayı
                   </label>
                   <input
                     type="month"
@@ -353,7 +353,7 @@ export default function ExpensesPage() {
                 </div>
                 <div>
                   <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                    Bitis Ayi
+                    Bitiş Ayı
                   </label>
                   <input
                     type="month"
@@ -366,7 +366,7 @@ export default function ExpensesPage() {
 
             <DialogFooter>
               <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
-                Iptal
+                İptal
               </DialogClose>
               <button
                 type="submit"
@@ -437,7 +437,7 @@ export default function ExpensesPage() {
   const columns: ColumnDef<Expense>[] = [
     {
       accessorKey: "title",
-      header: "Baslik",
+      header: "Başlık",
       cell: ({ row }) => (
         <span className="font-semibold text-on-surface">{row.original.title}</span>
       ),
@@ -460,7 +460,7 @@ export default function ExpensesPage() {
     },
     {
       accessorKey: "paymentDate",
-      header: "Odeme Tarihi",
+      header: "Ödeme Tarihi",
       cell: ({ row }) => (
         <span className="text-sm text-on-surface">
           {format(new Date(row.original.paymentDate), "d MMMM yyyy", { locale: tr })}
@@ -469,7 +469,7 @@ export default function ExpensesPage() {
     },
     {
       id: "period",
-      header: "Donem",
+      header: "Dönem",
       cell: ({ row }) => {
         const e = row.original
         if (e.effectiveMonth && e.effectiveEndMonth) {
@@ -482,12 +482,12 @@ export default function ExpensesPage() {
         if (e.effectiveMonth) {
           return <span className="text-sm text-on-surface-variant">{e.effectiveMonth}</span>
         }
-        return <span className="text-sm text-on-surface-variant/50">Ayni ay</span>
+        return <span className="text-sm text-on-surface-variant/50">Aynı ay</span>
       },
     },
     {
       id: "actions",
-      header: "Islemler",
+      header: "İşlemler",
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
           <button
@@ -514,10 +514,10 @@ export default function ExpensesPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h1 className="text-4xl font-extrabold tracking-tight text-on-surface font-headline">
-            Gider Yonetimi
+            Gider Yönetimi
           </h1>
           <p className="text-on-surface-variant mt-2 text-lg">
-            {expenses.length} gider kaydi listeleniyor.
+            {expenses.length} gider kaydı listeleniyor.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -558,19 +558,33 @@ export default function ExpensesPage() {
           </button>
         </div>
 
-        <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v ?? "all")}>
-          <SelectTrigger className="h-9 px-3 bg-surface-container-low border-0 rounded-lg">
-            <SelectValue placeholder="Tum kategoriler" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tum kategoriler</SelectItem>
-            {categories.map((cat) => (
-              <SelectItem key={cat.id} value={cat.id}>
-                {cat.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => setCategoryFilter("all")}
+            className={cn(
+              "px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors",
+              categoryFilter === "all"
+                ? "bg-on-surface text-surface"
+                : "text-on-surface-variant hover:bg-surface-container-high",
+            )}
+          >
+            Tümü
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setCategoryFilter(cat.id)}
+              className={cn(
+                "px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors",
+                categoryFilter === cat.id
+                  ? "bg-on-surface text-surface"
+                  : "text-on-surface-variant hover:bg-surface-container-high",
+              )}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Data Table */}
@@ -615,7 +629,7 @@ export default function ExpensesPage() {
           }}
           onSubmit={handleEditExpense}
           isPending={updateExpenseMutation.isPending}
-          title="Gideri Duzenle"
+          title="Gideri Düzenle"
         />
       )}
 
@@ -630,13 +644,13 @@ export default function ExpensesPage() {
           <DialogHeader>
             <DialogTitle>Gideri Sil</DialogTitle>
             <DialogDescription>
-              &quot;{deleteDialog.expense?.title}&quot; giderini silmek istediginize emin misiniz?
-              Bu islem geri alinamaz.
+              &quot;{deleteDialog.expense?.title}&quot; giderini silmek istediğinize emin misiniz?
+              Bu islem geri alınamaz.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
-              Iptal
+              İptal
             </DialogClose>
             <button
               onClick={() => {
@@ -659,7 +673,7 @@ export default function ExpensesPage() {
           <DialogHeader>
             <DialogTitle>Gider Kategorileri</DialogTitle>
             <DialogDescription>
-              Gider kategorilerini buradan yonetebilirsiniz.
+              Gider kategorilerini buradan yönetebilirsiniz.
             </DialogDescription>
           </DialogHeader>
 
@@ -678,7 +692,7 @@ export default function ExpensesPage() {
                   }
                 }}
                 className="w-full px-4 py-2.5 bg-surface-container-low border-0 focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest rounded-lg transition-all text-on-surface outline-none text-sm"
-                placeholder="Kategori adi"
+                placeholder="Kategori adı"
               />
             </div>
             <button
@@ -698,7 +712,7 @@ export default function ExpensesPage() {
           <div className="space-y-1 max-h-64 overflow-y-auto">
             {categories.length === 0 ? (
               <p className="text-sm text-on-surface-variant text-center py-4">
-                Henuz kategori eklenmemis.
+                Henüz kategori eklenmemiş.
               </p>
             ) : (
               categories.map((cat) => (
@@ -789,13 +803,13 @@ export default function ExpensesPage() {
           <DialogHeader>
             <DialogTitle>Kategoriyi Sil</DialogTitle>
             <DialogDescription>
-              &quot;{deleteCategoryDialog.category?.name}&quot; kategorisini silmek istediginize
+              &quot;{deleteCategoryDialog.category?.name}&quot; kategorisini silmek istediğinize
               emin misiniz?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
-              Iptal
+              İptal
             </DialogClose>
             <button
               onClick={() => {
