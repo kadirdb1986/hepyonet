@@ -147,23 +147,23 @@ export default function InventoryPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["raw-materials"] })
       queryClient.invalidateQueries({ queryKey: ["raw-materials-low-stock"] })
-      toast.success("Stok kalemi basariyla eklendi.")
       setAddDialogOpen(false)
+      toast.success("Stok kalemi başarıyla eklendi.")
     },
-    onError: () => toast.error("Stok kalemi eklenirken bir hata olustu."),
+    onError: () => toast.error("Stok kalemi eklenirken bir hata oluştu."),
   })
 
   const updateMaterialMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) =>
       api.patch(`/raw-materials/${id}`, data),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["raw-materials"] })
-      await queryClient.invalidateQueries({ queryKey: ["raw-materials-low-stock"] })
-      toast.success("Stok kalemi basariyla guncellendi.")
       setEditDialogOpen(false)
       setEditingMaterial(null)
+      toast.success("Stok kalemi başarıyla güncellendi.")
+      await queryClient.invalidateQueries({ queryKey: ["raw-materials"] })
+      await queryClient.invalidateQueries({ queryKey: ["raw-materials-low-stock"] })
     },
-    onError: () => toast.error("Stok kalemi guncellenirken bir hata olustu."),
+    onError: () => toast.error("Stok kalemi güncellenirken bir hata oluştu."),
   })
 
   const deleteMaterialMutation = useMutation({
@@ -174,7 +174,7 @@ export default function InventoryPage() {
       toast.success("Stok kalemi silindi.")
       setDeleteDialog({ open: false, material: null })
     },
-    onError: () => toast.error("Stok kalemi silinirken bir hata olustu."),
+    onError: () => toast.error("Stok kalemi silinirken bir hata oluştu."),
   })
 
   // Material type mutations
@@ -185,7 +185,7 @@ export default function InventoryPage() {
       toast.success("Malzeme tipi eklendi.")
       setNewTypeName("")
     },
-    onError: () => toast.error("Malzeme tipi eklenirken bir hata olustu."),
+    onError: () => toast.error("Malzeme tipi eklenirken bir hata oluştu."),
   })
 
   const updateTypeMutation = useMutation({
@@ -193,11 +193,11 @@ export default function InventoryPage() {
       api.patch(`/material-types/${id}`, { name }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["material-types"] })
-      toast.success("Malzeme tipi guncellendi.")
+      toast.success("Malzeme tipi güncellendi.")
       setEditingType(null)
       setEditingTypeName("")
     },
-    onError: () => toast.error("Malzeme tipi guncellenirken bir hata olustu."),
+    onError: () => toast.error("Malzeme tipi güncellenirken bir hata oluştu."),
   })
 
   const deleteTypeMutation = useMutation({
@@ -207,7 +207,7 @@ export default function InventoryPage() {
       toast.success("Malzeme tipi silindi.")
       setDeleteTypeDialog({ open: false, type: null })
     },
-    onError: () => toast.error("Malzeme tipi silinirken bir hata olustu."),
+    onError: () => toast.error("Malzeme tipi silinirken bir hata oluştu."),
   })
 
   // ─── Form Dialog ──────────────────────────────────────────────────────
@@ -262,7 +262,7 @@ export default function InventoryPage() {
               <input
                 {...register("name")}
                 className={inputClass}
-                placeholder="Malzeme adi"
+                placeholder="Malzeme adı"
               />
               {errors.name && (
                 <p className="text-xs text-error mt-1">{errors.name.message}</p>
@@ -279,7 +279,7 @@ export default function InventoryPage() {
                   render={({ field }) => (
                     <Select value={field.value || undefined} onValueChange={(v) => field.onChange(v ?? "")}>
                       <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                        <SelectValue placeholder="Tip secin" />
+                        <SelectValue placeholder="Tip seçin" />
                       </SelectTrigger>
                       <SelectContent>
                         {materialTypes.map((t) => (
@@ -302,7 +302,7 @@ export default function InventoryPage() {
                   render={({ field }) => (
                     <Select value={field.value || undefined} onValueChange={(v) => field.onChange(v ?? "")}>
                       <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                        <SelectValue placeholder="Birim secin" />
+                        <SelectValue placeholder="Birim seçin" />
                       </SelectTrigger>
                       <SelectContent>
                         {(["KG", "GR", "LT", "ML", "ADET"] as const).map((u) => (
@@ -341,7 +341,7 @@ export default function InventoryPage() {
               {/* Last Purchase Price */}
               <div>
                 <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                  Son Alis Fiyati
+                  Son Alış Fiyatı
                 </label>
                 <input
                   {...register("lastPurchasePrice")}
@@ -376,13 +376,13 @@ export default function InventoryPage() {
             {/* Supplier */}
             <div>
               <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                Tedarikci
+                Tedarikçi
               </label>
               <select
                 {...register("supplierId")}
                 className="w-full h-12 px-4 bg-surface-container-low border-0 focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest rounded-lg transition-all text-on-surface outline-none text-sm"
               >
-                <option value="">Tedarikci secin</option>
+                <option value="">Tedarikçi secin</option>
                 {suppliers.map((s) => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
@@ -391,7 +391,7 @@ export default function InventoryPage() {
 
             <DialogFooter>
               <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
-                Iptal
+                İptal
               </DialogClose>
               <button
                 type="submit"
@@ -472,7 +472,7 @@ export default function InventoryPage() {
     },
     {
       id: "supplier",
-      header: "Tedarikci",
+      header: "Tedarikçi",
       cell: ({ row }) => (
         <span className="text-sm text-on-surface">
           {row.original.supplier?.name || "-"}
@@ -499,7 +499,7 @@ export default function InventoryPage() {
     },
     {
       accessorKey: "lastPurchasePrice",
-      header: "Son Alis Fiyati",
+      header: "Son Alış Fiyatı",
       cell: ({ row }) => (
         <span className="text-sm font-semibold text-on-surface">
           {formatCurrencyDecimal(row.original.lastPurchasePrice)}
@@ -544,7 +544,7 @@ export default function InventoryPage() {
     },
     {
       id: "actions",
-      header: "Islemler",
+      header: "İşlemler",
       cell: ({ row }) => (
         <DropdownMenu>
           <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant outline-none">
@@ -556,7 +556,7 @@ export default function InventoryPage() {
               className="flex items-center gap-2 cursor-pointer"
             >
               <span className="material-symbols-outlined text-base">edit</span>
-              Duzenle
+              Düzenle
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
@@ -580,7 +580,7 @@ export default function InventoryPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h1 className="text-4xl font-extrabold tracking-tight text-on-surface font-headline">
-            Stok Yonetimi
+            Stok Yönetimi
           </h1>
           <p className="text-on-surface-variant mt-2 text-lg">
             {rawMaterials.length} stok kalemi listeleniyor.
@@ -610,10 +610,10 @@ export default function InventoryPage() {
           <span className="material-symbols-outlined text-error text-2xl">warning</span>
           <div>
             <p className="text-sm font-bold text-on-surface">
-              {lowStockCount} urun kritik stok seviyesinin altinda
+              {lowStockCount} ürün kritik stok seviyesinin altında
             </p>
             <p className="text-xs text-on-surface-variant mt-0.5">
-              Bu urunlerin stok seviyelerini kontrol edin.
+              Bu ürünlerin stok seviyelerini kontrol edin.
             </p>
           </div>
         </div>
@@ -629,7 +629,7 @@ export default function InventoryPage() {
               : "text-on-surface-variant text-sm font-semibold px-4 py-1.5"
           )}
         >
-          Tumu
+          Tümü
         </button>
         {materialTypes.map((t) => (
           <button
@@ -684,7 +684,7 @@ export default function InventoryPage() {
           }}
           onSubmit={handleEditMaterial}
           isPending={updateMaterialMutation.isPending}
-          title="Stok Kalemini Duzenle"
+          title="Stok Kalemini Düzenle"
         />
       )}
 
@@ -699,13 +699,13 @@ export default function InventoryPage() {
           <DialogHeader>
             <DialogTitle>Stok Kalemini Sil</DialogTitle>
             <DialogDescription>
-              &quot;{deleteDialog.material?.name}&quot; stok kalemini silmek istediginize emin
-              misiniz? Bu islem geri alinamaz.
+              &quot;{deleteDialog.material?.name}&quot; stok kalemini silmek istediğinize emin
+              misiniz? Bu işlem geri alınamaz.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
-              Iptal
+              İptal
             </DialogClose>
             <button
               onClick={() => {
@@ -728,7 +728,7 @@ export default function InventoryPage() {
           <DialogHeader>
             <DialogTitle>Malzeme Tipleri</DialogTitle>
             <DialogDescription>
-              Malzeme tiplerini buradan yonetebilirsiniz.
+              Malzeme tiplerini buradan yönetebilirsiniz.
             </DialogDescription>
           </DialogHeader>
 
@@ -747,7 +747,7 @@ export default function InventoryPage() {
                   }
                 }}
                 className="w-full px-4 py-2.5 bg-surface-container-low border-0 focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest rounded-lg transition-all text-on-surface outline-none text-sm"
-                placeholder="Tip adi"
+                placeholder="Tip adı"
               />
             </div>
             <button
@@ -767,7 +767,7 @@ export default function InventoryPage() {
           <div className="space-y-1 max-h-64 overflow-y-auto">
             {materialTypes.length === 0 ? (
               <p className="text-sm text-on-surface-variant text-center py-4">
-                Henuz malzeme tipi eklenmemis.
+                Henüz malzeme tipi eklenmemiş.
               </p>
             ) : (
               materialTypes.map((t) => (
@@ -858,12 +858,12 @@ export default function InventoryPage() {
           <DialogHeader>
             <DialogTitle>Malzeme Tipini Sil</DialogTitle>
             <DialogDescription>
-              &quot;{deleteTypeDialog.type?.name}&quot; tipini silmek istediginize emin misiniz?
+              &quot;{deleteTypeDialog.type?.name}&quot; tipini silmek istediğinize emin misiniz?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
-              Iptal
+              İptal
             </DialogClose>
             <button
               onClick={() => {
