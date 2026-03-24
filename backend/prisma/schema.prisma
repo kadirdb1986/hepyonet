@@ -109,7 +109,6 @@ model Personnel {
   surname      String
   phone        String?
   tcNo         String?
-  position     String?
   positionId   String?
   userId       String?
   startDate    DateTime
