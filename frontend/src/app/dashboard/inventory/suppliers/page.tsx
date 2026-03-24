@@ -470,6 +470,7 @@ export default function SuppliersPage() {
         data={suppliers}
         searchKey="name"
         searchPlaceholder="Tedarikçi ara..."
+        pageSize={50}
       />
 
       {/* Delete Confirm Dialog */}
