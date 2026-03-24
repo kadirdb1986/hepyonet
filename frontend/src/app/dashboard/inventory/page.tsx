@@ -131,14 +131,38 @@ export default function InventoryPage() {
 
   const lowStockCount = lowStockData?.count ?? (Array.isArray(lowStockData) ? (lowStockData as RawMaterial[]).length : 0)
 
+  // ─── Type helpers ────────────────────────────────────────────────────
+
+  const typeNameById = useMemo(() => {
+    const map: Record<string, string> = {}
+    materialTypes.forEach((t) => { map[t.id] = t.name })
+    return map
+  }, [materialTypes])
+
+  const typeIdByName = useMemo(() => {
+    const map: Record<string, string> = {}
+    materialTypes.forEach((t) => { map[t.name] = t.id })
+    return map
+  }, [materialTypes])
+
+  const getTypeName = (m: RawMaterial) =>
+    m.materialType?.name || typeNameById[m.type ?? ""] || m.type || null
+
+  const getTypeId = (m: RawMaterial) =>
+    m.materialType?.id || typeIdByName[m.type ?? ""] || m.type || null
+
   // ─── Filtered data ──────────────────────────────────────────────────
 
   const filteredMaterials = useMemo(() => {
     if (typeFilter === "all") return rawMaterials
+    const filterTypeName = typeNameById[typeFilter]
     return rawMaterials.filter(
-      (m) => m.materialType?.id === typeFilter || m.type === typeFilter
+      (m) =>
+        m.materialType?.id === typeFilter ||
+        m.type === typeFilter ||
+        m.type === filterTypeName
     )
-  }, [rawMaterials, typeFilter])
+  }, [rawMaterials, typeFilter, typeNameById])
 
   // ─── Mutations ────────────────────────────────────────────────────────
 
@@ -460,7 +484,7 @@ export default function InventoryPage() {
       id: "type",
       header: "Tip",
       cell: ({ row }) => {
-        const typeName = row.original.materialType?.name
+        const typeName = getTypeName(row.original)
         return typeName ? (
           <span className="inline-flex h-6 items-center px-2.5 rounded-full bg-primary/10 text-primary text-xs font-semibold">
             {typeName}
@@ -675,7 +699,7 @@ export default function InventoryPage() {
           }}
           defaultValues={{
             name: editingMaterial.name,
-            typeId: editingMaterial.materialType?.id || editingMaterial.type || "",
+            typeId: getTypeId(editingMaterial) || "",
             unit: editingMaterial.unit,
             currentStock: String(editingMaterial.currentStock || ""),
             lastPurchasePrice: String(editingMaterial.lastPurchasePrice || ""),
