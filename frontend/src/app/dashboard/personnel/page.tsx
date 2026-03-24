@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import { ColumnDef } from "@tanstack/react-table"
 import api from "@/lib/api"
-import { formatCurrency, formatDate, formatPhone } from "@/lib/utils"
+import { formatCurrency, formatPhone } from "@/lib/utils"
 import { DataTable } from "@/components/data-table/data-table"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -81,15 +81,6 @@ export default function PersonnelListPage() {
       cell: ({ row }) => (
         <span className="text-on-surface-variant text-sm">
           {row.original.phone ? formatPhone(row.original.phone) : "—"}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "startDate",
-      header: "Başlangıç Tarihi",
-      cell: ({ row }) => (
-        <span className="text-on-surface-variant text-sm">
-          {formatDate(row.original.startDate)}
         </span>
       ),
     },
