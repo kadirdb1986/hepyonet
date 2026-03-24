@@ -53,14 +53,6 @@ export class PositionService {
       throw new BadRequestException('Bu isimde bir pozisyon zaten var');
     }
 
-    // Eski adla kayitli personelin pozisyonunu da guncelle
-    if (positionConfig.name !== trimmed) {
-      await this.prisma.personnel.updateMany({
-        where: { restaurantId, positionId: id },
-        data: { position: trimmed },
-      });
-    }
-
     return this.prisma.positionConfig.update({
       where: { id },
       data: { name: trimmed },
