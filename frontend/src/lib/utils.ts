@@ -39,6 +39,10 @@ export function formatPercent(n: number): string {
 export function formatPhone(phone: string | number | null | undefined): string {
   if (phone == null) return "—"
   const digits = String(phone).replace(/\D/g, "")
+  if (digits.length === 12 && digits.startsWith("90")) {
+    const d = digits.slice(2)
+    return `0 (${d.slice(0, 3)}) ${d.slice(3, 6)} ${d.slice(6, 8)} ${d.slice(8)}`
+  }
   if (digits.length === 11 && digits.startsWith("0")) {
     return `0 (${digits.slice(1, 4)}) ${digits.slice(4, 7)} ${digits.slice(7, 9)} ${digits.slice(9)}`
   }

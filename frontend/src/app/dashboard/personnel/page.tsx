@@ -102,24 +102,6 @@ export default function PersonnelListPage() {
         </span>
       ),
     },
-    {
-      accessorKey: "isActive",
-      header: "Durum",
-      cell: ({ row }) => {
-        const active = row.original.isActive
-        return active ? (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-secondary-fixed text-on-secondary-fixed">
-            <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
-            Aktif
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-tertiary-fixed text-on-tertiary-fixed-variant">
-            <span className="w-1.5 h-1.5 rounded-full bg-tertiary" />
-            Pasif
-          </span>
-        )
-      },
-    },
   ]
 
   return (
