@@ -131,7 +131,8 @@ export default function FinanceOverviewPage() {
 
   // ─── Sparkline data for cards ─────────────────────────────────────────
 
-  const last7Days = dailyData.slice(-7)
+  const daysWithData = dailyData.filter((d) => d.revenue > 0 || (d.expense ?? 0) > 0)
+  const last7Days = daysWithData.slice(-7)
   const revenueSparkline = last7Days.map((d) => d.revenue)
   const expenseSparkline = last7Days.map((d) => d.expense ?? 0)
   const netSparkline = last7Days.map((d) => d.revenue - (d.expense ?? 0))
