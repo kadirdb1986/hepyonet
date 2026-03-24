@@ -36,13 +36,12 @@ interface Revenue {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const TR_DAY_NAMES_SHORT = ["Paz", "Pzt", "Sal", "Car", "Per", "Cum", "Cmt"]
 const TR_DAY_NAMES_FULL = [
   "Pazar",
   "Pazartesi",
-  "Sali",
-  "Carsamba",
-  "Persembe",
+  "Salı",
+  "Çarşamba",
+  "Perşembe",
   "Cuma",
   "Cumartesi",
 ]
@@ -84,11 +83,11 @@ export default function RevenuesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["revenues", month] })
       queryClient.invalidateQueries({ queryKey: ["finance-summary"] })
-      toast.success("Ciro basariyla kaydedildi.")
+      toast.success("Ciro başarıyla kaydedildi.")
       setConfirmDialog({ open: false, date: "", amount: 0 })
       setEditingDate(null)
     },
-    onError: () => toast.error("Ciro kaydedilirken bir hata olustu."),
+    onError: () => toast.error("Ciro kaydedilirken bir hata oluştu."),
   })
 
   const updateMutation = useMutation({
@@ -97,11 +96,11 @@ export default function RevenuesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["revenues", month] })
       queryClient.invalidateQueries({ queryKey: ["finance-summary"] })
-      toast.success("Ciro basariyla guncellendi.")
+      toast.success("Ciro başarıyla güncellendi.")
       setConfirmDialog({ open: false, date: "", amount: 0 })
       setEditingDate(null)
     },
-    onError: () => toast.error("Ciro guncellenirken bir hata olustu."),
+    onError: () => toast.error("Ciro güncellenirken bir hata oluştu."),
   })
 
   // ─── Build calendar days ──────────────────────────────────────────────
@@ -178,7 +177,7 @@ export default function RevenuesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-4xl font-extrabold tracking-tight text-on-surface font-headline">
-          Ciro Girisi
+          Ciro Girişi
         </h1>
         <div className="flex items-center gap-3">
           <button
@@ -204,7 +203,7 @@ export default function RevenuesPage() {
         <div className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(25,28,30,0.03)] border border-white">
           <div className="flex items-center gap-2 text-secondary mb-2">
             <span className="material-symbols-outlined text-xl">payments</span>
-            <span className="text-xs font-bold uppercase tracking-wider">Aylik Toplam Ciro</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Aylık Toplam Ciro</span>
           </div>
           <p className="text-3xl font-extrabold text-on-surface font-headline">
             {formatCurrency(monthTotal)}
@@ -213,7 +212,7 @@ export default function RevenuesPage() {
         <div className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(25,28,30,0.03)] border border-white">
           <div className="flex items-center gap-2 text-primary mb-2">
             <span className="material-symbols-outlined text-xl">avg_pace</span>
-            <span className="text-xs font-bold uppercase tracking-wider">Gunluk Ortalama</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Günlük Ortalama</span>
           </div>
           <p className="text-3xl font-extrabold text-on-surface font-headline">
             {formatCurrency(dailyAverage)}
@@ -228,7 +227,7 @@ export default function RevenuesPage() {
             <thead>
               <tr className="bg-surface-container-low">
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-                  Gun Adi
+                  Gün Adı
                 </th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">
                   Tarih
@@ -256,7 +255,6 @@ export default function RevenuesPage() {
                 : allDays.map((day) => {
                     const dateStr = format(day, "yyyy-MM-dd")
                     const dayIndex = getDay(day)
-                    const dayName = TR_DAY_NAMES_SHORT[dayIndex]
                     const dayNameFull = TR_DAY_NAMES_FULL[dayIndex]
                     const weekend = isWeekend(dayIndex)
                     const revenue = revenueMap[dateStr]
@@ -274,7 +272,7 @@ export default function RevenuesPage() {
                             weekend ? "text-on-surface-variant/50" : "text-on-surface",
                           )}
                         >
-                          {dayNameFull} ({dayName})
+                          {dayNameFull}
                         </td>
                         <td className="px-6 py-3 text-sm text-on-surface">
                           {format(day, "d MMMM yyyy", { locale: tr })}
@@ -344,7 +342,7 @@ export default function RevenuesPage() {
       {/* Bar Chart */}
       <div className="bg-surface-container-lowest rounded-xl p-8 shadow-[0_20px_40px_rgba(25,28,30,0.03)] border border-white">
         <h2 className="font-headline text-lg font-bold text-on-surface mb-6">
-          Aylik Ciro Grafigi
+          Aylık Ciro Grafiği
         </h2>
         <div className="flex items-end gap-1 h-48">
           {allDays.map((day) => {
@@ -395,12 +393,12 @@ export default function RevenuesPage() {
               {confirmDialog.date &&
                 format(new Date(confirmDialog.date), "d MMMM yyyy, EEEE", { locale: tr })}{" "}
               tarihine <strong>{formatCurrency(confirmDialog.amount)}</strong> ciro{" "}
-              {confirmDialog.existingId ? "guncellenecek" : "kaydedilecek"}. Onayliyor musunuz?
+              {confirmDialog.existingId ? "güncellenecek" : "kaydedilecek"}. Onaylıyor musunuz?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
-              Iptal
+              İptal
             </DialogClose>
             <button
               onClick={handleSave}

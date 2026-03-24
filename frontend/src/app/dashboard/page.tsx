@@ -36,7 +36,8 @@ interface RecentExpense {
   id: string
   title: string
   amount: number
-  category: string
+  categoryId: string
+  category?: { id: string; name: string }
   paymentDate: string
 }
 
@@ -458,7 +459,7 @@ export default function DashboardPage() {
                     <div className="flex-1">
                       <p className="text-sm font-bold text-on-surface leading-tight">{expense.title}</p>
                       <p className="text-[11px] text-on-surface-variant">
-                        {format(new Date(expense.paymentDate), "d MMM", { locale: tr })} · {expense.category}
+                        {format(new Date(expense.paymentDate), "d MMM", { locale: tr })} · {expense.category?.name || "-"}
                       </p>
                     </div>
                     <span className="text-sm font-bold text-on-surface">-{formatCurrency(expense.amount)}</span>
