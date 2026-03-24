@@ -344,10 +344,21 @@ export default function FinanceOverviewPage() {
               <div className="flex items-center justify-center mb-6">
                 <svg viewBox="0 0 200 200" width="160" height="160">
                   {(() => {
+                    if (categoryBreakdown.length === 1) {
+                      return (
+                        <circle
+                          cx="100"
+                          cy="100"
+                          r="70"
+                          fill="none"
+                          stroke={DONUT_COLORS[0]}
+                          strokeWidth="24"
+                        />
+                      )
+                    }
                     let startAngle = -Math.PI / 2
                     return categoryBreakdown.map((cat, i) => {
                       const angle = (cat.amount / totalExpenseForDonut) * 2 * Math.PI
-                      // Minimum angle for visibility
                       const effectiveAngle = Math.max(angle, 0.05)
                       const path = buildDonutPath(100, 100, 70, startAngle, startAngle + effectiveAngle)
                       startAngle += effectiveAngle
