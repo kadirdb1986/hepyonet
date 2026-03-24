@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useForm, Controller } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
@@ -19,13 +19,6 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -254,7 +247,6 @@ export default function InventoryPage() {
     const {
       register,
       handleSubmit,
-      control,
       formState: { errors },
     } = useForm<MaterialForm>({
       resolver: zodResolver(materialSchema),
@@ -297,47 +289,29 @@ export default function InventoryPage() {
               {/* Type */}
               <div>
                 <label className="text-sm font-semibold text-on-surface mb-1.5 block">Tip</label>
-                <Controller
-                  name="typeId"
-                  control={control}
-                  render={({ field }) => (
-                    <Select value={field.value || undefined} onValueChange={(v) => field.onChange(v ?? "")}>
-                      <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                        <SelectValue placeholder="Tip seçin" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {materialTypes.map((t) => (
-                          <SelectItem key={t.id} value={t.id}>
-                            {t.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
+                <select
+                  {...register("typeId")}
+                  className="w-full h-12 px-4 bg-surface-container-low border-0 focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest rounded-lg transition-all text-on-surface outline-none text-sm"
+                >
+                  <option value="">Tip seçin</option>
+                  {materialTypes.map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
               </div>
 
               {/* Unit */}
               <div>
                 <label className="text-sm font-semibold text-on-surface mb-1.5 block">Birim</label>
-                <Controller
-                  name="unit"
-                  control={control}
-                  render={({ field }) => (
-                    <Select value={field.value || undefined} onValueChange={(v) => field.onChange(v ?? "")}>
-                      <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                        <SelectValue placeholder="Birim seçin" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(["KG", "GR", "LT", "ML", "ADET"] as const).map((u) => (
-                          <SelectItem key={u} value={u}>
-                            {UNIT_DISPLAY[u]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
+                <select
+                  {...register("unit")}
+                  className="w-full h-12 px-4 bg-surface-container-low border-0 focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest rounded-lg transition-all text-on-surface outline-none text-sm"
+                >
+                  <option value="">Birim seçin</option>
+                  {(["KG", "GR", "LT", "ML", "ADET"] as const).map((u) => (
+                    <option key={u} value={u}>{UNIT_DISPLAY[u]}</option>
+                  ))}
+                </select>
                 {errors.unit && (
                   <p className="text-xs text-error mt-1">{errors.unit.message}</p>
                 )}
