@@ -47,7 +47,7 @@ interface RawMaterial {
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
 const supplierSchema = z.object({
-  name: z.string().min(1, "Tedarikci adi zorunludur"),
+  name: z.string().min(1, "Tedarikçi adı zorunludur"),
   description: z.string().optional(),
   deliveryType: z.string().optional(),
   phone: z.string().optional(),
@@ -57,8 +57,8 @@ type SupplierForm = z.infer<typeof supplierSchema>
 
 const DELIVERY_TYPES = [
   { value: "Kargo", label: "Kargo" },
-  { value: "Ayağa Hizmet", label: "Ayaga Hizmet" },
-  { value: "Kendin Alıyorsun", label: "Kendin Aliyorsun" },
+  { value: "Ayağa Hizmet", label: "Ayağa Hizmet" },
+  { value: "Kendin Alıyorsun", label: "Kendin Alıyorsun" },
 ]
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -72,6 +72,7 @@ export default function SuppliersPage() {
     deliveryType: "",
     phone: "",
   })
+  const [addDialogOpen, setAddDialogOpen] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean
     supplier: Supplier | null
@@ -125,10 +126,11 @@ export default function SuppliersPage() {
     mutationFn: (data: Record<string, unknown>) => api.post("/suppliers", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["suppliers"] })
-      toast.success("Tedarikci basariyla eklendi.")
+      toast.success("Tedarikçi başarıyla eklendi.")
       reset()
+      setAddDialogOpen(false)
     },
-    onError: () => toast.error("Tedarikci eklenirken bir hata olustu."),
+    onError: () => toast.error("Tedarikçi eklenirken bir hata oluştu."),
   })
 
   const updateMutation = useMutation({
@@ -136,20 +138,20 @@ export default function SuppliersPage() {
       api.patch(`/suppliers/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["suppliers"] })
-      toast.success("Tedarikci basariyla guncellendi.")
+      toast.success("Tedarikçi başarıyla güncellendi.")
       setEditingId(null)
     },
-    onError: () => toast.error("Tedarikci guncellenirken bir hata olustu."),
+    onError: () => toast.error("Tedarikçi güncellenirken bir hata oluştu."),
   })
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/suppliers/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["suppliers"] })
-      toast.success("Tedarikci silindi.")
+      toast.success("Tedarikçi silindi.")
       setDeleteDialog({ open: false, supplier: null })
     },
-    onError: () => toast.error("Tedarikci silinirken bir hata olustu."),
+    onError: () => toast.error("Tedarikçi silinirken bir hata oluştu."),
   })
 
   // ─── Handlers ─────────────────────────────────────────────────────────
@@ -174,7 +176,7 @@ export default function SuppliersPage() {
 
   const handleSaveEdit = (id: string) => {
     if (!editForm.name.trim()) {
-      toast.error("Tedarikci adi zorunludur.")
+      toast.error("Tedarikçi adı zorunludur.")
       return
     }
     const payload: Record<string, unknown> = { name: editForm.name.trim() }
@@ -220,7 +222,7 @@ export default function SuppliersPage() {
     },
     {
       accessorKey: "description",
-      header: "Aciklama",
+      header: "Açıklama",
       cell: ({ row }) => {
         if (editingId === row.original.id) {
           return (
@@ -253,7 +255,7 @@ export default function SuppliersPage() {
               }
               className={inputClass}
             >
-              <option value="">Secin</option>
+              <option value="">Seçin</option>
               {DELIVERY_TYPES.map((dt) => (
                 <option key={dt.value} value={dt.value}>
                   {dt.label}
@@ -296,7 +298,7 @@ export default function SuppliersPage() {
     },
     {
       id: "materialCount",
-      header: "Kalem Sayisi",
+      header: "Kalem Sayısı",
       cell: ({ row }) => {
         const count = supplierMaterialCount[row.original.id] || 0
         return (
@@ -308,7 +310,7 @@ export default function SuppliersPage() {
     },
     {
       id: "actions",
-      header: "Islemler",
+      header: "İşlemler",
       cell: ({ row }) => {
         if (editingId === row.original.id) {
           return (
@@ -358,35 +360,42 @@ export default function SuppliersPage() {
           Stok
         </Link>
         <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-        <span className="text-on-surface font-medium">Tedarikciler</span>
+        <span className="text-on-surface font-medium">Tedarikçiler</span>
       </nav>
 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div>
           <h1 className="text-4xl font-extrabold tracking-tight text-on-surface font-headline">
-            Tedarikciler
+            Tedarikçiler
           </h1>
           <p className="text-on-surface-variant mt-2 text-lg">
-            {suppliers.length} tedarikci listeleniyor.
+            {suppliers.length} tedarikçi listeleniyor.
           </p>
         </div>
+        <button
+          onClick={() => { reset(); setAddDialogOpen(true) }}
+          className="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-xl hover:translate-y-[-2px] active:scale-95 transition-all"
+        >
+          <span className="material-symbols-outlined">add</span>
+          Yeni Tedarikçi Ekle
+        </button>
       </div>
 
-      {/* Add Supplier Form Card */}
-      <div className="bg-surface-container-lowest rounded-xl p-6 shadow-[0_20px_40px_rgba(25,28,30,0.06)] mb-8">
-        <h2 className="font-headline text-lg font-bold text-on-surface mb-4">
-          Yeni Tedarikci Ekle
-        </h2>
-        <form onSubmit={handleSubmit(handleAdd)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Add Supplier Dialog */}
+      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Yeni Tedarikçi Ekle</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit(handleAdd)} className="space-y-4">
             {/* Name */}
             <div>
               <label className="text-sm font-semibold text-on-surface mb-1.5 block">Ad</label>
               <input
                 {...register("name")}
                 className="w-full px-4 py-3 bg-surface-container-low border-0 focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest rounded-lg transition-all text-on-surface outline-none"
-                placeholder="Tedarikci adi"
+                placeholder="Tedarikçi adı"
               />
               {errors.name && (
                 <p className="text-xs text-error mt-1">{errors.name.message}</p>
@@ -404,7 +413,7 @@ export default function SuppliersPage() {
                 render={({ field }) => (
                   <Select value={field.value || undefined} onValueChange={(v) => field.onChange(v ?? "")}>
                     <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                      <SelectValue placeholder="Tip secin" />
+                      <SelectValue placeholder="Tip seçin" />
                     </SelectTrigger>
                     <SelectContent>
                       {DELIVERY_TYPES.map((dt) => (
@@ -427,38 +436,40 @@ export default function SuppliersPage() {
                 placeholder="05XX XXX XX XX"
               />
             </div>
-          </div>
 
-          {/* Description */}
-          <div>
-            <label className="text-sm font-semibold text-on-surface mb-1.5 block">Aciklama</label>
-            <textarea
-              {...register("description")}
-              rows={2}
-              className="w-full px-4 py-3 bg-surface-container-low border-0 focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest rounded-lg transition-all text-on-surface outline-none resize-none"
-              placeholder="Tedarikci hakkinda kisa bir aciklama"
-            />
-          </div>
+            {/* Description */}
+            <div>
+              <label className="text-sm font-semibold text-on-surface mb-1.5 block">Açıklama</label>
+              <textarea
+                {...register("description")}
+                rows={2}
+                className="w-full px-4 py-3 bg-surface-container-low border-0 focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest rounded-lg transition-all text-on-surface outline-none resize-none"
+                placeholder="Tedarikçi hakkında kısa bir açıklama"
+              />
+            </div>
 
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={createMutation.isPending}
-              className="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all disabled:opacity-50"
-            >
-              <span className="material-symbols-outlined text-xl">add</span>
-              {createMutation.isPending ? "Ekleniyor..." : "Ekle"}
-            </button>
-          </div>
-        </form>
-      </div>
+            <DialogFooter>
+              <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
+                İptal
+              </DialogClose>
+              <button
+                type="submit"
+                disabled={createMutation.isPending}
+                className="bg-primary text-on-primary font-bold rounded-xl px-4 py-2 text-sm disabled:opacity-50"
+              >
+                {createMutation.isPending ? "Ekleniyor..." : "Ekle"}
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Data Table */}
       <DataTable
         columns={columns}
         data={suppliers}
         searchKey="name"
-        searchPlaceholder="Tedarikci ara..."
+        searchPlaceholder="Tedarikçi ara..."
       />
 
       {/* Delete Confirm Dialog */}
@@ -470,15 +481,15 @@ export default function SuppliersPage() {
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Tedarikciyi Sil</DialogTitle>
+            <DialogTitle>Tedarikçiyi Sil</DialogTitle>
             <DialogDescription>
-              &quot;{deleteDialog.supplier?.name}&quot; tedarikcisini silmek istediginize emin
-              misiniz? Bu islem geri alinamaz.
+              &quot;{deleteDialog.supplier?.name}&quot; tedarikçisini silmek istediğinize emin
+              misiniz? Bu işlem geri alınamaz.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
-              Iptal
+              İptal
             </DialogClose>
             <button
               onClick={() => {
