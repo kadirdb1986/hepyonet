@@ -45,7 +45,7 @@ export function formatPhone(phone: string | number | null | undefined): string {
   if (digits.length === 10) {
     return `0 (${digits.slice(0, 3)}) ${digits.slice(3, 6)} ${digits.slice(6, 8)} ${digits.slice(8)}`
   }
-  return phone
+  return String(phone)
 }
 
 export function formatDate(date: string | Date | null | undefined): string {
