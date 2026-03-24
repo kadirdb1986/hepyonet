@@ -37,7 +37,7 @@ interface Personnel {
   salary: number
   startDate: string
   isActive: boolean
-  position?: {
+  positionConfig?: {
     id: string
     name: string
   } | null
@@ -105,7 +105,7 @@ export default function PersonnelListPage() {
         const p = row.original
         const fullName = `${p.name} ${p.surname}`.toLowerCase()
         const phone = p.phone?.toLowerCase() ?? ""
-        const position = p.position?.name?.toLowerCase() ?? ""
+        const position = p.positionConfig?.name?.toLowerCase() ?? ""
         const search = filterValue.toLowerCase()
         return fullName.includes(search) || phone.includes(search) || position.includes(search)
       },
@@ -115,7 +115,7 @@ export default function PersonnelListPage() {
       header: "Pozisyon",
       cell: ({ row }) => (
         <span className="text-on-surface-variant text-sm">
-          {row.original.position?.name ?? "—"}
+          {row.original.positionConfig?.name ?? "—"}
         </span>
       ),
     },

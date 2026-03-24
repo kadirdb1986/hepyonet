@@ -48,8 +48,8 @@ interface PersonnelDetail {
   salary: number
   startDate: string
   isActive: boolean
-  position?: { id: string; name: string } | null
-  leaves: Leave[]
+  positionConfig?: { id: string; name: string } | null
+  leaveRecords?: Leave[]
 }
 
 interface PositionConfig {
@@ -58,11 +58,11 @@ interface PositionConfig {
 }
 
 interface WorkDays {
-  totalDays: number
-  weekendDays: number
+  totalDaysInMonth: number
+  weekends: number
+  businessDays: number
   workDays: number
   leaveDays: number
-  workedDays: number
 }
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
@@ -179,7 +179,7 @@ export default function PersonnelDetailPage() {
           surname: personnel.surname,
           phone: personnel.phone ? String(personnel.phone).replace("+90", "") : "",
           tcNo: personnel.tcNo ?? "",
-          positionId: personnel.position?.id ?? "",
+          positionId: personnel.positionConfig?.id ?? "",
           startDate: personnel.startDate ? personnel.startDate.slice(0, 10) : "",
           salary: String(personnel.salary),
         }
@@ -277,8 +277,8 @@ export default function PersonnelDetailPage() {
 
   const initials = `${(personnel.name ?? "?").charAt(0)}${(personnel.surname ?? "?").charAt(0)}`.toUpperCase()
   const workedPercent =
-    workDays && (workDays.workDays ?? 0) > 0
-      ? Math.round(((workDays.workedDays ?? 0) / workDays.workDays) * 100)
+    workDays && (workDays.businessDays ?? 0) > 0
+      ? Math.round(((workDays.workDays ?? 0) / workDays.businessDays) * 100)
       : 0
 
   const inputClass =
@@ -306,7 +306,7 @@ export default function PersonnelDetailPage() {
               {personnel.name} {personnel.surname}
             </h2>
             <p className="text-on-surface-variant mt-1">
-              {personnel.position?.name ?? "Pozisyon belirtilmedi"}
+              {personnel.positionConfig?.name ?? "Pozisyon belirtilmedi"}
             </p>
           </div>
         </div>
@@ -445,7 +445,7 @@ export default function PersonnelDetailPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-8">
-                <InfoRow label="Pozisyon" value={personnel.position?.name ?? "—"} />
+                <InfoRow label="Pozisyon" value={personnel.positionConfig?.name ?? "—"} />
                 <InfoRow label="Telefon" value={personnel.phone ? formatPhone(personnel.phone) : "—"} />
                 <InfoRow label="İşe Giriş" value={formatDate(personnel.startDate)} />
                 <InfoRow label="TC Kimlik" value={personnel.tcNo ?? "—"} />
@@ -466,7 +466,7 @@ export default function PersonnelDetailPage() {
                     Kalan İzin
                   </p>
                   <p className="text-xl font-bold text-on-surface">
-                    {workDays ? (workDays.workDays ?? 0) - (workDays.workedDays ?? 0) : "—"}
+                    {workDays ? workDays.leaveDays ?? 0 : "—"}
                   </p>
                 </div>
                 <div className="text-center">
@@ -517,11 +517,11 @@ export default function PersonnelDetailPage() {
           {/* Stats Grid */}
           {workDays ? (
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <StatBox label="Toplam Gün" value={workDays.totalDays} />
-              <StatBox label="Hafta Sonu" value={workDays.weekendDays} />
+              <StatBox label="Toplam Gün" value={workDays.totalDaysInMonth} />
+              <StatBox label="Hafta Sonu" value={workDays.weekends} />
               <StatBox
                 label="Çalışılan"
-                value={workDays.workedDays}
+                value={workDays.workDays}
                 borderColor="border-l-secondary"
               />
               <StatBox
@@ -601,8 +601,8 @@ export default function PersonnelDetailPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/10">
-              {(personnel.leaves ?? []).length > 0 ? (
-                (personnel.leaves ?? []).map((leave) => (
+              {(personnel.leaveRecords ?? []).length > 0 ? (
+                (personnel.leaveRecords ?? []).map((leave) => (
                   <tr key={leave.id} className="hover:bg-surface-bright transition-colors">
                     <td className="px-6 py-4 text-sm text-on-surface">
                       {formatDate(leave.startDate)}
