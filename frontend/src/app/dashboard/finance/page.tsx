@@ -160,7 +160,7 @@ export default function FinanceOverviewPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-4xl font-extrabold tracking-tight text-on-surface font-headline">
-          Finans Genel Bakis
+          Finans Genel Bakış
         </h1>
         <div className="flex items-center gap-3">
           <button
@@ -247,14 +247,14 @@ export default function FinanceOverviewPage() {
       {/* Analysis Section */}
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Bar Chart */}
-        <div className="lg:col-span-2 bg-surface-container-lowest rounded-xl p-8 shadow-[0_20px_40px_rgba(25,28,30,0.03)] border border-white">
+        <div className="lg:col-span-2 bg-surface-container-lowest rounded-xl p-8 shadow-[0_20px_40px_rgba(25,28,30,0.03)] border border-white overflow-hidden">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="font-headline text-lg font-bold text-on-surface">
-                Gelir Performansi
+                Gelir Performansı
               </h2>
               <p className="text-xs text-on-surface-variant mt-0.5">
-                {monthDisplay} - {chartTab === "daily" ? "gunluk" : "haftalik"} dagilim
+                {monthDisplay} - {chartTab === "daily" ? "günlük" : "haftalık"} dağılım
               </p>
             </div>
             <div className="flex bg-surface-container rounded-lg p-1 gap-1">
@@ -266,7 +266,7 @@ export default function FinanceOverviewPage() {
                     : "px-4 py-1.5 text-on-surface-variant text-sm font-semibold",
                 )}
               >
-                Gunluk
+                Günlük
               </button>
               <button
                 onClick={() => setChartTab("weekly")}
@@ -276,7 +276,7 @@ export default function FinanceOverviewPage() {
                     : "px-4 py-1.5 text-on-surface-variant text-sm font-semibold",
                 )}
               >
-                Haftalik
+                Haftalık
               </button>
             </div>
           </div>
@@ -293,7 +293,7 @@ export default function FinanceOverviewPage() {
               ))}
             </div>
           ) : (
-            <div className="flex items-end gap-1.5 h-56">
+            <div className="flex items-end gap-0.5 h-56 min-w-0">
               {chartData.map((item, idx) => {
                 const value = "revenue" in item ? item.revenue : 0
                 const barHeight = Math.max((value / maxChartValue) * 224, 4)
@@ -303,15 +303,15 @@ export default function FinanceOverviewPage() {
                     : (item as { label: string }).label
 
                 return (
-                  <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold text-on-surface">
+                  <div key={idx} className="flex-1 min-w-0 flex flex-col items-center gap-1 group">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold text-on-surface whitespace-nowrap">
                       {formatCurrency(value)}
                     </div>
                     <div
                       className="w-full rounded-t-sm bg-primary/70 group-hover:bg-primary transition-colors cursor-default"
                       style={{ height: `${barHeight}px` }}
                     />
-                    <span className="text-[10px] font-bold text-on-surface-variant">
+                    <span className="text-[10px] font-bold text-on-surface-variant truncate w-full text-center">
                       {label}
                     </span>
                   </div>
@@ -324,7 +324,7 @@ export default function FinanceOverviewPage() {
         {/* Donut Chart */}
         <div className="bg-surface-container-lowest rounded-xl p-8 shadow-[0_20px_40px_rgba(25,28,30,0.03)] border border-white">
           <h2 className="font-headline text-lg font-bold text-on-surface mb-6">
-            Gider Dagilimi
+            Gider Dağılımı
           </h2>
 
           {isLoading ? (
@@ -336,7 +336,7 @@ export default function FinanceOverviewPage() {
               <span className="material-symbols-outlined text-3xl text-on-surface-variant/40 mb-2">
                 donut_small
               </span>
-              <p className="text-xs text-on-surface-variant">Henuz gider verisi yok</p>
+              <p className="text-xs text-on-surface-variant">Henüz gider verisi yok</p>
             </div>
           ) : (
             <>
@@ -412,7 +412,7 @@ export default function FinanceOverviewPage() {
       <div className="bg-surface-container-lowest rounded-xl shadow-[0_20px_40px_rgba(25,28,30,0.03)] overflow-hidden border border-white">
         <div className="p-6 border-b border-outline-variant/15">
           <h2 className="font-headline text-lg font-bold text-on-surface">
-            Gunluk Detay
+            Günlük Detay
           </h2>
         </div>
         <div className="overflow-x-auto">
@@ -446,7 +446,7 @@ export default function FinanceOverviewPage() {
               ) : dailyTableData.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center text-on-surface-variant">
-                    Bu ay icin veri bulunamadi
+                    Bu ay için veri bulunamadı
                   </td>
                 </tr>
               ) : (
