@@ -389,7 +389,9 @@ export default function ProductDetailPage() {
                       onValueChange={(v) => field.onChange(v ?? "")}
                     >
                       <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                        <SelectValue placeholder="Kategori secin" />
+                        <SelectValue placeholder="Kategori secin">
+                          {categories.find((c) => c.id === field.value)?.name || "Kategori secin"}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map((c) => (
