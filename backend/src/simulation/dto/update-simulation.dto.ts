@@ -10,6 +10,10 @@ export class UpdateRevenueDto {
 
   @IsNumber()
   unitPrice: number;
+
+  @IsOptional()
+  @IsNumber()
+  amount?: number;
 }
 
 export class UpdateExpenseDto {

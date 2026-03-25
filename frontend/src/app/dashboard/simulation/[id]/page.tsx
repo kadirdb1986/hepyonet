@@ -440,7 +440,10 @@ export default function SimulationDetailPage() {
       toast.success("Simulasyon kaydedildi.")
       setInitialized(false)
     },
-    onError: () => toast.error("Simulasyon kaydedilirken bir hata olustu."),
+    onError: (err: any) => {
+      console.error("Simulation save error:", err?.response?.data || err)
+      toast.error("Simulasyon kaydedilirken bir hata olustu.")
+    },
   })
 
   const duplicateMutation = useMutation({
