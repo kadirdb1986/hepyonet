@@ -645,7 +645,7 @@ export default function ProductDetailPage() {
                       <button
                         onClick={() => {
                           const productIngredient = product.ingredients?.find(
-                            (pi) => pi.id === ing.id
+                            (pi) => pi.rawMaterialId === ing.id || pi.subProductId === ing.id
                           )
                           if (productIngredient) {
                             setDeleteIngredientDialog({
