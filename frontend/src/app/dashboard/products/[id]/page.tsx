@@ -619,7 +619,7 @@ export default function ProductDetailPage() {
                       <span className="font-semibold text-on-surface">{ing.name}</span>
                     </td>
                     <td className="px-6 py-4">
-                      {ing.type === "rawMaterial" ? (
+                      {ing.type === "raw_material" ? (
                         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-primary-fixed text-on-primary-fixed">
                           Stok Kalemi
                         </span>
