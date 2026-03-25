@@ -370,10 +370,10 @@ export default function ProductsPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h1 className="text-4xl font-extrabold tracking-tight text-on-surface font-headline">
-            Urunler
+            Ürünler
           </h1>
           <p className="text-on-surface-variant mt-2 text-lg">
-            {products.length} urun listeleniyor.
+            {products.length} ürün listeleniyor.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -421,7 +421,7 @@ export default function ProductsPage() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <span className="material-symbols-outlined text-primary">restaurant_menu</span>
-          <h2 className="text-lg font-bold text-on-surface">Menu Urunleri</h2>
+          <h2 className="text-lg font-bold text-on-surface">Menü Ürünleri</h2>
           <span className="text-sm text-on-surface-variant">({menuProducts.length})</span>
         </div>
         <DataTable columns={menuColumns} data={menuProducts} pageSize={10} />

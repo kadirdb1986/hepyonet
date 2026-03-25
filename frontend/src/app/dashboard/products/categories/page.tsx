@@ -161,7 +161,7 @@ export default function CategoriesPage() {
       header: "Ürün Sayısı",
       cell: ({ row }) => (
         <span className="text-sm text-on-surface">
-          {row.original._count?.products ?? 0} urun
+          {row.original._count?.products ?? 0} ürün
         </span>
       ),
       enableSorting: false,
