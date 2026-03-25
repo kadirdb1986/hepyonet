@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProductService } from '../product/product.service';
 import { CreateSimulationDto } from './dto/create-simulation.dto';
@@ -197,6 +198,7 @@ export class SimulationService {
           await tx.simulationProduct.createMany({
             data: dto.revenues.map((r) => ({
               simulationId: id,
+              productId: randomUUID(),
               productName: r.name,
               quantity: r.quantity,
               salePrice: r.unitPrice,
