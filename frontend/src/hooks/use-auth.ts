@@ -25,8 +25,10 @@ export function useAuth() {
   }, [setUser, setLoading, storeLogout])
 
   useEffect(() => {
-    checkAuth()
-  }, [checkAuth])
+    if (!user && isLoading) {
+      checkAuth()
+    }
+  }, [user, isLoading, checkAuth])
 
   const login = async (email: string, password: string) => {
     const res = await api.post("/auth/login", { email, password })

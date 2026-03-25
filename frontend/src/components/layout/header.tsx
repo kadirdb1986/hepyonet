@@ -1,6 +1,7 @@
 "use client"
 
 import { useAuth } from "@/hooks/use-auth"
+import { useQueryClient } from "@tanstack/react-query"
 
 const roleLabels: Record<string, string> = {
   OWNER: "Sahip",
@@ -18,6 +19,12 @@ interface HeaderProps {
 
 export function Header({ onMenuToggle }: HeaderProps) {
   const { user, activeMembership, switchRestaurant, logout } = useAuth()
+  const queryClient = useQueryClient()
+
+  const handleSwitchRestaurant = (restaurantId: string) => {
+    switchRestaurant(restaurantId)
+    queryClient.invalidateQueries()
+  }
 
   const approvedMemberships =
     user?.memberships.filter((m) => m.restaurantStatus === "APPROVED") || []
@@ -47,7 +54,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
         {approvedMemberships.length > 1 ? (
           <select
             value={activeMembership?.restaurantId || ""}
-            onChange={(e) => switchRestaurant(e.target.value)}
+            onChange={(e) => handleSwitchRestaurant(e.target.value)}
             className="text-xs font-semibold text-on-surface bg-transparent border border-outline-variant/20 rounded-md px-3 py-1.5 outline-none cursor-pointer"
           >
             {approvedMemberships.map((m) => (
