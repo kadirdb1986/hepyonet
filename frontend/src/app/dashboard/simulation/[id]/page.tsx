@@ -201,6 +201,7 @@ interface LocalFoodCost {
 // ─── Day names ────────────────────────────────────────────────────────────────
 
 const DAY_NAMES = ["Pzt", "Sal", "Car", "Per", "Cum", "Cmt", "Paz"]
+const DAY_KEYS = ["Pazartesi", "Sali", "Carsamba", "Persembe", "Cuma", "Cumartesi", "Pazar"]
 const DEFAULT_WEIGHTS = [10, 12, 13, 14, 17, 18, 16]
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -430,7 +431,7 @@ export default function SimulationDetailPage() {
         ],
         kdvRate,
         incomeTaxRate,
-        dayWeights,
+        dayWeights: DAY_KEYS.map((day, idx) => ({ day, weight: dayWeights[idx] })),
       })
     },
     onSuccess: () => {
