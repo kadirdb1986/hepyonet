@@ -208,6 +208,20 @@ export class PersonnelService {
     });
   }
 
+  async deleteLeave(personnelId: string, leaveId: string, restaurantId: string) {
+    const leave = await this.prisma.leaveRecord.findFirst({
+      where: { id: leaveId, personnelId, restaurantId },
+    });
+
+    if (!leave) {
+      throw new NotFoundException('İzin kaydı bulunamadı');
+    }
+
+    return this.prisma.leaveRecord.delete({
+      where: { id: leaveId },
+    });
+  }
+
   // --- Work Days Tracking ---
 
   async getWorkDays(personnelId: string, restaurantId: string, month?: string) {

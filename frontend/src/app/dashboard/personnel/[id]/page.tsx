@@ -243,6 +243,17 @@ export default function PersonnelDetailPage() {
     onError: () => toast.error("İzin durumu güncellenirken bir hata oluştu."),
   })
 
+  const deleteLeaveMutation = useMutation({
+    mutationFn: (leaveId: string) =>
+      api.delete(`/personnel/${id}/leaves/${leaveId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["personnel", id] })
+      queryClient.invalidateQueries({ queryKey: ["work-days", id] })
+      toast.success("İzin kaydı silindi.")
+    },
+    onError: () => toast.error("İzin kaydı silinirken bir hata oluştu."),
+  })
+
   // ─── Month Navigation ────────────────────────────────────────────────────
 
   const goToPrevMonth = () => {
@@ -627,43 +638,51 @@ export default function PersonnelDetailPage() {
                       {leave.notes ?? "—"}
                     </td>
                     <td className="px-6 py-4">
-                      {leave.status === "PENDING" && (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-low transition-colors">
-                            <span className="material-symbols-outlined text-on-surface-variant text-xl">
-                              more_vert
-                            </span>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" sideOffset={4}>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                updateLeaveMutation.mutate({
-                                  leaveId: leave.id,
-                                  status: "APPROVED",
-                                })
-                              }
-                            >
-                              <span className="material-symbols-outlined text-[18px]">
-                                check_circle
-                              </span>
-                              Onayla
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              variant="destructive"
-                              onClick={() =>
-                                updateLeaveMutation.mutate({
-                                  leaveId: leave.id,
-                                  status: "REJECTED",
-                                })
-                              }
-                            >
-                              <span className="material-symbols-outlined text-[18px]">cancel</span>
-                              Reddet
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-low transition-colors">
+                          <span className="material-symbols-outlined text-on-surface-variant text-xl">
+                            more_vert
+                          </span>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" sideOffset={4}>
+                          {leave.status === "PENDING" && (
+                            <>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  updateLeaveMutation.mutate({
+                                    leaveId: leave.id,
+                                    status: "APPROVED",
+                                  })
+                                }
+                              >
+                                <span className="material-symbols-outlined text-[18px]">
+                                  check_circle
+                                </span>
+                                Onayla
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  updateLeaveMutation.mutate({
+                                    leaveId: leave.id,
+                                    status: "REJECTED",
+                                  })
+                                }
+                              >
+                                <span className="material-symbols-outlined text-[18px]">cancel</span>
+                                Reddet
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                            </>
+                          )}
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onClick={() => deleteLeaveMutation.mutate(leave.id)}
+                          >
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                            Sil
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))

@@ -100,6 +100,15 @@ export class PersonnelController {
     return this.personnelService.updateLeaveStatus(personnelId, leaveId, restaurantId, dto);
   }
 
+  @Delete(':id/leaves/:leaveId')
+  deleteLeave(
+    @Param('id') personnelId: string,
+    @Param('leaveId') leaveId: string,
+    @CurrentUser('restaurantId') restaurantId: string,
+  ) {
+    return this.personnelService.deleteLeave(personnelId, leaveId, restaurantId);
+  }
+
   @Get(':id/work-days')
   getWorkDays(
     @Param('id') personnelId: string,
