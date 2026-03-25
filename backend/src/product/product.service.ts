@@ -413,9 +413,9 @@ export class ProductService {
             name: ingredient.rawMaterial.name,
             quantity,
             unit: ingredient.unit,
-            unitPrice: pricePerBaseUnit,
+            unitCost: pricePerBaseUnit,
             baseUnit: ingredient.rawMaterial.unit,
-            cost,
+            totalCost: cost,
           };
         } else if (ingredient.subProductId && ingredient.subProduct) {
           const subCost = await this.calculateCost(
@@ -431,7 +431,7 @@ export class ProductService {
             quantity,
             unit: ingredient.unit,
             unitCost: subCost,
-            cost,
+            totalCost: cost,
           };
         }
 
@@ -439,7 +439,7 @@ export class ProductService {
       }),
     );
 
-    const totalCost = breakdown.reduce((sum, item) => sum + (item?.cost ?? 0), 0);
+    const totalCost = breakdown.reduce((sum, item) => sum + (item?.totalCost ?? 0), 0);
     const price = Number(product.price);
     const profitMargin = price > 0 ? ((price - totalCost) / price) * 100 : 0;
 
