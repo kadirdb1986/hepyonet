@@ -28,7 +28,7 @@ interface Category {
 
 const productSchema = z
   .object({
-    name: z.string().min(1, "Urun adi zorunludur"),
+    name: z.string().min(1, "Ürün adı zorunludur"),
     code: z.string().optional(),
     categoryId: z.string().optional(),
     description: z.string().optional(),
@@ -43,7 +43,7 @@ const productSchema = z
       }
       return true
     },
-    { message: "Menu urunleri icin satis fiyati zorunludur", path: ["price"] }
+    { message: "Menü ürünleri için satış fiyatı zorunludur", path: ["price"] }
   )
 
 type ProductForm = z.infer<typeof productSchema>
@@ -94,10 +94,10 @@ export default function NewProductPage() {
       return api.post("/products", payload)
     },
     onSuccess: (res) => {
-      toast.success("Urun basariyla olusturuldu.")
+      toast.success("Ürün başarıyla oluşturuldu.")
       router.push(`/dashboard/products/${res.data.id}`)
     },
-    onError: () => toast.error("Urun olusturulurken bir hata olustu."),
+    onError: () => toast.error("Ürün oluşturulurken bir hata oluştu."),
   })
 
   const onSubmit = (data: ProductForm) => {
@@ -124,12 +124,12 @@ export default function NewProductPage() {
           Urunler
         </Link>
         <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-        <span className="text-on-surface font-medium">Yeni Urun</span>
+        <span className="text-on-surface font-medium">Yeni Ürün</span>
       </nav>
 
       {/* Title */}
       <h2 className="text-4xl font-extrabold tracking-tight text-on-surface font-headline mb-8">
-        Yeni Urun Olustur
+        Yeni Ürün Oluştur
       </h2>
 
       {/* Grid: Form + Sidebar */}
@@ -146,11 +146,11 @@ export default function NewProductPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                  Urun Adi <span className="text-error">*</span>
+                  Ürün Adı <span className="text-error">*</span>
                 </label>
                 <input
                   {...register("name")}
-                  placeholder="Urun adi girin"
+                  placeholder="Ürün adı girin"
                   className={inputClass}
                 />
                 {errors.name && (
@@ -162,7 +162,7 @@ export default function NewProductPage() {
                 <label className="text-sm font-semibold text-on-surface mb-1.5 block">Kod</label>
                 <input
                   {...register("code")}
-                  placeholder="Urun kodu (opsiyonel)"
+                  placeholder="Ürün kodu (opsiyonel)"
                   className={inputClass}
                 />
               </div>
@@ -180,8 +180,8 @@ export default function NewProductPage() {
                       onValueChange={(v) => field.onChange(v ?? "")}
                     >
                       <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                        <SelectValue placeholder="Kategori secin">
-                          {categories.find((c) => c.id === field.value)?.name || "Kategori secin"}
+                        <SelectValue placeholder="Kategori seçin">
+                          {categories.find((c) => c.id === field.value)?.name || "Kategori seçin"}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
@@ -198,7 +198,7 @@ export default function NewProductPage() {
 
               <div>
                 <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                  Gorsel URL
+                  Görsel URL
                 </label>
                 <input
                   {...register("image")}
@@ -209,12 +209,12 @@ export default function NewProductPage() {
 
               <div className="md:col-span-2">
                 <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                  Aciklama
+                  Açıklama
                 </label>
                 <textarea
                   {...register("description")}
                   rows={3}
-                  placeholder="Urun aciklamasi (opsiyonel)"
+                  placeholder="Ürün açıklaması (opsiyonel)"
                   className={inputClass}
                 />
               </div>
@@ -239,9 +239,9 @@ export default function NewProductPage() {
                       onCheckedChange={(checked) => field.onChange(checked)}
                     />
                     <div>
-                      <span className="text-sm font-semibold text-on-surface">Menude Goster</span>
+                      <span className="text-sm font-semibold text-on-surface">Menüde Göster</span>
                       <p className="text-xs text-on-surface-variant">
-                        Bu urun menude gorunecek ve satis yapilabilecek.
+                        Bu ürün menüde görünecek ve satış yapılabilecek.
                       </p>
                     </div>
                   </label>
@@ -251,7 +251,7 @@ export default function NewProductPage() {
               {isMenuItem && (
                 <div className="max-w-sm">
                   <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                    Satis Fiyati <span className="text-error">*</span>
+                    Satış Fiyatı <span className="text-error">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -284,7 +284,7 @@ export default function NewProductPage() {
               href="/dashboard/products"
               className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-6 py-3 transition-all hover:bg-surface-container-high"
             >
-              Iptal
+              İptal
             </Link>
             <button
               type="submit"
@@ -292,7 +292,7 @@ export default function NewProductPage() {
               className="bg-primary text-on-primary font-bold rounded-xl px-6 py-3 flex items-center gap-2 shadow-xl hover:translate-y-[-2px] active:scale-95 transition-all disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-xl">check_circle</span>
-              {createMutation.isPending ? "Kaydediliyor..." : "Urunu Olustur"}
+              {createMutation.isPending ? "Kaydediliyor..." : "Ürünü Oluştur"}
             </button>
           </div>
         </form>
@@ -302,7 +302,7 @@ export default function NewProductPage() {
           {/* Preview Card */}
           <div className="bg-surface-container-lowest/80 backdrop-blur-md rounded-xl p-6 shadow-[0_20px_40px_rgba(25,28,30,0.06)] ring-1 ring-white/20">
             <h4 className="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-4">
-              Onizleme
+              Önizleme
             </h4>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-lg bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold text-lg">
@@ -310,7 +310,7 @@ export default function NewProductPage() {
               </div>
               <div>
                 <p className="font-bold text-on-surface">
-                  {watchedValues.name || "Urun Adi"}
+                  {watchedValues.name || "Ürün Adı"}
                 </p>
                 {watchedValues.code && (
                   <p className="text-xs text-on-surface-variant font-mono">
@@ -331,7 +331,7 @@ export default function NewProductPage() {
               <div className="flex justify-between">
                 <span className="text-on-surface-variant">Tip</span>
                 <span className="text-on-surface font-medium">
-                  {watchedValues.isMenuItem ? "Menu Urunu" : "Ara Urun"}
+                  {watchedValues.isMenuItem ? "Menü Ürünü" : "Ara Ürün"}
                 </span>
               </div>
               {watchedValues.price && (
@@ -359,25 +359,25 @@ export default function NewProductPage() {
                 <span className="material-symbols-outlined text-[14px] text-primary mt-0.5 shrink-0">
                   check
                 </span>
-                Urun adi zorunludur.
+                Ürün adı zorunludur.
               </li>
               <li className="flex gap-2">
                 <span className="material-symbols-outlined text-[14px] text-primary mt-0.5 shrink-0">
                   check
                 </span>
-                Menu urunleri icin satis fiyati belirtilmelidir.
+                Menü ürünleri için satış fiyatı belirtilmelidir.
               </li>
               <li className="flex gap-2">
                 <span className="material-symbols-outlined text-[14px] text-primary mt-0.5 shrink-0">
                   check
                 </span>
-                Urunu olusturduktan sonra recete ekleyebilirsiniz.
+                Ürünü oluşturduktan sonra reçete ekleyebilirsiniz.
               </li>
               <li className="flex gap-2">
                 <span className="material-symbols-outlined text-[14px] text-primary mt-0.5 shrink-0">
                   check
                 </span>
-                Kategorileri &quot;Kategoriler&quot; sayfasindan yonetebilirsiniz.
+                Kategorileri &quot;Kategoriler&quot; sayfasından yönetebilirsiniz.
               </li>
             </ul>
           </div>

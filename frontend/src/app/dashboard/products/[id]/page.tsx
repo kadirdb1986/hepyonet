@@ -84,7 +84,7 @@ interface CostBreakdown {
 
 const editSchema = z
   .object({
-    name: z.string().min(1, "Urun adi zorunludur"),
+    name: z.string().min(1, "Ürün adı zorunludur"),
     code: z.string().optional(),
     categoryId: z.string().optional(),
     description: z.string().optional(),
@@ -97,7 +97,7 @@ const editSchema = z
       if (data.isMenuItem) return !!data.price && data.price.trim() !== ""
       return true
     },
-    { message: "Menu urunleri icin satis fiyati zorunludur", path: ["price"] }
+    { message: "Menü ürünleri için satış fiyatı zorunludur", path: ["price"] }
   )
 
 type EditForm = z.infer<typeof editSchema>
@@ -208,10 +208,10 @@ export default function ProductDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["product", id] })
       queryClient.invalidateQueries({ queryKey: ["product-cost", id] })
       queryClient.invalidateQueries({ queryKey: ["products"] })
-      toast.success("Urun bilgileri guncellendi.")
+      toast.success("Ürün bilgileri güncellendi.")
       setIsEditing(false)
     },
-    onError: () => toast.error("Guncelleme sirasinda bir hata olustu."),
+    onError: () => toast.error("Güncelleme sırasında bir hata oluştu."),
   })
 
   // ─── Ingredient Form ────────────────────────────────────────────────────
@@ -262,7 +262,7 @@ export default function ProductDetailPage() {
       setAddIngredientOpen(false)
       ingredientForm.reset()
     },
-    onError: () => toast.error("Malzeme eklenirken bir hata olustu."),
+    onError: () => toast.error("Malzeme eklenirken bir hata oluştu."),
   })
 
   const removeIngredientMutation = useMutation({
@@ -272,10 +272,10 @@ export default function ProductDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["product", id] })
       queryClient.invalidateQueries({ queryKey: ["product-cost", id] })
       queryClient.invalidateQueries({ queryKey: ["products"] })
-      toast.success("Malzeme kaldirildi.")
+      toast.success("Malzeme kaldırıldı.")
       setDeleteIngredientDialog({ open: false, ingredient: null })
     },
-    onError: () => toast.error("Malzeme kaldirilirken bir hata olustu."),
+    onError: () => toast.error("Malzeme kaldırılırken bir hata oluştu."),
   })
 
   // ─── Loading & Not Found ────────────────────────────────────────────────
@@ -291,7 +291,7 @@ export default function ProductDetailPage() {
   if (!product) {
     return (
       <div className="text-center py-20">
-        <p className="text-on-surface-variant">Urun bulunamadi.</p>
+        <p className="text-on-surface-variant">Ürün bulunamadı.</p>
       </div>
     )
   }
@@ -344,7 +344,7 @@ export default function ProductDetailPage() {
           className="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-xl hover:translate-y-[-2px] active:scale-95 transition-all"
         >
           <span className="material-symbols-outlined">{isEditing ? "close" : "edit"}</span>
-          {isEditing ? "Duzenlemeyi Iptal Et" : "Urunu Duzenle"}
+          {isEditing ? "Düzenlemeyi İptal Et" : "Ürünü Düzenle"}
         </button>
       </div>
 
@@ -357,13 +357,13 @@ export default function ProductDetailPage() {
           >
             <div className="flex items-center gap-2 pb-2 border-b border-surface-container mb-6">
               <span className="material-symbols-outlined text-primary">edit</span>
-              <h3 className="text-lg font-bold text-on-surface">Bilgileri Duzenle</h3>
+              <h3 className="text-lg font-bold text-on-surface">Bilgileri Düzenle</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                  Urun Adi <span className="text-error">*</span>
+                  Ürün Adı <span className="text-error">*</span>
                 </label>
                 <input {...editForm.register("name")} className={inputClass} />
                 {editForm.formState.errors.name && (
@@ -389,8 +389,8 @@ export default function ProductDetailPage() {
                       onValueChange={(v) => field.onChange(v ?? "")}
                     >
                       <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                        <SelectValue placeholder="Kategori secin">
-                          {categories.find((c) => c.id === field.value)?.name || "Kategori secin"}
+                        <SelectValue placeholder="Kategori seçin">
+                          {categories.find((c) => c.id === field.value)?.name || "Kategori seçin"}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
@@ -406,13 +406,13 @@ export default function ProductDetailPage() {
               </div>
               <div>
                 <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                  Gorsel URL
+                  Görsel URL
                 </label>
                 <input {...editForm.register("image")} className={inputClass} />
               </div>
               <div className="md:col-span-2">
                 <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                  Aciklama
+                  Açıklama
                 </label>
                 <textarea
                   {...editForm.register("description")}
@@ -433,10 +433,10 @@ export default function ProductDetailPage() {
                       />
                       <div>
                         <span className="text-sm font-semibold text-on-surface">
-                          Menude Goster
+                          Menüde Göster
                         </span>
                         <p className="text-xs text-on-surface-variant">
-                          Bu urun menude gorunecek ve satis yapilabilecek.
+                          Bu ürün menüde görünecek ve satış yapılabilecek.
                         </p>
                       </div>
                     </label>
@@ -447,7 +447,7 @@ export default function ProductDetailPage() {
               {isMenuItemEdit && (
                 <div>
                   <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                    Satis Fiyati <span className="text-error">*</span>
+                    Satış Fiyatı <span className="text-error">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -480,7 +480,7 @@ export default function ProductDetailPage() {
                 onClick={() => setIsEditing(false)}
                 className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-6 py-3"
               >
-                Iptal
+                İptal
               </button>
               <button
                 type="submit"
@@ -496,7 +496,7 @@ export default function ProductDetailPage() {
           <>
             <div className="flex items-center gap-2 pb-2 border-b border-surface-container mb-6">
               <span className="material-symbols-outlined text-primary">inventory_2</span>
-              <h3 className="text-lg font-bold text-on-surface">Urun Bilgileri</h3>
+              <h3 className="text-lg font-bold text-on-surface">Ürün Bilgileri</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-8">
@@ -504,7 +504,7 @@ export default function ProductDetailPage() {
               <InfoRow label="Kod" value={product.code || "-"} />
               <InfoRow label="Kategori" value={product.category?.name || "-"} />
               <InfoRow
-                label="Satis Fiyati"
+                label="Satış Fiyatı"
                 value={product.price ? formatCurrencyDecimal(product.price) : "-"}
               />
               <InfoRow
@@ -520,7 +520,7 @@ export default function ProductDetailPage() {
             {product.description && (
               <div className="mt-6 pt-4 border-t border-surface-container">
                 <p className="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">
-                  Aciklama
+                  Açıklama
                 </p>
                 <p className="text-sm text-on-surface">{product.description}</p>
               </div>
@@ -530,7 +530,7 @@ export default function ProductDetailPage() {
             <div className="grid grid-cols-3 gap-4 mt-8 pt-6 border-t border-surface-container">
               <div className="text-center">
                 <p className="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">
-                  Satis Fiyati
+                  Satış Fiyatı
                 </p>
                 <p className="text-xl font-bold text-on-surface">
                   {price > 0 ? formatCurrencyDecimal(price) : "-"}
@@ -556,7 +556,7 @@ export default function ProductDetailPage() {
                       : "bg-tertiary-fixed text-on-tertiary-fixed-variant"
                   )}
                 >
-                  {product.isMenuItem ? "Menu Urunu" : "Ara Urun"}
+                  {product.isMenuItem ? "Menü Ürünü" : "Ara Ürün"}
                 </span>
               </div>
             </div>
@@ -569,7 +569,7 @@ export default function ProductDetailPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary">receipt_long</span>
-            <h3 className="text-lg font-bold text-on-surface">Recete / Malzemeler</h3>
+            <h3 className="text-lg font-bold text-on-surface">Reçete / Malzemeler</h3>
           </div>
           <button
             onClick={() => {
@@ -607,7 +607,7 @@ export default function ProductDetailPage() {
                   Toplam Maliyet
                 </th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-                  Islemler
+                  İşlemler
                 </th>
               </tr>
             </thead>
@@ -625,7 +625,7 @@ export default function ProductDetailPage() {
                         </span>
                       ) : (
                         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-tertiary-fixed text-on-tertiary-fixed-variant">
-                          Alt Urun
+                          Alt Ürün
                         </span>
                       )}
                     </td>
@@ -676,7 +676,7 @@ export default function ProductDetailPage() {
                         </span>
                       ) : (
                         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-tertiary-fixed text-on-tertiary-fixed-variant">
-                          Alt Urun
+                          Alt Ürün
                         </span>
                       )}
                     </td>
@@ -706,7 +706,7 @@ export default function ProductDetailPage() {
                     <span className="material-symbols-outlined text-3xl text-on-surface-variant/40 mb-2 block">
                       science
                     </span>
-                    Henuz malzeme eklenmemis. Recete olusturmak icin malzeme ekleyin.
+                    Henüz malzeme eklenmemiş. Reçete oluşturmak için malzeme ekleyin.
                   </td>
                 </tr>
               )}
@@ -734,7 +734,7 @@ export default function ProductDetailPage() {
             </div>
             <div className="text-center">
               <p className="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-2">
-                Satis Fiyati
+                Satış Fiyatı
               </p>
               <p className="text-2xl font-bold text-on-surface">
                 {price > 0 ? formatCurrencyDecimal(price) : "-"}
@@ -779,7 +779,7 @@ export default function ProductDetailPage() {
           <DialogHeader>
             <DialogTitle>Malzeme Ekle</DialogTitle>
             <DialogDescription>
-              Receteye yeni bir stok kalemi veya alt urun ekleyin.
+              Reçeteye yeni bir stok kalemi veya alt ürün ekleyin.
             </DialogDescription>
           </DialogHeader>
           <form
@@ -807,11 +807,13 @@ export default function ProductDetailPage() {
                     }}
                   >
                     <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                      <SelectValue />
+                      <SelectValue>
+                        {field.value === "rawMaterial" ? "Stok Kalemi" : field.value === "subProduct" ? "Alt Ürün" : "Tip seçin"}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="rawMaterial">Stok Kalemi</SelectItem>
-                      <SelectItem value="subProduct">Alt Urun</SelectItem>
+                      <SelectItem value="subProduct">Alt Ürün</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -836,7 +838,11 @@ export default function ProductDetailPage() {
                       }}
                     >
                       <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                        <SelectValue placeholder="Stok kalemi secin" />
+                        <SelectValue placeholder="Stok kalemi seçin">
+                          {rawMaterials.find((m) => m.id === field.value)
+                            ? `${rawMaterials.find((m) => m.id === field.value)!.name} (${UNIT_DISPLAY[rawMaterials.find((m) => m.id === field.value)!.unit] || rawMaterials.find((m) => m.id === field.value)!.unit})`
+                            : "Stok kalemi seçin"}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {rawMaterials.map((m) => (
@@ -852,7 +858,7 @@ export default function ProductDetailPage() {
             ) : (
               <div>
                 <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                  Alt Urun <span className="text-error">*</span>
+                  Alt Ürün <span className="text-error">*</span>
                 </label>
                 <Controller
                   name="subProductId"
@@ -866,7 +872,9 @@ export default function ProductDetailPage() {
                       }}
                     >
                       <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                        <SelectValue placeholder="Alt urun secin" />
+                        <SelectValue placeholder="Alt ürün seçin">
+                          {subProducts.find((p) => p.id === field.value)?.name || "Alt ürün seçin"}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {subProducts.map((p) => (
@@ -919,7 +927,9 @@ export default function ProductDetailPage() {
                       disabled={compatibleUnits.length === 0}
                     >
                       <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                        <SelectValue placeholder="Birim secin" />
+                        <SelectValue placeholder="Birim seçin">
+                          {UNIT_DISPLAY[field.value] || field.value || "Birim seçin"}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {compatibleUnits.map((u) => (
@@ -943,7 +953,7 @@ export default function ProductDetailPage() {
             {selectedRawMaterial && (
               <div className="bg-surface-container-low rounded-lg p-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-on-surface-variant">Son Alis Fiyati</span>
+                  <span className="text-on-surface-variant">Son Alış Fiyatı</span>
                   <span className="font-semibold text-on-surface">
                     {formatCurrencyDecimal(selectedRawMaterial.lastPurchasePrice)} /{" "}
                     {UNIT_DISPLAY[selectedRawMaterial.unit]}
@@ -955,7 +965,7 @@ export default function ProductDetailPage() {
             {selectedSubProduct && selectedSubProduct.calculatedCost != null && (
               <div className="bg-surface-container-low rounded-lg p-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-on-surface-variant">Alt Urun Maliyeti</span>
+                  <span className="text-on-surface-variant">Alt Ürün Maliyeti</span>
                   <span className="font-semibold text-on-surface">
                     {formatCurrencyDecimal(selectedSubProduct.calculatedCost)}
                   </span>
@@ -965,7 +975,7 @@ export default function ProductDetailPage() {
 
             <DialogFooter>
               <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
-                Iptal
+                İptal
               </DialogClose>
               <button
                 type="submit"
@@ -988,14 +998,14 @@ export default function ProductDetailPage() {
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Malzemeyi Kaldir</DialogTitle>
+            <DialogTitle>Malzemeyi Kaldır</DialogTitle>
             <DialogDescription>
-              Bu malzemeyi receteden kaldirmak istediginize emin misiniz?
+              Bu malzemeyi reçeteden kaldırmak istediğinize emin misiniz?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
-              Iptal
+              İptal
             </DialogClose>
             <button
               onClick={() => {
@@ -1006,7 +1016,7 @@ export default function ProductDetailPage() {
               disabled={removeIngredientMutation.isPending}
               className="bg-error text-on-error font-bold rounded-md px-4 py-2 text-sm disabled:opacity-50"
             >
-              {removeIngredientMutation.isPending ? "Kaldiriliyor..." : "Kaldir"}
+              {removeIngredientMutation.isPending ? "Kaldırılıyor..." : "Kaldır"}
             </button>
           </DialogFooter>
         </DialogContent>

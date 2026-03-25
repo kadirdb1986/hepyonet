@@ -32,7 +32,7 @@ interface Category {
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
 const categorySchema = z.object({
-  name: z.string().min(1, "Kategori adi zorunludur"),
+  name: z.string().min(1, "Kategori adı zorunludur"),
 })
 
 type CategoryForm = z.infer<typeof categorySchema>
@@ -73,7 +73,7 @@ export default function CategoriesPage() {
       setAddDialogOpen(false)
       addForm.reset()
     },
-    onError: () => toast.error("Kategori eklenirken bir hata olustu."),
+    onError: () => toast.error("Kategori eklenirken bir hata oluştu."),
   })
 
   const updateMutation = useMutation({
@@ -84,7 +84,7 @@ export default function CategoriesPage() {
       toast.success("Kategori guncellendi.")
       setEditDialog({ open: false, category: null })
     },
-    onError: () => toast.error("Kategori guncellenirken bir hata olustu."),
+    onError: () => toast.error("Kategori güncellenirken bir hata oluştu."),
   })
 
   const deleteMutation = useMutation({
@@ -94,7 +94,7 @@ export default function CategoriesPage() {
       toast.success("Kategori silindi.")
       setDeleteDialog({ open: false, category: null })
     },
-    onError: () => toast.error("Kategori silinirken bir hata olustu."),
+    onError: () => toast.error("Kategori silinirken bir hata oluştu."),
   })
 
   const reorderMutation = useMutation({
@@ -103,7 +103,7 @@ export default function CategoriesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] })
     },
-    onError: () => toast.error("Siralama guncellenirken bir hata olustu."),
+    onError: () => toast.error("Sıralama güncellenirken bir hata oluştu."),
   })
 
   // ─── Reorder Handlers ─────────────────────────────────────────────────
@@ -158,7 +158,7 @@ export default function CategoriesPage() {
     },
     {
       id: "productCount",
-      header: "Urun Sayisi",
+      header: "Ürün Sayısı",
       cell: ({ row }) => (
         <span className="text-sm text-on-surface">
           {row.original._count?.products ?? 0} urun
@@ -196,7 +196,7 @@ export default function CategoriesPage() {
     },
     {
       id: "actions",
-      header: "Islemler",
+      header: "İşlemler",
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
           <button
@@ -275,7 +275,7 @@ export default function CategoriesPage() {
           <DialogHeader>
             <DialogTitle>Yeni Kategori</DialogTitle>
             <DialogDescription>
-              Urunler icin yeni bir kategori olusturun.
+              Ürünler için yeni bir kategori oluşturun.
             </DialogDescription>
           </DialogHeader>
           <form
@@ -299,7 +299,7 @@ export default function CategoriesPage() {
             </div>
             <DialogFooter>
               <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
-                Iptal
+                İptal
               </DialogClose>
               <button
                 type="submit"
@@ -322,7 +322,7 @@ export default function CategoriesPage() {
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Kategoriyi Duzenle</DialogTitle>
+            <DialogTitle>Kategoriyi Düzenle</DialogTitle>
           </DialogHeader>
           <form
             onSubmit={editForm.handleSubmit((data) => {
@@ -349,7 +349,7 @@ export default function CategoriesPage() {
             </div>
             <DialogFooter>
               <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
-                Iptal
+                İptal
               </DialogClose>
               <button
                 type="submit"
@@ -374,13 +374,13 @@ export default function CategoriesPage() {
           <DialogHeader>
             <DialogTitle>Kategoriyi Sil</DialogTitle>
             <DialogDescription>
-              &quot;{deleteDialog.category?.name}&quot; kategorisini silmek istediginize emin
+              &quot;{deleteDialog.category?.name}&quot; kategorisini silmek istediğinize emin
               misiniz? Bu kategoriye bagli urunler etkilenebilir.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
-              Iptal
+              İptal
             </DialogClose>
             <button
               onClick={() => {

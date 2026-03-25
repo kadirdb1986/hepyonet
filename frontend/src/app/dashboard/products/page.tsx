@@ -91,7 +91,7 @@ function getProductTypeBadge(product: Product) {
     case "direct":
       return (
         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-surface-container-high text-on-surface-variant">
-          Direkt Satis
+          Direkt Satış
         </span>
       )
     case "recipe":
@@ -150,8 +150,8 @@ function ProductAvatar({ name }: { name: string }) {
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
 const quickCreateSchema = z.object({
-  rawMaterialId: z.string().min(1, "Stok kalemi secin"),
-  price: z.string().min(1, "Satis fiyati zorunludur"),
+  rawMaterialId: z.string().min(1, "Stok kalemi seçin"),
+  price: z.string().min(1, "Satış fiyatı zorunludur"),
 })
 
 type QuickCreateForm = z.infer<typeof quickCreateSchema>
@@ -218,10 +218,10 @@ export default function ProductsPage() {
     mutationFn: (id: string) => api.delete(`/products/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
-      toast.success("Urun basariyla silindi.")
+      toast.success("Ürün başarıyla silindi.")
       setDeleteDialog({ open: false, product: null })
     },
-    onError: () => toast.error("Urun silinirken bir hata olustu."),
+    onError: () => toast.error("Ürün silinirken bir hata oluştu."),
   })
 
   const quickCreateMutation = useMutation({
@@ -243,11 +243,11 @@ export default function ProductsPage() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
-      toast.success("Urun basariyla olusturuldu.")
+      toast.success("Ürün başarıyla oluşturuldu.")
       setQuickCreateOpen(false)
       router.push(`/dashboard/products/${data.id}`)
     },
-    onError: () => toast.error("Urun olusturulurken bir hata olustu."),
+    onError: () => toast.error("Ürün oluşturulurken bir hata oluştu."),
   })
 
   // ─── Quick Create Form ────────────────────────────────────────────────
@@ -300,7 +300,7 @@ export default function ProductsPage() {
     },
     {
       id: "price",
-      header: "Satis Fiyati",
+      header: "Satış Fiyatı",
       cell: ({ row }) => (
         <span className="text-sm font-semibold text-on-surface">
           {row.original.price ? formatCurrencyDecimal(row.original.price) : "-"}
@@ -331,7 +331,7 @@ export default function ProductsPage() {
     },
     {
       id: "actions",
-      header: "Islemler",
+      header: "İşlemler",
       cell: ({ row }) => (
         <DropdownMenu>
           <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant outline-none">
@@ -392,14 +392,14 @@ export default function ProductsPage() {
             className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2.5 text-sm flex items-center gap-2 hover:bg-surface-container-high transition-colors"
           >
             <span className="material-symbols-outlined text-lg">inventory_2</span>
-            Stok Kaleminden Urun Olustur
+            Stok Kaleminden Ürün Oluştur
           </button>
           <Link
             href="/dashboard/products/new"
             className="bg-primary text-on-primary px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:translate-y-[-1px] active:scale-95 transition-all"
           >
             <span className="material-symbols-outlined text-xl">add</span>
-            Yeni Urun
+            Yeni Ürün
           </Link>
         </div>
       </div>
@@ -413,7 +413,7 @@ export default function ProductsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-10 pr-4 py-3 bg-surface-container-low border-0 rounded-lg focus:ring-2 focus:ring-primary/10 focus:bg-surface-container-lowest outline-none transition-all placeholder:text-outline/50 text-on-surface"
-          placeholder="Urun adi, kodu veya kategori ara..."
+          placeholder="Ürün adı, kodu veya kategori ara..."
         />
       </div>
 
@@ -431,7 +431,7 @@ export default function ProductsPage() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <span className="material-symbols-outlined text-primary">science</span>
-          <h2 className="text-lg font-bold text-on-surface">Ara Urunler</h2>
+          <h2 className="text-lg font-bold text-on-surface">Ara Ürünler</h2>
           <span className="text-sm text-on-surface-variant">
             ({intermediateProducts.length})
           </span>
@@ -510,9 +510,9 @@ export default function ProductsPage() {
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Stok Kaleminden Urun Olustur</DialogTitle>
+            <DialogTitle>Stok Kaleminden Ürün Oluştur</DialogTitle>
             <DialogDescription>
-              Bir stok kalemi secip satis fiyati belirleyin. Urun otomatik olarak olusturulacaktir.
+              Bir stok kalemi seçip satış fiyatı belirleyin. Ürün otomatik olarak oluşturulacaktır.
             </DialogDescription>
           </DialogHeader>
           <form
@@ -532,7 +532,7 @@ export default function ProductsPage() {
                     onValueChange={(v) => field.onChange(v ?? "")}
                   >
                     <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                      <SelectValue placeholder="Stok kalemi secin" />
+                      <SelectValue placeholder="Stok kalemi seçin" />
                     </SelectTrigger>
                     <SelectContent>
                       {rawMaterials.map((m) => (
@@ -564,7 +564,7 @@ export default function ProductsPage() {
 
             <div>
               <label className="text-sm font-semibold text-on-surface mb-1.5 block">
-                Satis Fiyati <span className="text-error">*</span>
+                Satış Fiyatı <span className="text-error">*</span>
               </label>
               <div className="relative">
                 <input
@@ -590,14 +590,14 @@ export default function ProductsPage() {
 
             <DialogFooter>
               <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
-                Iptal
+                İptal
               </DialogClose>
               <button
                 type="submit"
                 disabled={quickCreateMutation.isPending}
                 className="bg-primary text-on-primary font-bold rounded-xl px-4 py-2 text-sm disabled:opacity-50"
               >
-                {quickCreateMutation.isPending ? "Olusturuluyor..." : "Olustur"}
+                {quickCreateMutation.isPending ? "Oluşturuluyor..." : "Oluştur"}
               </button>
             </DialogFooter>
           </form>
@@ -615,13 +615,13 @@ export default function ProductsPage() {
           <DialogHeader>
             <DialogTitle>Urunu Sil</DialogTitle>
             <DialogDescription>
-              &quot;{deleteDialog.product?.name}&quot; urununu silmek istediginize emin misiniz? Bu
+              &quot;{deleteDialog.product?.name}&quot; ürününü silmek istediğinize emin misiniz? Bu
               islem geri alinamaz.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose className="bg-surface-container-highest text-on-surface font-semibold rounded-md px-4 py-2 text-sm">
-              Iptal
+              İptal
             </DialogClose>
             <button
               onClick={() => {
