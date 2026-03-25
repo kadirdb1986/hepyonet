@@ -16,6 +16,7 @@ async function bootstrap() {
   app.enableCors({
     origin: configService.get<string>('FRONTEND_URL', 'http://localhost:3000'),
     credentials: true,
+    maxAge: 86400,
   });
 
   app.setGlobalPrefix('api');
