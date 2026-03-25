@@ -180,68 +180,43 @@ export class SimulationService {
     }
 
     return this.prisma.$transaction(async (tx) => {
-      // Update simulation-level fields (name, kdvRate, incomeTaxRate)
-      if (dto.name !== undefined || dto.kdvRate !== undefined || dto.incomeTaxRate !== undefined) {
-        await tx.simulation.update({
-          where: { id },
-          data: {
-            ...(dto.name !== undefined && { name: dto.name }),
-            ...(dto.kdvRate !== undefined && { kdvRate: dto.kdvRate }),
-            ...(dto.incomeTaxRate !== undefined && {
-              incomeTaxRate: dto.incomeTaxRate,
-            }),
-          },
-        });
-      }
+      // Update simulation-level fields
+      await tx.simulation.update({
+        where: { id },
+        data: {
+          ...(dto.name !== undefined && { name: dto.name }),
+          ...(dto.kdvRate !== undefined && { kdvRate: dto.kdvRate }),
+          ...(dto.incomeTaxRate !== undefined && { incomeTaxRate: dto.incomeTaxRate }),
+        },
+      });
 
-      // Update products
-      if (dto.products && dto.products.length > 0) {
-        for (const product of dto.products) {
-          await tx.simulationProduct.update({
-            where: { id: product.id },
-            data: {
-              ...(product.quantity !== undefined && {
-                quantity: product.quantity,
-              }),
-              ...(product.salePrice !== undefined && {
-                salePrice: product.salePrice,
-              }),
-              ...(product.costPrice !== undefined && {
-                costPrice: product.costPrice,
-              }),
-            },
-          });
-        }
-
-        // Recalculate FOOD_COST expenses: delete old ones, create new ones
-        await tx.simulationExpense.deleteMany({
-          where: { simulationId: id, type: SimExpenseType.FOOD_COST },
-        });
-
-        const updatedProducts = await tx.simulationProduct.findMany({
-          where: { simulationId: id },
-        });
-
-        if (updatedProducts.length > 0) {
-          await tx.simulationExpense.createMany({
-            data: updatedProducts.map((p) => ({
+      // Replace products (delete all, re-create from revenues)
+      if (dto.revenues) {
+        await tx.simulationProduct.deleteMany({ where: { simulationId: id } });
+        if (dto.revenues.length > 0) {
+          await tx.simulationProduct.createMany({
+            data: dto.revenues.map((r) => ({
               simulationId: id,
-              name: `${p.productName} gıda maliyeti`,
-              amount: Number(p.quantity) * Number(p.costPrice),
-              type: SimExpenseType.FOOD_COST,
+              productName: r.name,
+              quantity: r.quantity,
+              salePrice: r.unitPrice,
+              costPrice: 0,
             })),
           });
         }
       }
 
-      // Update FIXED expenses
-      if (dto.expenses && dto.expenses.length > 0) {
-        for (const expense of dto.expenses) {
-          await tx.simulationExpense.update({
-            where: { id: expense.id },
-            data: {
-              ...(expense.amount !== undefined && { amount: expense.amount }),
-            },
+      // Replace expenses (delete all, re-create)
+      if (dto.expenses) {
+        await tx.simulationExpense.deleteMany({ where: { simulationId: id } });
+        if (dto.expenses.length > 0) {
+          await tx.simulationExpense.createMany({
+            data: dto.expenses.map((e) => ({
+              simulationId: id,
+              name: e.name,
+              amount: e.amount,
+              type: e.type === 'food_cost' ? SimExpenseType.FOOD_COST : SimExpenseType.FIXED,
+            })),
           });
         }
       }
@@ -257,14 +232,9 @@ export class SimulationService {
         }
       }
 
-      // Return the updated simulation
       return tx.simulation.findFirst({
         where: { id },
-        include: {
-          products: true,
-          expenses: true,
-          dayWeights: true,
-        },
+        include: { products: true, expenses: true, dayWeights: true },
       });
     });
   }

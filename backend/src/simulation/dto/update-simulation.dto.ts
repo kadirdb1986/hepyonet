@@ -1,29 +1,35 @@
-import { IsOptional, IsNumber, IsArray, IsString } from 'class-validator';
+import { IsOptional, IsNumber, IsArray, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 
-export class UpdateSimProductDto {
+export class UpdateRevenueDto {
   @IsString()
-  id: string;
+  name: string;
 
-  @IsOptional()
   @IsNumber()
-  quantity?: number;
+  quantity: number;
 
-  @IsOptional()
   @IsNumber()
-  salePrice?: number;
-
-  @IsOptional()
-  @IsNumber()
-  costPrice?: number;
+  unitPrice: number;
 }
 
-export class UpdateSimExpenseDto {
+export class UpdateExpenseDto {
   @IsString()
-  id: string;
+  name: string;
+
+  @IsNumber()
+  amount: number;
 
   @IsOptional()
+  @IsString()
+  type?: string;
+}
+
+export class UpdateDayWeightDto {
+  @IsString()
+  day: string;
+
   @IsNumber()
-  amount?: number;
+  weight: number;
 }
 
 export class UpdateSimulationDto {
@@ -41,13 +47,19 @@ export class UpdateSimulationDto {
 
   @IsOptional()
   @IsArray()
-  products?: UpdateSimProductDto[];
+  @ValidateNested({ each: true })
+  @Type(() => UpdateRevenueDto)
+  revenues?: UpdateRevenueDto[];
 
   @IsOptional()
   @IsArray()
-  expenses?: UpdateSimExpenseDto[];
+  @ValidateNested({ each: true })
+  @Type(() => UpdateExpenseDto)
+  expenses?: UpdateExpenseDto[];
 
   @IsOptional()
   @IsArray()
-  dayWeights?: { day: string; weight: number }[];
+  @ValidateNested({ each: true })
+  @Type(() => UpdateDayWeightDto)
+  dayWeights?: UpdateDayWeightDto[];
 }

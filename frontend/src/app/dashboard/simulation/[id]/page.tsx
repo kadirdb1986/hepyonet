@@ -959,6 +959,12 @@ export default function SimulationDetailPage() {
                 })}
               </tbody>
             </table>
+            <div className="px-3 py-3 border-t border-outline-variant/10 flex justify-between items-center">
+              <span className="text-sm text-on-surface-variant">Toplam Ağırlık</span>
+              <span className={`text-sm font-bold ${totalWeight === 100 ? "text-primary" : "text-error"}`}>
+                %{totalWeight}
+              </span>
+            </div>
           </div>
         </div>
       </div>
