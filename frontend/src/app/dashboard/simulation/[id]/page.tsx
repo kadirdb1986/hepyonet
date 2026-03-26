@@ -438,10 +438,10 @@ export default function SimulationDetailPage() {
         dayWeights: DAY_KEYS.map((day, idx) => ({ day, weight: dayWeights[idx] })),
       })
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["simulation", id] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["simulation", id] })
       queryClient.invalidateQueries({ queryKey: ["simulations"] })
-      toast.success("Simulasyon kaydedildi.")
+      toast.success("Simülasyon kaydedildi.")
       setInitialized(false)
     },
     onError: (err: any) => {
