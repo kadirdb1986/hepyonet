@@ -14,6 +14,10 @@ export class UpdateRevenueDto {
   @IsOptional()
   @IsNumber()
   amount?: number;
+
+  @IsOptional()
+  @IsNumber()
+  costPrice?: number;
 }
 
 export class UpdateExpenseDto {

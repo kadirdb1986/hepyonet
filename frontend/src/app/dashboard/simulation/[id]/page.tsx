@@ -411,12 +411,16 @@ export default function SimulationDetailPage() {
       // Alternatively, send PATCH with full data
       await api.patch(`/simulations/${id}`, {
         name: title,
-        revenues: revenues.map((r) => ({
-          name: r.name,
-          amount: r.quantity,
-          unitPrice: r.unitPrice,
-          quantity: r.quantity,
-        })),
+        revenues: revenues.map((r) => {
+          const fc = foodCosts.find((f) => f.name === r.name)
+          return {
+            name: r.name,
+            amount: r.quantity,
+            unitPrice: r.unitPrice,
+            quantity: r.quantity,
+            costPrice: fc?.unitCost || 0,
+          }
+        }),
         expenses: [
           ...foodCosts.map((fc) => ({
             name: fc.name,

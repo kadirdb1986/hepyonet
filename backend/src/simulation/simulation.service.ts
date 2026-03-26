@@ -202,7 +202,7 @@ export class SimulationService {
               productName: r.name,
               quantity: r.quantity,
               salePrice: r.unitPrice,
-              costPrice: 0,
+              costPrice: r.costPrice || 0,
             })),
           });
         }
