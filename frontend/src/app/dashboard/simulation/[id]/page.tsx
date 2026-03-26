@@ -37,7 +37,7 @@ interface SimExpense {
 
 interface SimDayWeight {
   id: string
-  day: number
+  day: string
   weight: number
 }
 
