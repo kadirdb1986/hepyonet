@@ -292,7 +292,8 @@ export default function SimulationDetailPage() {
       if (simulation.dayWeights?.length) {
         const weights = [...DEFAULT_WEIGHTS]
         simulation.dayWeights.forEach((dw) => {
-          if (dw.day >= 0 && dw.day < 7) weights[dw.day] = Number(dw.weight)
+          const idx = DAY_KEYS.indexOf(dw.day)
+          if (idx >= 0) weights[idx] = Number(dw.weight)
         })
         setDayWeights(weights)
       }
