@@ -23,10 +23,13 @@ interface AdminRestaurant {
   name: string
   slug: string
   status: "APPROVED" | "PENDING" | "REJECTED"
-  ownerEmail: string
   createdAt: string
   address?: string
   phone?: string
+  members?: Array<{
+    role: string
+    user: { email: string; name: string }
+  }>
 }
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
@@ -99,10 +102,14 @@ export default function AdminRestaurantsPage() {
         ),
       },
       {
-        accessorKey: "ownerEmail",
+        id: "ownerEmail",
         header: "Yönetici",
-        cell: ({ row }) => (
-          <span className="text-sm text-on-surface-variant">{row.original.ownerEmail}</span>
+        accessorFn: (row) =>
+          row.members?.find((m) => m.role === "OWNER")?.user.email ?? "",
+        cell: ({ getValue }) => (
+          <span className="text-sm text-on-surface-variant">
+            {(getValue() as string) || "—"}
+          </span>
         ),
       },
       {

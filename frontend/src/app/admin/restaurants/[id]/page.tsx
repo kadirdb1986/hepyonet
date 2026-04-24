@@ -19,11 +19,15 @@ import {
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface RestaurantMember {
+  id: string
   userId: string
-  email: string
-  name: string
   role: string
   isActive: boolean
+  user: {
+    id: string
+    email: string
+    name: string
+  }
 }
 
 interface RestaurantDetail {
@@ -33,7 +37,6 @@ interface RestaurantDetail {
   address?: string
   phone?: string
   status: "APPROVED" | "PENDING" | "REJECTED"
-  ownerEmail: string
   createdAt: string
   members?: RestaurantMember[]
 }
@@ -207,7 +210,9 @@ export default function AdminRestaurantDetailPage() {
           </div>
           <div className="space-y-1">
             <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Sahip</p>
-            <p className="text-sm text-on-surface">{restaurant.ownerEmail}</p>
+            <p className="text-sm text-on-surface">
+              {restaurant.members?.find((m) => m.role === "OWNER")?.user.email ?? "—"}
+            </p>
           </div>
           <div className="space-y-1">
             <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Oluşturma Tarihi</p>
@@ -235,8 +240,8 @@ export default function AdminRestaurantDetailPage() {
               <tbody className="divide-y divide-outline-variant/10">
                 {restaurant.members.map((member) => (
                   <tr key={member.userId}>
-                    <td className="py-3 text-sm text-on-surface">{member.email}</td>
-                    <td className="py-3 text-sm text-on-surface">{member.name || "—"}</td>
+                    <td className="py-3 text-sm text-on-surface">{member.user.email}</td>
+                    <td className="py-3 text-sm text-on-surface">{member.user.name || "—"}</td>
                     <td className="py-3">
                       <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface">
                         {ROLE_LABELS[member.role] || member.role}
