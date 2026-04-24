@@ -15,7 +15,7 @@ interface Restaurant {
   id: string
   name: string
   slug: string
-  logoUrl?: string
+  logo?: string
   address?: string
   phone?: string
   status: "APPROVED" | "PENDING" | "REJECTED"
@@ -25,7 +25,7 @@ interface Restaurant {
 
 const settingsSchema = z.object({
   name: z.string().min(1, "Restoran adı gerekli"),
-  logoUrl: z.string().optional(),
+  logo: z.string().optional(),
   address: z.string().optional(),
   phone: z.string().optional(),
 })
@@ -86,7 +86,7 @@ export default function SettingsPage() {
     if (restaurant) {
       reset({
         name: restaurant.name,
-        logoUrl: restaurant.logoUrl || "",
+        logo: restaurant.logo || "",
         address: restaurant.address || "",
         phone: restaurant.phone || "",
       })
@@ -183,7 +183,7 @@ export default function SettingsPage() {
               Logo URL
             </label>
             <input
-              {...register("logoUrl")}
+              {...register("logo")}
               className="w-full px-4 py-3 bg-surface-container-low focus:bg-surface-container-lowest border-none rounded-xl focus:ring-2 focus:ring-surface-tint/20 transition-all placeholder:text-outline/60 text-on-surface outline-none"
               placeholder="https://..."
             />
