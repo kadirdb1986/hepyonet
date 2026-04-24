@@ -170,7 +170,11 @@ export default function UsersPage() {
               }}
             >
               <SelectTrigger className="w-[160px] h-8 text-xs">
-                <SelectValue />
+                <SelectValue>
+                  {(value: string | null) =>
+                    value ? ROLE_LABELS[value] ?? value : ""
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {ROLE_OPTIONS.map((opt) => (
@@ -284,7 +288,11 @@ export default function UsersPage() {
               </label>
               <Select value={selectedRole} onValueChange={(val) => setSelectedRole(val ?? "ACCOUNTANT")}>
                 <SelectTrigger className="w-full h-10">
-                  <SelectValue />
+                  <SelectValue>
+                    {(value: string | null) =>
+                      value ? ROLE_LABELS[value] ?? value : ""
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {ROLE_OPTIONS.map((opt) => (
