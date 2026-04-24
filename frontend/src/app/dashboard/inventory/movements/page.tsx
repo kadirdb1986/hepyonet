@@ -176,7 +176,12 @@ export default function StockMovementsPage() {
                 render={({ field }) => (
                   <Select value={field.value || undefined} onValueChange={(v) => field.onChange(v ?? "")}>
                     <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                      <SelectValue placeholder="Malzeme secin" />
+                      <SelectValue placeholder="Malzeme secin">
+                        {(() => {
+                          const m = rawMaterials.find((m) => m.id === field.value)
+                          return m ? `${m.name} (${UNIT_DISPLAY[m.unit] || m.unit})` : "Malzeme secin"
+                        })()}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {rawMaterials.map((m) => (
@@ -205,7 +210,9 @@ export default function StockMovementsPage() {
                   render={({ field }) => (
                     <Select value={field.value || undefined} onValueChange={(v) => field.onChange(v ?? "")}>
                       <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                        <SelectValue placeholder="Tip secin" />
+                        <SelectValue placeholder="Tip secin">
+                          {field.value === "IN" ? "Giris" : field.value === "OUT" ? "Cikis" : "Tip secin"}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="IN">Giris</SelectItem>

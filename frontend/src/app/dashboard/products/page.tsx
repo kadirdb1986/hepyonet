@@ -532,7 +532,12 @@ export default function ProductsPage() {
                     onValueChange={(v) => field.onChange(v ?? "")}
                   >
                     <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                      <SelectValue placeholder="Stok kalemi seçin" />
+                      <SelectValue placeholder="Stok kalemi seçin">
+                        {(() => {
+                          const m = rawMaterials.find((m) => m.id === field.value)
+                          return m ? `${m.name} (${m.unit})` : "Stok kalemi seçin"
+                        })()}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {rawMaterials.map((m) => (

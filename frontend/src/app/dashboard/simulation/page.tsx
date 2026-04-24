@@ -507,7 +507,9 @@ export default function SimulationPage() {
                   </label>
                   <Select value={frProductId || undefined} onValueChange={(v) => setFrProductId(v ?? "")}>
                     <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                      <SelectValue placeholder="Urun secin" />
+                      <SelectValue placeholder="Urun secin">
+                        {menuProducts.find((p) => p.id === frProductId)?.name || "Urun secin"}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {menuProducts.map((p) => (

@@ -250,7 +250,9 @@ export default function ExpensesPage() {
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={(v) => field.onChange(v ?? "")}>
                     <SelectTrigger className="w-full h-12 px-4 bg-surface-container-low border-0 rounded-lg">
-                      <SelectValue placeholder="Kategori seçin" />
+                      <SelectValue placeholder="Kategori seçin">
+                        {categories.find((c) => c.id === field.value)?.name || "Kategori seçin"}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map((cat) => (
