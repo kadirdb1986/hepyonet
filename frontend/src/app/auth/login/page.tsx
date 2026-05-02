@@ -171,6 +171,7 @@ export default function LoginPage() {
                 Gizlilik
               </Link>
             </div>
+            <p className="text-xs font-medium text-outline pt-2">Made in Kadir</p>
           </div>
         </div>
       </main>
